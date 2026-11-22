@@ -2368,3 +2368,51 @@ textarea {
     animation-delay: calc(var(--transition-duration-fast) * 2);
   }
 }
+/* THE SCROLLING TEXT STRIP (marquee block): components/storefront/
+   MarqueeTileContent, lib/storefront/marquee. The track is two equal halves
+   of the words; sliding it by one half loops without a seam. Its pace is per
+   character (--marquee-chars, set on the track), so a long line crosses at the
+   speed a short one does. It pauses under the pointer and while focused, and
+   under reduced motion it stands still with the words shown once. */
+@keyframes board-marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+.board-marquee {
+  /* Time per character at each speed, and the space after each copy. */
+  --marquee-pace: 0.12s;
+  --marquee-gap: 2em;
+}
+.board-marquee[data-speed="slow"] {
+  --marquee-pace: 0.2s;
+}
+.board-marquee-copy {
+  padding-inline-end: var(--marquee-gap);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .board-marquee-track {
+    animation: board-marquee calc(var(--marquee-chars) * var(--marquee-pace)) linear infinite;
+  }
+  .board-marquee:hover .board-marquee-track,
+  .board-marquee:focus-within .board-marquee-track {
+    animation-play-state: paused;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-marquee {
+    justify-content: center;
+    text-align: center;
+  }
+  .board-marquee-track {
+    width: auto;
+    flex-shrink: 1;
+  }
+  .board-marquee-copy {
+    padding-inline-end: 0;
+    white-space: normal;
+  }
+  .board-marquee-copy:not(:first-child) {
+    display: none;
+  }
+}

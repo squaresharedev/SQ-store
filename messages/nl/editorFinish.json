@@ -32,6 +32,21 @@
       "light": "Licht",
       "strong": "Sterk",
       "hint": "Een fijne korrel over de achtergrond, zoals bedrukt papier."
+    },
+    "marquee": {
+      "textLabel": "Tekst",
+      "speedLabel": "Snelheid",
+      "speeds": {
+        "slow": "Langzaam",
+        "normal": "Normaal"
+      },
+      "colorLabel": "Kleur",
+      "autoColor": "Automatisch",
+      "useAutoColor": "Automatische kleur gebruiken",
+      "defaultText": "Gratis verzending bij elke bestelling",
+      "add": "Lopende tekst toevoegen",
+      "inspectorTitle": "Lopende tekst",
+      "inspectorClose": "Paneel voor lopende tekst sluiten"
     }
   },
   "board": {}

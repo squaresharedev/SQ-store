@@ -32,6 +32,21 @@
       "light": "Légère",
       "strong": "Marquée",
       "hint": "Un grain fin sur le fond, comme du papier imprimé."
+    },
+    "marquee": {
+      "textLabel": "Texte",
+      "speedLabel": "Vitesse",
+      "speeds": {
+        "slow": "Lente",
+        "normal": "Normale"
+      },
+      "colorLabel": "Couleur",
+      "autoColor": "Automatique",
+      "useAutoColor": "Utiliser la couleur automatique",
+      "defaultText": "Livraison offerte sur toutes les commandes",
+      "add": "Ajouter un texte défilant",
+      "inspectorTitle": "Texte défilant",
+      "inspectorClose": "Fermer le panneau du texte défilant"
     }
   },
   "board": {}

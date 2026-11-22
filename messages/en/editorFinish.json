@@ -32,6 +32,21 @@
       "light": "Light",
       "strong": "Strong",
       "hint": "A fine grain over the background, like printed paper."
+    },
+    "marquee": {
+      "textLabel": "Words",
+      "speedLabel": "Speed",
+      "speeds": {
+        "slow": "Slow",
+        "normal": "Normal"
+      },
+      "colorLabel": "Color",
+      "autoColor": "Automatic",
+      "useAutoColor": "Use the automatic color",
+      "defaultText": "Free delivery on every order",
+      "add": "Add scrolling text",
+      "inspectorTitle": "Scrolling text",
+      "inspectorClose": "Close scrolling text panel"
     }
   },
   "board": {}

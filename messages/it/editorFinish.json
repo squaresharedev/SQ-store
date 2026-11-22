@@ -32,6 +32,21 @@
       "light": "Leggera",
       "strong": "Marcata",
       "hint": "Una grana fine sullo sfondo, come carta stampata."
+    },
+    "marquee": {
+      "textLabel": "Testo",
+      "speedLabel": "Velocità",
+      "speeds": {
+        "slow": "Lenta",
+        "normal": "Normale"
+      },
+      "colorLabel": "Colore",
+      "autoColor": "Automatico",
+      "useAutoColor": "Usa il colore automatico",
+      "defaultText": "Spedizione gratuita su ogni ordine",
+      "add": "Aggiungi testo scorrevole",
+      "inspectorTitle": "Testo scorrevole",
+      "inspectorClose": "Chiudi il pannello del testo scorrevole"
     }
   },
   "board": {}

@@ -18,6 +18,7 @@ import {
 import type { StorefrontPageData } from "@/types/storefront-page";
 import { FinishGallery } from "./FinishGallery";
 import { GALLERY_PALETTES, GradientSheet, isGalleryPalette } from "./GradientSheet";
+import { StripSheet } from "./StripSheet";
 
 // Living reference for the editor upgrade's MOTION AND FINISH workstream: the
 // board's arrival, palette gradients, paper texture and the scrolling strip,
@@ -33,10 +34,13 @@ import { GALLERY_PALETTES, GradientSheet, isGalleryPalette } from "./GradientShe
 //     &freeform=1             two shapes tucked behind the words (stacked, so
 //                             a phone keeps the layout instead of reflowing)
 //     &texture=light|strong   theme.texture, the paper grain
+//     &marquee=1              two scrolling strips at the foot of the board
 //     &embed=1                the embed frame instead of the hosted page
 //   ?view=legacy            the sample with NONE of this workstream's fields,
 //                           for the before/after comparison
 //   ?view=sheet             every ready-made gradient on every gallery palette
+//   ?view=strips            the scrolling strip on light, dark and coloured
+//                           backdrops, in every saved text style
 //   ?view=panel             the editor controls, at the panel's real width
 
 export const metadata = { title: "Motion and finish: dev gallery" };
@@ -50,6 +54,7 @@ type Query = {
   shapes?: string;
   freeform?: string;
   texture?: string;
+  marquee?: string;
 };
 
 /** Fixed ids for the showcase rows, so a reload draws the same board. */
@@ -92,6 +97,15 @@ function showcaseRows(ink: string, under: string, freeform: boolean): Storefront
     { type: "text", id: SHOWCASE_ID(10), text: "Every piece is checked by hand before it ships, and wrapped in paper, never plastic.", variant: "body", align: "left", x: 0, y: 14, w: 6, h: 2 },
     shape(11, "burst", 0, 16, 3, 2),
     shape(12, "diamond", 3, 16, 3, 2),
+  ];
+}
+
+/** Two strips under the showcase: the default (Small label, normal speed,
+ *  automatic ink) and a slow Headline in a colour of its own. */
+function marqueeRows(own: string): StorefrontBlock[] {
+  return [
+    { type: "marquee", id: SHOWCASE_ID(30), text: "Free delivery on every order", x: 0, y: 18, w: 6, h: 1 },
+    { type: "marquee", id: SHOWCASE_ID(31), text: "New colours every Friday", speed: "slow", variant: "heading", color: own, x: 0, y: 19, w: 6, h: 1 },
   ];
 }
 
@@ -142,6 +156,7 @@ export default async function EditorFinishDevPage({
 
   if (query.view === "panel") return <FinishGallery />;
   if (query.view === "sheet") return <GradientSheet sampleTheme={config.theme} />;
+  if (query.view === "strips") return <StripSheet theme={config.theme} />;
 
   const legacy = query.view === "legacy";
   const motion = MOTION_PRESETS.find((preset) => preset === query.motion);
@@ -154,7 +169,7 @@ export default async function EditorFinishDevPage({
     ? config.theme
     : {
         ...config.theme,
-        rows: config.theme.rows + 10,
+        rows: config.theme.rows + (query.marquee === "1" ? 12 : 10),
         ...(motion ? { motion } : {}),
         ...(texture ? { texture } : {}),
         ...(palette
@@ -172,7 +187,8 @@ export default async function EditorFinishDevPage({
       ? { ...block, gradient: fills[index % fills.length].fill, color: fills[index % fills.length].fill.from }
       : block,
   );
-  const blocks = legacy ? buyerVisibleBlocks(config) : [...buyerVisibleBlocks(config), ...rows];
+  const strips = query.marquee === "1" ? marqueeRows("#9a3412") : [];
+  const blocks = legacy ? buyerVisibleBlocks(config) : [...buyerVisibleBlocks(config), ...rows, ...strips];
   const page = pageFor(config, sample, theme, blocks);
 
   if (query.embed === "1") {

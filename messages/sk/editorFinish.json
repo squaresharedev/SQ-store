@@ -32,6 +32,21 @@
       "light": "Jemná",
       "strong": "Výrazná",
       "hint": "Jemné zrno na pozadí, ako tlačený papier."
+    },
+    "marquee": {
+      "textLabel": "Text",
+      "speedLabel": "Rýchlosť",
+      "speeds": {
+        "slow": "Pomaly",
+        "normal": "Normálne"
+      },
+      "colorLabel": "Farba",
+      "autoColor": "Automaticky",
+      "useAutoColor": "Použiť automatickú farbu",
+      "defaultText": "Doprava zadarmo pri každej objednávke",
+      "add": "Pridať bežiaci text",
+      "inspectorTitle": "Bežiaci text",
+      "inspectorClose": "Zavrieť panel bežiaceho textu"
     }
   },
   "board": {}

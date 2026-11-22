@@ -32,6 +32,21 @@
       "light": "Jemná",
       "strong": "Výrazná",
       "hint": "Jemné zrno přes pozadí, jako tištěný papír."
+    },
+    "marquee": {
+      "textLabel": "Text",
+      "speedLabel": "Rychlost",
+      "speeds": {
+        "slow": "Pomalu",
+        "normal": "Normálně"
+      },
+      "colorLabel": "Barva",
+      "autoColor": "Automaticky",
+      "useAutoColor": "Použít automatickou barvu",
+      "defaultText": "Doprava zdarma u každé objednávky",
+      "add": "Přidat běžící text",
+      "inspectorTitle": "Běžící text",
+      "inspectorClose": "Zavřít panel běžícího textu"
     }
   },
   "board": {}

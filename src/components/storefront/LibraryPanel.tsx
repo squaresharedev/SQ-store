@@ -2,6 +2,7 @@
 
 import { Library, X } from "lucide-react";
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
@@ -43,6 +44,7 @@ export function LibraryPanel({
   onPlaceUpload,
   onAddShape,
   onClose,
+  moreBlocks,
 }: {
   tab: LibraryTab;
   onTabChange: (tab: LibraryTab) => void;
@@ -54,6 +56,8 @@ export function LibraryPanel({
   onPlaceUpload: (upload: StorefrontUpload) => void;
   onAddShape: (kind: ShapeKind) => void;
   onClose: () => void;
+  /** Other built-in blocks, listed after the shapes (the scrolling strip). */
+  moreBlocks?: ReactNode;
 }) {
   const t = useTranslations("Storefront.library");
 
@@ -120,6 +124,7 @@ export function LibraryPanel({
         ) : (
           <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} />
         )}
+        {tab === "shapes" && moreBlocks}
       </div>
     </div>
   );

@@ -32,6 +32,21 @@
       "light": "Lekka",
       "strong": "Mocna",
       "hint": "Delikatne ziarno na tle, jak na zadrukowanym papierze."
+    },
+    "marquee": {
+      "textLabel": "Tekst",
+      "speedLabel": "Prędkość",
+      "speeds": {
+        "slow": "Wolno",
+        "normal": "Normalnie"
+      },
+      "colorLabel": "Kolor",
+      "autoColor": "Automatyczny",
+      "useAutoColor": "Użyj automatycznego koloru",
+      "defaultText": "Darmowa dostawa przy każdym zamówieniu",
+      "add": "Dodaj przewijany tekst",
+      "inspectorTitle": "Przewijany tekst",
+      "inspectorClose": "Zamknij panel przewijanego tekstu"
     }
   },
   "board": {}

@@ -32,6 +32,21 @@
       "light": "Suave",
       "strong": "Intensa",
       "hint": "Un grano fino sobre el fondo, como papel impreso."
+    },
+    "marquee": {
+      "textLabel": "Texto",
+      "speedLabel": "Velocidad",
+      "speeds": {
+        "slow": "Lenta",
+        "normal": "Normal"
+      },
+      "colorLabel": "Color",
+      "autoColor": "Automático",
+      "useAutoColor": "Usar el color automático",
+      "defaultText": "Envío gratis en todos los pedidos",
+      "add": "Añadir texto en movimiento",
+      "inspectorTitle": "Texto en movimiento",
+      "inspectorClose": "Cerrar el panel de texto en movimiento"
     }
   },
   "board": {}
