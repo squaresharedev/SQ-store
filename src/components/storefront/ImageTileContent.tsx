@@ -6,6 +6,7 @@ import { ImageOff } from "lucide-react";
 import { imageStyle } from "@/lib/images/placement";
 import type { ImageBlock } from "@/types/storefront";
 import { infoTextClass } from "@/components/ui/control-styles";
+import { photoShapeStyle } from "./card-look";
 
 /**
  * The visual face of an uploaded element: the seller's own artwork on the
@@ -34,6 +35,11 @@ import { infoTextClass } from "@/components/ui/control-styles";
  * - `cover` (the default) fills the block and crops the overflow, positioned
  *   by the shared focal-point model product tiles already use — which is what
  *   lets TileImageFramer frame an element with no code of its own.
+ *
+ * A `shape` (PHOTO_SHAPES) cuts the picture to rounded, an arch or a circle,
+ * as a clip on the picture (photoShapeStyle): its box and its crop stay what
+ * they were, so framing is untouched. Its drop shadow is drawn by the grid
+ * cell, outside this face's clip (blockShadowStyle).
  */
 export function ImageTileContent({
   block,
@@ -68,8 +74,11 @@ export function ImageTileContent({
   }
 
   const contain = block.fit === "contain";
+  // Empty with no shape, so an untouched element keeps the style it had.
+  const shape = photoShapeStyle(block.shape, "block", Math.min(block.w, block.h));
 
   return (
+    // eslint-disable-next-line @next/next/no-img-element -- a signed R2 URL (or an SVG kept in secure static mode); next/image adds nothing here.
     <img
       ref={imageRef}
       src={src}
@@ -80,8 +89,8 @@ export function ImageTileContent({
       className={contain ? "size-full object-contain" : "size-full object-cover"}
       style={
         contain
-          ? opacityStyle
-          : { ...imageStyle(block.imagePlacement), ...opacityStyle }
+          ? { ...opacityStyle, ...shape }
+          : { ...imageStyle(block.imagePlacement), ...opacityStyle, ...shape }
       }
       // The tile owns dragging (it moves the block); letting the browser start
       // a native image drag would fight it.

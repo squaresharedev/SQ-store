@@ -1,0 +1,28 @@
+{
+  "product": {
+    "borderRadius": "24px",
+    "--tile-radius": "24px"
+  },
+  "roundProduct": {
+    "borderRadius": "60px",
+    "--tile-radius": "60px"
+  },
+  "image": {
+    "borderRadius": "12px",
+    "--tile-radius": "12px"
+  },
+  "shape": {
+    "borderRadius": "12px",
+    "--tile-radius": "12px"
+  },
+  "covered": {
+    "borderRadius": "20px",
+    "--tile-radius": "20px",
+    "--tile-cover-clip": "inset(2px round 18px)"
+  },
+  "frames": [
+    "relative h-full w-full rounded-[inherit] border border-border bg-card",
+    "relative h-full w-full rounded-[inherit] bg-transparent",
+    "relative h-full w-full rounded-[inherit] bg-transparent"
+  ]
+}
