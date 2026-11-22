@@ -1,4 +1,99 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Esquema",
+      "groupLabel": "Adicionar um elemento de esquema",
+      "name": {
+        "band": "Faixa",
+        "button": "Botão"
+      },
+      "add": {
+        "band": "Adicionar uma faixa a toda a largura",
+        "button": "Adicionar um botão"
+      },
+      "noRoom": "Já há uma faixa atrás de cada linha."
+    },
+    "bandChrome": {
+      "rail": "Faixa atrás das linhas {from} a {to}. Arraste para a mover, prima para a editar.",
+      "stretch": "Arraste para mudar quantas linhas a faixa cobre"
+    },
+    "band": {
+      "title": "Faixa",
+      "close": "Fechar a faixa",
+      "background": "Fundo",
+      "kind": {
+        "solid": "Cor",
+        "gradient": "Gradiente",
+        "image": "Foto"
+      },
+      "palette": "As suas cores",
+      "custom": "Cor personalizada",
+      "gradients": "Gradientes prontos",
+      "gradientOption": "Gradiente {n}",
+      "photo": "Foto",
+      "shade": "Véu",
+      "shadeInfo": "Um véu claro ou escuro sobre a foto mantém legível o texto por cima.",
+      "dim": {
+        "none": "Nenhum",
+        "light": "Claro",
+        "dark": "Escuro"
+      },
+      "moveHint": "Mova a faixa com a pega ao lado do quadro. No telemóvel, segue os blocos que tem por cima.",
+      "linked": "Há uma ligação que leva a esta faixa. Aponte-a para outro sítio antes de remover a faixa.",
+      "remove": "Remover faixa"
+    },
+    "button": {
+      "title": "Botão",
+      "close": "Fechar o botão",
+      "label": "Texto",
+      "labelProblem": "Um botão precisa de algumas palavras.",
+      "charsLeft": "{n, plural, one {Resta # carácter} other {Restam # caracteres}}",
+      "destination": "Leva a",
+      "kind": {
+        "product": "Produto",
+        "band": "Faixa nesta página",
+        "storefront": "Montra",
+        "url": "Um endereço web"
+      },
+      "bandName": "Faixa nas linhas {from} a {to}",
+      "url": "Endereço web",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Use um endereço completo que comece por https://",
+      "look": "Aspeto",
+      "looks": {
+        "solid": "Preenchido",
+        "outline": "Contorno",
+        "link": "Ligação"
+      },
+      "defaultLabel": "Comprar já"
+    },
+    "header": {
+      "logoAndMenu": "Logótipo e menu",
+      "logo": "Logótipo",
+      "uploadLogo": "Carregar um logótipo",
+      "replaceLogo": "Substituir logótipo",
+      "removeLogo": "Remover logótipo",
+      "logoAlt": "O que diz o logótipo",
+      "logoSize": "Tamanho do logótipo",
+      "sizes": {
+        "small": "Pequeno",
+        "medium": "Médio",
+        "large": "Grande"
+      },
+      "menu": "Ligações do menu",
+      "addLink": "Adicionar uma ligação",
+      "linkLabel": "Texto",
+      "linkDestination": "Leva a",
+      "removeLink": "Remover esta ligação",
+      "newLinkLabel": "Loja",
+      "menuFull": "Um menu tem no máximo 4 ligações.",
+      "cartNote": "O ícone do carrinho junta-se sozinho ao menu onde o carrinho estiver ligado."
+    }
+  },
+  "board": {
+    "navLabel": "Menu da montra",
+    "openMenu": "Abrir o menu",
+    "closeMenu": "Fechar o menu",
+    "logoFallback": "Logótipo de {store}"
+  }
 }

@@ -48,6 +48,7 @@ import {
   type CartPageConfig,
   type CheckoutPageConfig,
   type StorefrontSeller,
+  type StorefrontBand,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
 import { pinOnPhone, unpinnedOnPhone, withPhoneColumns } from "@/lib/storefront/mobile-layout";
@@ -160,6 +161,11 @@ import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
+import { useLayoutEditing } from "./useLayoutEditing";
+import { LayoutInspector } from "./LayoutInspector";
+import type { LinkableStorefront } from "./ButtonBlockEditor";
+import { bandsForSave } from "@/lib/storefront/bands";
+import { headerForSave } from "@/lib/storefront/layout-blocks";
 import {
   CANVAS_PANEL_ATTR,
   useCanvasAnchor,
@@ -187,6 +193,8 @@ type EditorSnapshot = {
   productPage: ProductPageConfig;
   checkoutPage: CheckoutPageConfig;
   cartPage: CartPageConfig;
+  /** Full-width bands (config.bands): beside the blocks, not among them. */
+  bands: StorefrontBand[];
   // NO `policies` OR `shippingProfiles` HERE either, for the same reason as
   // `seller`: shipping and returns terms are account-level and read-only in
   // this editor, so there is nothing about them to undo.
@@ -397,7 +405,11 @@ export function StorefrontDesigner({
   sellerDetailsMissing = false,
   initialVersion = null,
   cartOffered = false,
+  linkStorefronts,
 }: {
+  /** This store's storefronts, for a button that leads to another one.
+   *  Absent = this storefront alone. */
+  linkStorefronts?: LinkableStorefront[];
   /** Whether buyers can have a cart at all yet (lib/cart/availability.ts
    *  cartLaunched). Until then the designer shows none of it: no Cart group,
    *  no cart buttons on the page artboards, cards that open the page. Absent
@@ -543,6 +555,8 @@ export function StorefrontDesigner({
   );
   // The cart's design, the same way.
   const [cartPage, setCartPage] = useState<CartPageConfig>(() => resolveCartPage(initialConfig));
+  // Full-width bands: undoable and saved like the blocks they sit behind.
+  const [bands, setBands] = useState<StorefrontBand[]>(initialConfig.bands ?? []);
   // Bumped by the panel's "Play it" to replay the thank-you celebration.
   const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -722,6 +736,16 @@ export function StorefrontDesigner({
   );
   /** The single selection, when exactly one block is selected. */
   const selectedBlock = selectedBlocks.length === 1 ? selectedBlocks[0] : null;
+  // Bands, half-cell placement and buttons (the layout workstream's edits).
+  const layout = useLayoutEditing({
+    theme, blocks, header, bands, setBands, setBlocks, recordChange, storefrontId,
+    blocksSelected: inspector !== null,
+    clearBlockSelection: () => setInspector(null),
+    insertBlock: (build, w, h) => insertBlock(build, w, h, takeInsertHint()),
+    selectInserted: (block) => selectBlock(blockKey(block), false, block),
+    onNoRoomForBand: () => toast.info(tKey("EditorLayout.panel.insert.noRoom")),
+    newButtonLabel: tKey("EditorLayout.panel.button.defaultLabel"),
+  });
 
   // Which product a "show me the page" request means when it does not name
   // one: the selected tile, else the first product on the board. Null when the
@@ -912,6 +936,7 @@ export function StorefrontDesigner({
     productPage,
     checkoutPage,
     cartPage,
+    bands,
   });
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -927,6 +952,7 @@ export function StorefrontDesigner({
     setProductPage(next.productPage);
     setCheckoutPage(next.checkoutPage);
     setCartPage(next.cartPage);
+    setBands(next.bands);
     markDirty();
   }
 
@@ -2444,7 +2470,8 @@ export function StorefrontDesigner({
     if (keys.length === 0) return;
     const gone = new Set(keys);
     recordChange();
-    setBlocks((current) => current.filter((b) => !gone.has(blockKey(b))));
+    // A button whose product went with them goes too (layout.withoutDeadLinks).
+    setBlocks((current) => layout.withoutDeadLinks(current.filter((b) => !gone.has(blockKey(b))), bands));
     setInspector((current) => {
       if (current?.kind !== "blocks") return current;
       const left = current.keys.filter((k) => !gone.has(k));
@@ -3834,7 +3861,7 @@ export function StorefrontDesigner({
       theme,
       // Blocks carry their own coordinates, so array order is irrelevant.
       blocks,
-      header,
+      header: headerForSave(header, blocks, bands),
       // Embed settings are edited in the list-page modal, not here — pass the
       // loaded value through so a designer save never wipes them.
       ...(initialConfig.embed ? { embed: initialConfig.embed } : {}),
@@ -3849,6 +3876,8 @@ export function StorefrontDesigner({
       // The cart's design: sent once it was ever stored or moved off the
       // defaults (every member optional, so the defaults are an empty one).
       ...(initialConfig.cartPage || !isDefaultCartPage(cartPage) ? { cartPage } : {}),
+      // Bands, held to the board's rows; nothing at all when there are none.
+      ...bandsForSave(bands, theme.rows),
     };
     // SF-01: Warn when any block in the grid points at a draft product.
     // Draft products are hidden from buyers, so a grid tile that points at one
@@ -3973,16 +4002,31 @@ export function StorefrontDesigner({
               : "text";
   // The title and the close button's label are separate messages rather than
   // one spliced into the other, so each language can inflect them its own way.
+  const layoutTitle = layout.inspectorTitle(selectedBlock);
+  // A selected band's panel, or a selected button's (null for anything else).
+  const layoutInspector = (
+    <LayoutInspector
+      layout={layout} button={selectedBlock?.type === "button" ? selectedBlock : null}
+      theme={theme} blocks={blocks} header={header} bands={bands} productsById={productsById}
+      storefronts={linkStorefronts ?? [{ id: storefrontId, name }]}
+      photoUrls={pagePhotoUrls}
+      onPhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
+      onDuplicate={duplicateBlocks}
+      onRemove={removeBlock}
+    />
+  );
   const inspectorTitle =
+    layoutTitle ? layoutTitle.title :
     inspectorKind === "blocks"
       ? t("inspector.title.blocks", { count: selectedBlocks.length })
       : t(`inspector.title.${inspectorKind}`);
   const inspectorCloseLabel =
+    layoutTitle ? layoutTitle.close :
     inspectorKind === "blocks"
       ? t("inspector.close.blocks", { count: selectedBlocks.length })
       : t(`inspector.close.${inspectorKind}`);
   const showInspector =
-    inspector?.kind === "picker" || selectedBlocks.length > 0;
+    inspector?.kind === "picker" || selectedBlocks.length > 0 || layout.selectedBand !== null;
 
   // WHICH PANEL HAS THE PHONE'S ONE BOTTOM SLOT (null on lg+, where they are
   // columns and share nothing). Everything that has to agree about the sheets
@@ -4352,6 +4396,8 @@ export function StorefrontDesigner({
                   onUpload={addImageBlock}
                   onPlaceUpload={placeUpload}
                   onAddShape={addShapeBlock}
+                  onAddBand={layout.addBand}
+                  onAddButton={layout.addButton}
                   onClose={() => setLeftPanel(null)}
                 />
               )}
@@ -4480,6 +4526,11 @@ export function StorefrontDesigner({
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
             seller={sellerIdentity}
+            bands={bands}
+            selectedBandId={layout.selectedBand?.id ?? null}
+            onSelectBand={layout.selectBand}
+            onMoveBand={layout.moveBand}
+            onPlaceBlock={layout.placeBlock}
           />
 
           {/* The selected block's tools, floating over the top of the canvas
@@ -4545,7 +4596,7 @@ export function StorefrontDesigner({
           showInspector={showInspector}
           inspectorTitle={inspectorTitle}
           inspectorCloseLabel={inspectorCloseLabel}
-          onCloseInspector={() => setInspector(null)}
+          onCloseInspector={() => { setInspector(null); layout.selectBand(null); }}
           // On mobile every panel is the SAME bottom slot, and selecting a
           // shape opens both this and the color sheet — which would stack one
           // on top of the other. The color sheet wins while it is open;
@@ -4636,7 +4687,7 @@ export function StorefrontDesigner({
                       />
                     </div>
                   )}
-                  {inspector?.kind === "picker" ? (
+                  {layout.selectedBand ? layoutInspector : inspector?.kind === "picker" ? (
                     <ProductPicker
                       products={catalog}
                       usedProductIds={usedProductIds}
@@ -4771,7 +4822,7 @@ export function StorefrontDesigner({
                       }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
-                  ) : null}
+                  ) : selectedBlock?.type === "button" ? layoutInspector : null}
             </>
           }
         />

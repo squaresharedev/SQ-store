@@ -14,6 +14,7 @@ import { resolveProductPage } from "@/lib/storefront/product-page";
 import { storefrontPagePath } from "@/lib/storefront/product-page-url";
 import { getAccountShippingPolicy } from "@/lib/settings/shipping-policy";
 import { presignGetUrl } from "@/lib/r2";
+import { layoutPhotoKeys, listLinkableStorefronts } from "@/lib/storefront/link-targets";
 import { blockKey, type StorefrontConfig } from "@/types/storefront";
 
 export async function generateMetadata() {
@@ -101,7 +102,7 @@ export default async function StorefrontEditorPage({
   // (server-only credentials) so the client never mints URLs itself.
   const { background, customFont } = storefront.config.theme;
   const { productPage, checkoutPage } = storefront.config;
-  const [backgroundImageUrl, customFontUrl, elementUrls, pagePhotoUrls] = await Promise.all([
+  const [backgroundImageUrl, customFontUrl, elementUrls, pagePhotoUrls, linkStorefronts] = await Promise.all([
     background.kind === "image" ? presignGetUrl(background.key) : null,
     customFont ? presignGetUrl(customFont.key) : null,
     signElementUrls(storefront.config.blocks),
@@ -109,7 +110,10 @@ export default async function StorefrontEditorPage({
       productPage?.backgroundImage?.key,
       checkoutPage?.backgroundImage?.key,
       checkoutPage?.thanksBackgroundImage?.key,
+      ...layoutPhotoKeys(storefront.config),
     ]),
+    // What a button or a menu entry may lead to besides this board.
+    listLinkableStorefronts(),
   ]);
 
   return (
@@ -128,6 +132,7 @@ export default async function StorefrontEditorPage({
       initialCustomFontUrl={customFontUrl}
       initialElementUrls={elementUrls}
       initialPagePhotoUrls={pagePhotoUrls}
+      linkStorefronts={linkStorefronts}
       initialSetting={initialSetting ?? null}
       sellerIdentity={sellerIdentity}
       shippingPolicy={shippingPolicy}

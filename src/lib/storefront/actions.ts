@@ -41,6 +41,7 @@ import {
 } from "@/lib/billing/limits";
 import { firstIssue } from "@/lib/validation/messages";
 import { carryOverDesign } from "@/lib/predictions";
+import { addLogoKey, settleBandPhotos, settleLayout } from "@/lib/storefront/layout-save";
 import { msg } from "@/i18n/types";
 import {
   listStorefronts,
@@ -302,6 +303,10 @@ export async function saveStorefront(
       ? { cartPage: parsed.data.cartPage }
       : {}),
   };
+  // Layout and navigation (lib/storefront/layout-save.ts): the bands come
+  // along, and a link to another storefront must name one of this store's.
+  const layout = await settleLayout(supabase, account.accountId, config, parsed.data.bands);
+  if (!layout.ok) return failure(layout.error);
 
   // Uploaded assets (image background, custom font): the config stores only the
   // R2 object KEY. A key that differs from the one already saved must be a NEW
@@ -357,9 +362,11 @@ export async function saveStorefront(
   // storefront are verified: re-saving an untouched canvas costs no HEAD
   // requests at all, however many elements it carries.
   const previousElementKeys = storedElementKeys(existingRow.config);
+  addLogoKey(previousElementKeys, existingRow.config);
   const nextElementKeys = new Set(
     config.blocks.flatMap((block) => (block.type === "image" ? [block.key] : [])),
   );
+  addLogoKey(nextElementKeys, config);
   const newElementKeys = [...nextElementKeys].filter(
     (key) => !previousElementKeys.has(key),
   );
@@ -380,6 +387,8 @@ export async function saveStorefront(
   // once the row is written.
   const pagePhotos = await settlePagePhotos(existingRow.config, config, account.userId);
   if (!pagePhotos.ok) return failure(pagePhotos.error);
+  const bandPhotos = await settleBandPhotos(existingRow.config, config, account.userId);
+  if (!bandPhotos.ok) return failure(bandPhotos.error);
 
   await precheck("storefront", id, { name: parsedName.data, config });
 
@@ -412,6 +421,7 @@ export async function saveStorefront(
     if (!nextElementKeys.has(key)) await evictObject(key);
   }
   for (const key of pagePhotos.released) await evictObject(key);
+  for (const key of bandPhotos.released) await evictObject(key);
 
   revalidatePath("/storefront");
   revalidatePath(`/storefront/${id}`);

@@ -42,6 +42,8 @@ export function LibraryPanel({
   onUpload,
   onPlaceUpload,
   onAddShape,
+  onAddBand,
+  onAddButton,
   onClose,
 }: {
   tab: LibraryTab;
@@ -53,6 +55,9 @@ export function LibraryPanel({
   onUpload: (file: File) => void;
   onPlaceUpload: (upload: StorefrontUpload) => void;
   onAddShape: (kind: ShapeKind) => void;
+  /** The Layout group's band and button (LayoutInserts), shown with the shapes. */
+  onAddBand?: () => void;
+  onAddButton?: () => void;
   onClose: () => void;
 }) {
   const t = useTranslations("Storefront.library");
@@ -118,7 +123,7 @@ export function LibraryPanel({
             onPlace={onPlaceUpload}
           />
         ) : (
-          <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} />
+          <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} onAddBand={onAddBand} onAddButton={onAddButton} />
         )}
       </div>
     </div>
