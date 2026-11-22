@@ -346,7 +346,9 @@ const cardLookFields = {
   whiteBlend: z
     .enum(WHITE_BLENDS)
     .optional()
-    .describe("Blend a photo's white background into the card colour: auto (only photos with near-white edges, the usual choice), on, off. Absent is off."),
+    .describe(
+      "Blend a photo's white background into the card colour: auto, on or off. Absent is off. Auto blends only photos the DESIGNER has measured as white at the edges, so it does nothing on a card the seller has not yet opened there: for a card whose photo you can see is a white studio shot, set on for that card (style), and leave photos with a scene behind them alone. A card darker than mid grey never blends.",
+    ),
   titleBarColor: hexColorSchema.optional().describe("The name strip's fill. Absent follows cardColor. Use a theme.palette colour."),
   titleTextColor: hexColorSchema
     .optional()
