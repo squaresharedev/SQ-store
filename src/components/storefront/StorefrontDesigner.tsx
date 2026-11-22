@@ -172,6 +172,9 @@ import { useStoredFlag } from "@/lib/hooks/useStoredFlag";
 import { useIsTouch } from "@/lib/hooks/useIsTouch";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
 import type { TeamRole } from "@/lib/team/permissions";
+import { usePhotoEdges } from "./usePhotoEdges";
+import { withPhotoEdges } from "@/lib/storefront/photo-edge";
+import { cardLookColorPatch, isCardLookColorKind, themeWithCardLookColor } from "@/lib/storefront/card-look-fields";
 
 /** What the left inspector column shows: the product picker, or the editor
  *  card for the selected block(s). One key = that block's own editor; several
@@ -671,6 +674,19 @@ export function StorefrontDesigner({
     () => new Map(catalog.map((product) => [product.id, product])),
     [catalog],
   );
+  // Photo cards: measure the photos whose look depends on their edges and
+  // cache the answer on the blocks, so the saved storefront carries it to
+  // buyers (lib/storefront/photo-edge). Not an undo step: a measurement.
+  usePhotoEdges({
+    theme,
+    blocks,
+    products: productsById,
+    sample: isSample,
+    onMeasured: (edges) => {
+      setBlocks((current) => withPhotoEdges(current, edges));
+      markDirty();
+    },
+  });
   // Whether a sale chip shows anywhere on the board: without one, the theme's
   // sale badge controls offer to start a sale instead (SaleBadgeControls).
   const saleOnBoard = useMemo(
@@ -3269,6 +3285,7 @@ export function StorefrontDesigner({
    * history and flips the dirty flag exactly like one set from a swatch.
    */
   function applyColorTarget(ref: ColorTargetRef, hex: string) {
+    if (isCardLookColorKind(ref.kind)) return setCardLookColor(ref, hex);
     switch (ref.kind) {
       case "theme-accent":
         updateTheme({ ...theme, accent: hex });
@@ -3310,6 +3327,14 @@ export function StorefrontDesigner({
         setTitleShadowColor(ref, hex);
         return;
     }
+  }
+
+  /** Write (or clear) one of the card look's colours (card-look-fields), on
+   *  a tile's override or the theme, exactly as setPriceTagColor does. */
+  function setCardLookColor(ref: ColorTargetRef, hex: string | undefined) {
+    if (!isCardLookColorKind(ref.kind)) return;
+    if ("blockKey" in ref && ref.blockKey) updateProductBlocksStyle([ref.blockKey], cardLookColorPatch(ref.kind, hex));
+    else updateTheme(themeWithCardLookColor(theme, ref.kind, hex));
   }
 
   /** Write (or clear) the `shadow` title area's tint, on a tile's override
@@ -3408,6 +3433,7 @@ export function StorefrontDesigner({
    *  The header's two lines DROP their key rather than storing `undefined`, so
    *  a header the seller never colored stays identical to a legacy one. */
   function clearColorTarget(ref: ColorTargetRef) {
+    if (isCardLookColorKind(ref.kind)) return setCardLookColor(ref, undefined);
     if (ref.kind === "text-color") {
       setTextColor(ref.blockKey, undefined);
       return;

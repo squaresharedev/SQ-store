@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Card color",
+    "blend": {
+      "label": "Blend white background",
+      "auto": "Auto",
+      "on": "On",
+      "off": "Off",
+      "hint": "The card color shows through a photo's white background. Auto blends only photos with white edges.",
+      "darkCard": "Photos keep their white on a dark card: blending would darken the product too."
+    },
+    "more": "More",
+    "nameStrip": "Name strip",
+    "nameColor": "Name color",
+    "nameFont": {
+      "label": "Name font",
+      "heading": "Headline",
+      "body": "Body"
+    },
+    "photoShape": {
+      "label": "Photo shape",
+      "rectangle": "Rectangle",
+      "rounded": "Rounded",
+      "arch": "Arch",
+      "circle": "Circle"
+    },
+    "imageShape": "Shape",
+    "shadow": {
+      "label": "Shadow",
+      "none": "None",
+      "soft": "Soft",
+      "lifted": "Lifted"
+    }
+  },
   "board": {}
 }

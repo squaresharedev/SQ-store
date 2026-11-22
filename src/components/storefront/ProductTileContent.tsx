@@ -25,6 +25,7 @@ import {
   type CardStyle,
   type CardStyleOverrides,
   type ImagePlacement,
+  type PhotoEdge,
   type PriceTagFloatPosition,
   type PriceTagPosition,
   type SpotRow,
@@ -32,6 +33,7 @@ import {
 } from "@/types/storefront";
 // Buyer-safe: core file has no designer-panel code.
 import { priceTagAutoTextColor } from "@/lib/theme/color-target-core";
+import { fontRoleStyle } from "@/lib/theme/font-roles";
 import { imageStyle } from "@/lib/images/placement";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -63,6 +65,7 @@ import {
   titleShadowInk,
   titleShadowStyle,
 } from "./config-maps";
+import { PHOTO_BLEND_CLASS, cardPaint, photoShapeStyle, type CardPaint } from "./card-look";
 import { SaleChip, saleChipWidth, useSaleChipWords } from "./SaleChip";
 import type { TileSpotDrag } from "./TileSpotDragLayer";
 
@@ -90,30 +93,26 @@ function hoverDurationStyle(ms: number): CSSProperties {
   return { transitionDuration: `${ms}ms` };
 }
 
-/** The info bar's own surface (`bg-card`), which is what an unfilled chip in
- *  a `bar` or `overlay` band is actually read against. */
-const CARD_SURFACE = "#ffffff";
-
 /**
  * What the price is READ AGAINST, which is not always its own fill.
  *
  * A floated tag wears a backing, so the answer is that backing. A tag in the
  * title band has no fill by default and sits directly on whatever the band
- * is: the card's surface for a bar or an overlay, the dark gradient for a
- * `shadow`. Handing that to the chip is what lets the legibility floor apply
- * to an unfilled price as well as a filled one.
+ * is: the card's strip for a bar or an overlay (its own colour, or the old
+ * white), the gradient for a `shadow`. Handing that to the chip is what lets
+ * the legibility floor apply to an unfilled price as well as a filled one.
  *
  * A tag floated over a PHOTO is the one case nobody can answer, since the
  * picture underneath is the seller's. It never needs answering: a floated tag
  * always has a fill (see defaultPriceTagFill), which is exactly why it has
  * one.
  */
-function priceBackdrop(card: CardStyle, position: PriceTagPosition): string {
+function priceBackdrop(card: CardStyle, position: PriceTagPosition, paint: CardPaint): string {
   const fill = card.priceTagColor ?? defaultPriceTagFill(position);
   if (fill !== "transparent") return fill;
   return card.titleStyle === "shadow"
-    ? titleShadowBackdrop(card.titleShadowColor)
-    : CARD_SURFACE;
+    ? titleShadowBackdrop(paint.shade)
+    : paint.stripBackdrop;
 }
 
 /** A buyer's board turning a card's buy button into a real "Add to cart"
@@ -183,11 +182,16 @@ export function ProductTileContent({
   look,
   hover = "board",
   quickAddAction,
+  photoEdge,
 }: {
   product: Product;
   theme: StorefrontTheme;
   /** The block's per-tile style overrides (block.style), if any. */
   overrides?: CardStyleOverrides;
+  /** What was measured at this photo's edges (block.photoEdge, written by
+   *  the designer). Absent = not measured: an `auto` blend leaves the photo
+   *  alone, and a `shadow` title keeps its fade. See lib/storefront/photo-edge. */
+  photoEdge?: PhotoEdge;
   /** The seller's own sold-out mark on this block (block.soldOut). */
   soldOut?: boolean;
   /** Where the photo sits in this tile's frame. Absent = centred at cover,
@@ -221,6 +225,11 @@ export function ProductTileContent({
   const locale = useLocale();
   const card = resolveCardStyle(theme, overrides);
   const tileLook = look ?? resolveTileLook({ theme });
+  // THE CARD LOOK: the card's own colours, whether its photo blends, and the
+  // shade a `shadow` title fades in (card-look). All absent on a card that
+  // sets none of it, which then draws its old classes and nothing inline.
+  const paint = cardPaint(card, photoEdge);
+  const photoShape = photoShapeStyle(card.photoShape, "card");
 
   // THE CARD EXTRAS. Stock is a state, never a count (tileStockState): "Low
   // stock" under the name, and the sold-out badge once none are left, the
@@ -291,7 +300,9 @@ export function ProductTileContent({
   // own, above or below it.
   const overlaid = titleOverlaysImage(card.titleStyle);
   const shadowArea = card.titleStyle === "shadow";
-  const shadowInk = titleShadowInk(card.titleShadowColor);
+  const shadowInk = titleShadowInk(paint.shade);
+  // The name's own colour on a fade, where the seller chose one.
+  const nameShadowInk = paint.shadeInk ?? shadowInk;
   const titleHover = card.titleDisplay === "hover";
 
   // "hidden" position is the single hide switch (legacy priceDisplay "never"
@@ -339,11 +350,13 @@ export function ProductTileContent({
     {
       fill: defaultPriceTagFill(pricePosition),
       text: priceTagAutoTextColor(
-        { ...card, priceTagPosition: pricePosition },
+        // The shade as drawn: over a white-edged photo a `shadow` band fades
+        // pale (cardPaint), and the price's own ink has to follow it.
+        { ...card, titleShadowColor: paint.shade, priceTagPosition: pricePosition },
         theme.accent,
       ),
     },
-    priceBackdrop(card, pricePosition),
+    priceBackdrop(card, pricePosition, paint),
   );
   const chipFontClass = PRICE_TAG_FONT_CLASSES[card.priceTagFont];
 
@@ -511,9 +524,12 @@ export function ProductTileContent({
       className={cn(
         "block truncate",
         TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
-        shadowArea ? shadowInk === "#ffffff" && "drop-shadow-sm" : "text-foreground",
+        shadowArea ? shadowInk === "#ffffff" && "drop-shadow-sm" : !paint.ink && "text-foreground",
       )}
-      style={{ ...tileDetailsStyle(), ...(shadowArea ? { color: shadowInk } : {}) }}
+      style={{
+        ...tileDetailsStyle(),
+        ...(shadowArea ? { color: shadowInk } : paint.ink ? { color: paint.ink } : {}),
+      }}
     >
       {rating && (
         <span data-tile-rating="">
@@ -549,7 +565,7 @@ export function ProductTileContent({
   // (an arrow says "goes somewhere"), turning to a spinner and a tick as it
   // goes in. On a buyer's board (quickAddAction) it is a real button, which
   // StorefrontBoard keeps OUT of the card's link.
-  const buyStyle = buyLook ? tileBuyButtonStyle(buyLook, tileLook.buy, card) : undefined;
+  const buyStyle = buyLook ? tileBuyButtonStyle(buyLook, tileLook.buy, card, paint.foot) : undefined;
   const CartIcon = CART_ICON[CART_LOOK.icon];
   const quickState = quickAdd ? (quickAddAction?.state ?? "idle") : null;
   const buyInner = buyLook ? (
@@ -577,8 +593,12 @@ export function ProductTileContent({
   const buyRow = buyLook ? (
     <div
       data-tile-buy={buyLook}
-      className="shrink-0 bg-card py-1.5"
-      style={{ ...titleBandStyle(card.titleInset), ...titleBandFontStyle() }}
+      className={cn("shrink-0", !paint.foot && "bg-card", "py-1.5")}
+      style={{
+        ...titleBandStyle(card.titleInset),
+        ...titleBandFontStyle(),
+        ...(paint.foot ? { backgroundColor: paint.foot } : {}),
+      }}
     >
       {quickAdd && quickAddAction ? (
         <button
@@ -619,6 +639,19 @@ export function ProductTileContent({
   const frosted = shadowArea && card.titleShadowBlur > 0;
   const bandPinClass = cn("absolute inset-x-0 z-10", TITLE_BAND_ROW_CLASSES[titleRow]);
 
+  // The name's ink and face, inline only where something sets them, so a
+  // card with neither carries no style on its name at all.
+  const nameInk = shadowArea ? nameShadowInk : paint.ink;
+  const nameStyle =
+    nameInk !== undefined || card.titleFont !== undefined
+      ? {
+          ...(nameInk !== undefined ? { color: nameInk } : {}),
+          // "Name font: Headline / Body". With no font pairing the role is
+          // unset and the name keeps the board's font (fontRoleStyle).
+          ...(card.titleFont !== undefined ? fontRoleStyle(card.titleFont) : {}),
+        }
+      : undefined;
+
   const titleName = card.showTitle ? (
     <span
       {...titleToken}
@@ -633,13 +666,14 @@ export function ProductTileContent({
         TEXT_ALIGN_CLASSES[spotColumn(titleSpot)],
         // On a shadow the ink follows the shade's lightness (inline, since
         // the shade is a seller hex that no theme token tracks); the drop
-        // shadow only helps white words, and muddies dark ones.
+        // shadow only helps white words, and muddies dark ones. On a strip
+        // with a colour of its own, the ink that reads on it (cardPaint).
         shadowArea
-          ? shadowInk === "#ffffff" && "drop-shadow-sm"
-          : "text-foreground",
+          ? nameShadowInk === "#ffffff" && "drop-shadow-sm"
+          : !paint.ink && "text-foreground",
         titleToken?.className,
       )}
-      style={shadowArea ? { color: shadowInk } : undefined}
+      style={nameStyle}
     >
       {product.title}
     </span>
@@ -663,14 +697,19 @@ export function ProductTileContent({
         ...titleBandStyle(card.titleInset),
         ...titleBandFontStyle(),
         ...hoverDurationStyle(card.titleHoverMs),
-        ...(shadowArea && titleShadowStyle(titleRow, card.titleShadowColor)),
+        ...(shadowArea && titleShadowStyle(titleRow, paint.shade)),
+        // A strip in the card's own colour (or its own), in place of the
+        // white classes below; an overlay keeps its see-through.
+        ...(paint.strip && !shadowArea
+          ? { backgroundColor: card.titleStyle === "overlay" ? paint.overlayStrip : paint.strip }
+          : {}),
       }}
       className={cn(
         "flex items-baseline justify-between gap-2 py-1.5",
         // A bar is a real row in the tile's column, so it needs no pinning.
-        !overlaid && "bg-card",
+        !overlaid && !paint.strip && "bg-card",
         overlaid && (frosted ? "relative" : bandPinClass),
-        card.titleStyle === "overlay" && "bg-card/90",
+        card.titleStyle === "overlay" && !paint.strip && "bg-card/90",
         // Shadow: no bar, a gradient fading away from the words for legibility.
         shadowArea && TITLE_BAND_SHADOW_CLASSES[titleRow],
         titleHover &&
@@ -747,7 +786,10 @@ export function ProductTileContent({
         data-image-frame=""
         // A zoomed photo grows past its frame, which then clips it, so it
         // never spills over a bar title or the buy row.
-        className={cn("relative min-h-0 flex-1 bg-muted", zoom && "overflow-hidden")}
+        // The frame is the card's own colour where it has one: what shows
+        // round a shaped photo, and through a blended one (cardPaint).
+        className={cn("relative min-h-0 flex-1", !paint.frame && "bg-muted", zoom && "overflow-hidden")}
+        style={paint.frame ? { backgroundColor: paint.frame } : undefined}
       >
         {product.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
@@ -764,11 +806,15 @@ export function ProductTileContent({
             decoding="async"
             // Empty for an unframed tile, so the overwhelmingly common case
             // carries no inline style and renders exactly as it always has.
-            style={imageStyle(imagePlacement)}
+            // A photo shape is a clip on the picture, never a change to its
+            // box, so framing still measures what it always did.
+            style={{ ...imageStyle(imagePlacement), ...photoShape }}
             className={cn(
               "size-full object-cover",
               soldOut && "opacity-60 grayscale",
               zoom && cardHoverZoomClass(hover),
+              // The photo's white turns into the card's colour (cardPaint).
+              paint.blend && PHOTO_BLEND_CLASS,
             )}
           />
         ) : (
@@ -798,7 +844,12 @@ export function ProductTileContent({
             loading="lazy"
             decoding="async"
             data-tile-hover-photo=""
-            className={cn(hoverPhotoClass(hover, soldOut), zoom && cardHoverZoomClass(hover))}
+            style={Object.keys(photoShape).length > 0 ? photoShape : undefined}
+            className={cn(
+              hoverPhotoClass(hover, soldOut),
+              zoom && cardHoverZoomClass(hover),
+              paint.blendHover && PHOTO_BLEND_CLASS,
+            )}
           />
         )}
         {/* The photo's blur, as a layer over it rather than a filter on it,
@@ -808,7 +859,7 @@ export function ProductTileContent({
           <span
             aria-hidden="true"
             className="pointer-events-none absolute inset-0"
-            style={photoBlurStyle(card.photoBlur, card.photoBlurDirection)}
+            style={{ ...photoBlurStyle(card.photoBlur, card.photoBlurDirection), ...photoShape }}
           />
         )}
         {/* Floating price tag, placed over the image per the chosen spot. */}

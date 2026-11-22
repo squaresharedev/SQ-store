@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Barva karty",
+    "blend": {
+      "label": "Prolnout bílé pozadí",
+      "auto": "Automaticky",
+      "on": "Zapnuto",
+      "off": "Vypnuto",
+      "hint": "Barva karty prosvítá bílým pozadím fotky. Automaticky prolne jen fotky s bílými okraji.",
+      "darkCard": "Na tmavé kartě si fotky nechají bílou: prolnutí by ztmavilo i produkt."
+    },
+    "more": "Další",
+    "nameStrip": "Pruh s názvem",
+    "nameColor": "Barva názvu",
+    "nameFont": {
+      "label": "Písmo názvu",
+      "heading": "Nadpis",
+      "body": "Text"
+    },
+    "photoShape": {
+      "label": "Tvar fotky",
+      "rectangle": "Obdélník",
+      "rounded": "Zaoblený",
+      "arch": "Oblouk",
+      "circle": "Kruh"
+    },
+    "imageShape": "Tvar",
+    "shadow": {
+      "label": "Stín",
+      "none": "Žádný",
+      "soft": "Jemný",
+      "lifted": "Výrazný"
+    }
+  },
   "board": {}
 }

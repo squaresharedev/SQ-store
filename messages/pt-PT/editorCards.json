@@ -1,4 +1,36 @@
 {
-  "panel": {},
+  "panel": {
+    "cardColor": "Cor do cartão",
+    "blend": {
+      "label": "Fundir o fundo branco",
+      "auto": "Automático",
+      "on": "Ligado",
+      "off": "Desligado",
+      "hint": "A cor do cartão aparece através do fundo branco da fotografia. Automático só funde fotografias com margens brancas.",
+      "darkCard": "Num cartão escuro as fotografias mantêm o branco: fundi-las escureceria também o produto."
+    },
+    "more": "Mais",
+    "nameStrip": "Faixa do nome",
+    "nameColor": "Cor do nome",
+    "nameFont": {
+      "label": "Tipo de letra do nome",
+      "heading": "Título",
+      "body": "Corpo"
+    },
+    "photoShape": {
+      "label": "Forma da fotografia",
+      "rectangle": "Retângulo",
+      "rounded": "Arredondada",
+      "arch": "Arco",
+      "circle": "Círculo"
+    },
+    "imageShape": "Forma",
+    "shadow": {
+      "label": "Sombra",
+      "none": "Nenhuma",
+      "soft": "Suave",
+      "lifted": "Elevada"
+    }
+  },
   "board": {}
 }

@@ -14,6 +14,7 @@ import {
 } from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 import { rangeColor } from "@/lib/storefront/text-spans";
+import { cardLookColorField, type CardLookColorKind } from "@/lib/storefront/card-look-fields";
 import type { MessageKey } from "@/i18n/types";
 // Buyer-safe primitives live in the core file; this module re-exports them
 // for all existing importers while importing them locally so internal
@@ -64,7 +65,10 @@ export type ColorTargetRef =
   // blockKey means the theme.
   | { kind: "price-tag"; part: PriceTagPart; blockKey?: string }
   // The `shadow` title style's tint, on the same two scopes as the price tag.
-  | { kind: "title-shadow"; blockKey?: string };
+  | { kind: "title-shadow"; blockKey?: string }
+  // The card look's three colours (Photo cards: lib/storefront/card-look-fields),
+  // on the same two scopes. One kind per field.
+  | { kind: CardLookColorKind; blockKey?: string };
 // A "product-page-text" ref lived here. The product page's ink is derived from
 // the storefront background's lightness now, so there is no colour to pick.
 
@@ -421,6 +425,15 @@ export function resolveColorTarget(
       const block = find(blocks, ref.blockKey);
       if (block?.type !== "product") return null;
       return titleShadowColorField(theme, block.style ?? {});
+    }
+
+    case "card-color":
+    case "title-bar-color":
+    case "title-text-color": {
+      if (!ref.blockKey) return cardLookColorField(theme, undefined, ref.kind);
+      const block = find(blocks, ref.blockKey);
+      if (block?.type !== "product") return null;
+      return cardLookColorField(theme, block.style ?? {}, ref.kind);
     }
   }
 }

@@ -21,10 +21,11 @@ import {
 import { SliderField } from "@/components/ui/SliderField";
 import { BlockActions } from "./BlockActions";
 import { BlurSlider } from "./BlurSlider";
+import { PhotoShapePicker, ShadowPicker } from "./CardLookControls";
 import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 
 export type ImageBlockPatch = Partial<
-  Pick<ImageBlock, "alt" | "fit" | "opacity" | "blur" | "blurDirection">
+  Pick<ImageBlock, "alt" | "fit" | "opacity" | "blur" | "blurDirection" | "shape" | "shadow">
 >;
 
 const FIT_BUTTON_CLASS = `inline-flex flex-1 items-center justify-center rounded-none border border-border bg-background px-2 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground ${transitionClass} ${focusRingClass}`;
@@ -79,6 +80,7 @@ export function ImageBlockEditor({
 }) {
   const fieldId = useId();
   const t = useTranslations("Storefront");
+  const tCards = useTranslations("EditorCards.panel");
   const fit = block.fit ?? "cover";
   const opacity = block.opacity ?? 100;
 
@@ -138,6 +140,19 @@ export function ImageBlockEditor({
           {t("imageBlock.reposition")}
         </button>
       )}
+
+      {/* The outline the picture is cut to, and a shadow under it (Photo
+          cards). Back at the defaults each stores nothing, so an untouched
+          element stays the block it was. */}
+      <PhotoShapePicker
+        label={tCards("imageShape")}
+        value={block.shape ?? "rectangle"}
+        onChange={(shape) => onUpdate({ shape: shape === "rectangle" ? undefined : shape })}
+      />
+      <ShadowPicker
+        value={block.shadow ?? "none"}
+        onChange={(shadow) => onUpdate({ shadow: shadow === "none" ? undefined : shadow })}
+      />
 
       <SummonedField field="opacity" summons={summons} variant="slider">
         {(highlighted) => (
