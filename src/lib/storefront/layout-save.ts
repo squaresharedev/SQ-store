@@ -7,6 +7,10 @@
 //   - a link to ANOTHER STOREFRONT must name one of this store's own: a button
 //     or menu entry that names any other is dropped, the way a product block
 //     naming someone else's product is;
+//   - a link to a PRODUCT the save has just dropped (not this store's, or
+//     deleted while the editor was open) is dropped with it. The schema refuses
+//     a link to a product the board does not show, so storing one would leave a
+//     config that could not be read back;
 //   - band photos are uploads like the background (an `images/` key): a key
 //     new to this storefront is verified (ownership, real size and type), and
 //     one the save lets go of is evicted once the row is written;
@@ -16,6 +20,7 @@
 import { serverError, type ActionError } from "@/lib/errors";
 import { storedPagePhotoKeys, verifyUpload } from "@/lib/storefront/uploads";
 import { bandPhotoKeys } from "@/lib/storefront/bands";
+import { liveHeaderLinks, withoutDeadLinks } from "@/lib/storefront/layout-blocks";
 import type { createClient } from "@/lib/supabase/server";
 import type { StorefrontBand, StorefrontConfig } from "@/types/storefront";
 
@@ -33,6 +38,18 @@ export async function settleLayout(
   bands: StorefrontBand[] | undefined,
 ): Promise<{ ok: true } | { ok: false; error: ActionError }> {
   if (bands && bands.length > 0) config.bands = bands;
+
+  // After the save's own ownership check has had its say over the product
+  // blocks: what is left of the board decides which links still lead somewhere.
+  config.blocks = withoutDeadLinks(config.blocks, config.bands ?? []);
+  if (config.header?.links) {
+    const live = liveHeaderLinks(config.header.links, config.blocks, config.bands ?? []) ?? [];
+    if (live.length !== config.header.links.length) {
+      const { links: _links, ...rest } = config.header;
+      void _links;
+      config.header = live.length > 0 ? { ...rest, links: live } : rest;
+    }
+  }
 
   const named = new Set<string>();
   for (const block of config.blocks) if (block.type === "button" && block.link.kind === "storefront") named.add(block.link.storefrontId);

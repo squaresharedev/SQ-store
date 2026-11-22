@@ -370,3 +370,29 @@ describe("words on a band", () => {
     }
   });
 });
+
+describe("a stored storefront with a link to nothing", () => {
+  it("is read back without the dead links, never lost whole", () => {
+    const stored = structuredClone(upgradedConfig()) as Record<string, any>;
+    // The product the button and a menu entry lead to has left the board.
+    stored.blocks = stored.blocks.filter((block: Record<string, unknown>) => block.productId !== PRODUCT);
+    stored.header.links.push({ label: "Gone", link: { kind: "product", productId: PRODUCT } });
+    stored.header.links.splice(3, 1);
+    expect(storefrontConfigSchema.safeParse(stored).success).toBe(false);
+
+    const read = parseStoredStorefrontConfig(stored);
+    expect(read).not.toBeNull();
+    expect(read!.blocks.some((block) => block.type === "button")).toBe(false);
+    expect(read!.blocks.map((block) => block.type)).toContain("marquee");
+    expect(read!.header?.links?.map((entry) => entry.label)).toEqual(["Candles", "Journal", "Outlet"]);
+    expect(read!.bands).toHaveLength(1);
+    expect(read!.theme.palette).toEqual(upgradedConfig().theme.palette);
+  });
+
+  it("is still refused when something else is wrong with it too", () => {
+    const stored = structuredClone(upgradedConfig()) as Record<string, any>;
+    stored.blocks = stored.blocks.filter((block: Record<string, unknown>) => block.productId !== PRODUCT);
+    stored.theme.motion = "spin";
+    expect(parseStoredStorefrontConfig(stored)).toBeNull();
+  });
+});

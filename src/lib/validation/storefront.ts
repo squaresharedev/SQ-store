@@ -1577,5 +1577,27 @@ export function parseStoredStorefrontConfig(
     // members any more, and the preprocess above has already dropped them.
   };
   const retry = storefrontConfigSchema.safeParse(upgraded);
-  return retry.success ? retry.data : null;
+  if (retry.success) return retry.data;
+
+  // DEAD LINKS never cost a seller their storefront. A button or a menu entry
+  // that names a product the board no longer shows, or a band it no longer
+  // has, fails the link check, and with it the whole config. When that is all
+  // that is wrong, the links the check names are dropped and the rest is kept:
+  // a link to nothing is the one thing here that is safe to lose.
+  const deadLink = issueKey("Validation.storefront.linkTargetMissing");
+  if (retry.error.issues.some((issue) => issue.message !== deadLink)) return null;
+  const deadBlocks = new Set<PropertyKey>();
+  const deadMenuEntries = new Set<PropertyKey>();
+  for (const issue of retry.error.issues) {
+    if (issue.path[0] === "blocks") deadBlocks.add(issue.path[1]);
+    else if (issue.path[0] === "header" && issue.path[1] === "links") deadMenuEntries.add(issue.path[2]);
+  }
+  const header = "header" in upgraded ? (upgraded.header as { links?: unknown[] }) : undefined;
+  const repaired = {
+    ...upgraded,
+    blocks: upgraded.blocks.filter((_block: unknown, index: number) => !deadBlocks.has(index)),
+    ...(header?.links ? { header: { ...header, links: header.links.filter((_entry, index) => !deadMenuEntries.has(index)) } } : {}),
+  };
+  const last = storefrontConfigSchema.safeParse(repaired);
+  return last.success ? last.data : null;
 }

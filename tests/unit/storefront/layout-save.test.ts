@@ -103,3 +103,34 @@ describe("the header logo's key", () => {
     expect([...keys]).toEqual(["elements/u/a.png", "elements/u/logo.svg"]);
   });
 });
+
+describe("a save's links to products the save has dropped", () => {
+  const GONE = "99999999-9999-4999-8999-999999999999";
+  const KEPT = "88888888-8888-4888-8888-888888888888";
+
+  it("drops a button and a menu entry whose product is no longer on the board, and keeps the rest", async () => {
+    // What saveStorefront hands over once its ownership check has dropped the
+    // block of a product that is not this store's (or was deleted meanwhile).
+    const saved = config({
+      blocks: [
+        { type: "product", productId: KEPT, x: 0, y: 0, w: 2, h: 2 },
+        { type: "button", id: "dead", label: "Gone", link: { kind: "product", productId: GONE }, x: 2, y: 0, w: 2, h: 1 },
+        { type: "button", id: "live", label: "Here", link: { kind: "product", productId: KEPT }, x: 2, y: 1, w: 2, h: 1 },
+        { type: "button", id: "band", label: "Up", link: { kind: "band", bandId: BAND }, x: 2, y: 2, w: 2, h: 1 },
+      ],
+      header: {
+        show: true,
+        name: "",
+        bio: "",
+        links: [
+          { label: "Gone", link: { kind: "product", productId: GONE } },
+          { label: "Here", link: { kind: "product", productId: KEPT } },
+        ],
+      },
+    });
+    const bands = [{ id: BAND, y: 0, h: 1, background: { kind: "solid" as const, color: "#000000" } }];
+    expect(await settleLayout(supabaseWith([]), "owner", saved, bands)).toEqual({ ok: true });
+    expect(saved.blocks.map((block) => ("id" in block ? block.id : "tile"))).toEqual(["tile", "live", "band"]);
+    expect(saved.header?.links).toEqual([{ label: "Here", link: { kind: "product", productId: KEPT } }]);
+  });
+});
