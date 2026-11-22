@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Paleta",
+      "hint": "Změňte tu barvu a změní se s ní všechno, co je v ní obarvené.",
+      "group": "Barvy palety",
+      "allColors": "Všechny barvy",
+      "slots": {
+        "background": {
+          "name": "Pozadí",
+          "label": "Pozadí z palety ({value})"
+        },
+        "text": {
+          "name": "Text",
+          "label": "Text z palety ({value})"
+        },
+        "accent": {
+          "name": "Zvýraznění",
+          "label": "Zvýraznění z palety ({value})"
+        },
+        "surface": {
+          "name": "Plocha",
+          "label": "Plocha z palety ({value})"
+        },
+        "muted": {
+          "name": "Tlumená",
+          "label": "Tlumená barva z palety ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Dvojice písem",
+      "group": "Volba dvojice písem",
+      "editorial": {
+        "name": "Redakční",
+        "hint": "Měkké patkové nadpisy a čistý text pod nimi"
+      },
+      "classic": {
+        "name": "Klasická",
+        "hint": "Elegantní patkové písmo s dobře čitelným bezpatkovým"
+      },
+      "modern": {
+        "name": "Moderní",
+        "hint": "Geometrické nadpisy a neutrální text"
+      },
+      "soft": {
+        "name": "Jemná",
+        "hint": "Oblé patkové písmo s přátelským bezpatkovým"
+      },
+      "studio": {
+        "name": "Ateliér",
+        "hint": "Štíhlé patkové písmo s otevřeným bezpatkovým"
+      }
+    },
+    "typography": {
+      "singleFont": "Jedno písmo na všechno",
+      "singleFontHint": "Výběrem písma zde vypnete dvojici písem."
+    },
+    "textStyles": {
+      "title": "Styly textu",
+      "hint": "Každý styl nastavte jednou. Řídí se jím každý textový blok v tom stylu.",
+      "pick": "Styl k úpravě",
+      "face": "Písmo",
+      "faceHeading": "Nadpisové",
+      "faceBody": "Textové",
+      "uppercase": "Velká písmena",
+      "colorDefault": "Výchozí stylu",
+      "useColorDefault": "Použít výchozí stylu",
+      "reset": "Obnovit tento styl"
+    },
+    "valign": {
+      "label": "Svislé zarovnání",
+      "group": "Svislé zarovnání textu",
+      "top": "Zarovnat nahoru",
+      "middle": "Zarovnat na střed",
+      "bottom": "Zarovnat dolů"
+    }
+  },
   "board": {}
 }

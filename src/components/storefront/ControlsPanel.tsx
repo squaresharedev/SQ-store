@@ -39,6 +39,7 @@ import { CardShoppingControls } from "./CardShoppingControls";
 import { ChipScaleControl } from "./ChipScaleControl";
 import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
+import { typographyMenuHint } from "@/lib/theme/font-pairing-labels";
 import { SoldOutSection } from "./SoldOutSection";
 import { ProductPageSection } from "./ProductPageSection";
 import { CheckoutPageSection } from "./CheckoutPageSection";
@@ -265,9 +266,9 @@ export function ControlsPanel({
             // holds instead.
             hint={
               id === "typography"
-                ? theme.customFont && theme.font === "custom"
+                ? typographyMenuHint(theme, tKey) ?? (theme.customFont && theme.font === "custom"
                   ? theme.customFont.name
-                  : tKey(FONT_LABELS[theme.font])
+                  : tKey(FONT_LABELS[theme.font]))
                 : id === "theme"
                   ? t("themeHint")
                   : id === "productPage" && !productPage.enabled

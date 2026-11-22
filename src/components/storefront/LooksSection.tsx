@@ -8,6 +8,7 @@ import {
   type StorefrontVibe,
 } from "@/lib/storefront/presets";
 import type { StorefrontTheme } from "@/types/storefront";
+import { derivePalette } from "@/lib/storefront/palette";
 import { cn } from "@/lib/utils";
 import { strongLabelClass } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
@@ -65,6 +66,22 @@ function LookSwatch({ vibe }: { vibe: StorefrontVibe }) {
   );
 }
 
+/**
+ * A look laid over the theme. A look sets a typeface, and a font pairing
+ * would win over it, so the pairing goes (the look is the way back to a
+ * coherent storefront, and its own type is part of it). A storefront with a
+ * palette of its own keeps one, re-read off the colours the look brings: left
+ * as it was, it would go on offering the old background and accent in every
+ * picker.
+ */
+function withLook(theme: StorefrontTheme, vibe: StorefrontVibe): StorefrontTheme {
+  const next: StorefrontTheme = { ...theme, ...VIBE_PRESETS[vibe] };
+  delete next.fontPairing;
+  if (!theme.palette) return next;
+  delete next.palette;
+  return { ...next, palette: derivePalette(next) };
+}
+
 export function LooksSection({
   theme,
   onChange,
@@ -95,7 +112,8 @@ export function LooksSection({
         {STOREFRONT_VIBES.map((vibe) => {
           // A look is "on" while everything it writes still matches. One edit
           // away and nothing is pressed, which is the truth.
-          const active = themeMatchesVibe(theme, vibe);
+          // A pairing sets the type over the look's own, so then it is not on.
+          const active = themeMatchesVibe(theme, vibe) && !theme.fontPairing;
           return (
             <button
               key={vibe}
@@ -108,7 +126,7 @@ export function LooksSection({
               // theme would snap the seller's canvas back to the 6x6 default
               // every time they tried a look. Spreading the preset alone is
               // the fields it actually owns, nothing else.
-              onClick={() => onChange({ ...theme, ...VIBE_PRESETS[vibe] })}
+              onClick={() => onChange(withLook(theme, vibe))}
               aria-pressed={active}
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-none border p-2 text-left transition-colors duration-base ease-standard focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none",

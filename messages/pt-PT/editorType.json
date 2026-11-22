@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Paleta",
+      "hint": "Mude aqui uma cor e tudo o que a usa muda com ela.",
+      "group": "Cores da paleta",
+      "allColors": "Todas as cores",
+      "slots": {
+        "background": {
+          "name": "Fundo",
+          "label": "Fundo da paleta ({value})"
+        },
+        "text": {
+          "name": "Texto",
+          "label": "Texto da paleta ({value})"
+        },
+        "accent": {
+          "name": "Destaque",
+          "label": "Destaque da paleta ({value})"
+        },
+        "surface": {
+          "name": "Superfície",
+          "label": "Superfície da paleta ({value})"
+        },
+        "muted": {
+          "name": "Esbatido",
+          "label": "Cor esbatida da paleta ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Par de tipos de letra",
+      "group": "Pares de tipos de letra",
+      "editorial": {
+        "name": "Editorial",
+        "hint": "Um serifado suave nos títulos e texto limpo por baixo"
+      },
+      "classic": {
+        "name": "Clássica",
+        "hint": "Um serifado elegante com uma sem serifa fácil de ler"
+      },
+      "modern": {
+        "name": "Moderna",
+        "hint": "Títulos geométricos com texto neutro"
+      },
+      "soft": {
+        "name": "Suave",
+        "hint": "Um serifado arredondado com uma sem serifa simpática"
+      },
+      "studio": {
+        "name": "Estúdio",
+        "hint": "Um serifado esguio com uma sem serifa aberta"
+      }
+    },
+    "typography": {
+      "singleFont": "Um tipo de letra para tudo",
+      "singleFontHint": "Escolher aqui um tipo de letra desliga o par."
+    },
+    "textStyles": {
+      "title": "Estilos de texto",
+      "hint": "Defina cada estilo uma vez. Todos os blocos de texto nesse estilo seguem-no.",
+      "pick": "Estilo a editar",
+      "face": "Tipo de letra",
+      "faceHeading": "Título",
+      "faceBody": "Corpo",
+      "uppercase": "Maiúsculas",
+      "colorDefault": "Predefinição do estilo",
+      "useColorDefault": "Utilizar a predefinição do estilo",
+      "reset": "Repor este estilo"
+    },
+    "valign": {
+      "label": "Alinhamento vertical",
+      "group": "Alinhamento vertical do texto",
+      "top": "Alinhar em cima",
+      "middle": "Alinhar ao meio",
+      "bottom": "Alinhar em baixo"
+    }
+  },
   "board": {}
 }

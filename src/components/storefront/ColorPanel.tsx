@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Copy, Pipette, X } from "lucide-react";
+import { Check, ChevronDown, Copy, Pipette, X } from "lucide-react";
 import {
   STOREFRONT_FONTS,
   type StorefrontFont,
+  type StorefrontPalette,
   type TextAlign,
 } from "@/types/storefront";
 import { cn } from "@/lib/utils";
@@ -18,6 +19,7 @@ import {
   fieldBaseClass,
   focusRingClass,
   helpTextClass,
+  infoTextClass,
   labelClass,
   transitionClass,
 } from "@/components/ui/control-styles";
@@ -32,8 +34,11 @@ import {
   subscribeRecentColors,
 } from "@/lib/theme/recent-colors";
 import type { ResolvedColorTarget } from "@/lib/theme/color-target";
+import { useColorTarget } from "@/lib/theme/color-context";
+import { PALETTE_SLOT_LABELS, PALETTE_SLOT_ORDER } from "@/lib/theme/palette-swatches";
 import { FONT_LABELS } from "./config-maps";
 import { FontSizeField } from "./FontSizeField";
+import { PALETTE_CHIPS_CLASS, PALETTE_CHIP_CLASS } from "./PaletteRow";
 import { AlignmentToggles, FormatToggles } from "./TextFormatControls";
 
 /**
@@ -129,6 +134,19 @@ export function ColorPanel({
   const current = target.value.toLowerCase();
   const inheriting = target.inherit?.active ?? false;
 
+  // PALETTE FIRST. The designer hands the storefront's palette down with the
+  // panel's opener; with it, the panel opens on the five colours the design
+  // is built from, and everything else (the colours in the design, recents,
+  // the standard grid, the curated palettes, the free square) waits behind
+  // "All colors". A palette slot ITSELF is the one field that needs free
+  // colours first, so it gets the whole panel as it always was. Without a
+  // provider (a test, a gallery) nothing changes either.
+  const colorTarget = useColorTarget();
+  const editingPalette = colorTarget?.activeRef?.kind === "palette";
+  const designPalette = editingPalette ? undefined : colorTarget?.palette;
+  const [showAll, setShowAll] = useState(false);
+  const showRest = !designPalette || showAll;
+
   const fontChoiceOptions = useMemo(
     (): SelectOption<FontChoice>[] => [
       {
@@ -154,14 +172,23 @@ export function ColorPanel({
   function pick(hex: string) {
     const lower = hex.toLowerCase();
     if (!isStrictHexColor(lower)) return;
+    // A palette slot recolours the whole design, so re-picking the colour it
+    // already is must not cost an undo step for nothing.
+    if (editingPalette && lower === current) return;
     recordRecentColor(lower);
     onPick(lower);
   }
 
   /** Apply without remembering. For the custom section's live drag, which emits
    *  on every pointer move — recording those would bury the recents list under
-   *  one gesture. It records once when the gesture ends. */
+   *  one gesture. It records once when the gesture ends.
+   *
+   *  Not for a palette slot: changing one REPLACES its colour wherever the
+   *  design wears it (lib/storefront/palette), and a drag passing over some
+   *  other colour on the board on its way would take that along too. A slot
+   *  is set where the gesture lands, once. */
   function preview(hex: string) {
+    if (editingPalette) return;
     const lower = hex.toLowerCase();
     if (isStrictHexColor(lower)) onPick(lower);
   }
@@ -254,6 +281,40 @@ export function ColorPanel({
         </CollapsibleSection>
       )}
 
+      {designPalette && (
+        <CollapsibleSection title={tKey("EditorType.panel.palette.title")}>
+          <PaletteSwatches palette={designPalette} isActive={isActive} onPick={pick} />
+          <button
+            type="button"
+            onClick={() => setShowAll((open) => !open)}
+            aria-expanded={showAll}
+            className={cn(
+              "mt-3 flex w-full items-center justify-between gap-2 text-sm text-muted-foreground hover:text-foreground",
+              transitionClass,
+              focusRingClass,
+            )}
+          >
+            {tKey("EditorType.panel.palette.allColors")}
+            <ChevronDown
+              className={cn(
+                "size-4 transition-transform duration-base ease-standard motion-reduce:transition-none",
+                showAll && "rotate-180",
+              )}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </button>
+        </CollapsibleSection>
+      )}
+
+      {/* With the palette first, "follow the theme" is not a free colour, so
+          it stays in view beside the palette rather than behind the toggle. */}
+      {designPalette && target.inherit && onInherit && (
+        <InheritSection inherit={target.inherit} inheriting={inheriting} onInherit={onInherit} />
+      )}
+
+      {showRest && (
+        <>
       <CollapsibleSection title={t("sectionInDesign")}>
         {inDesign.length > 0 ? (
           <div
@@ -282,33 +343,8 @@ export function ColorPanel({
 
       {/* "Follow the theme" for optional colors — the same affordance the
           inline picker offers, rather than a second reset invention. */}
-      {target.inherit && onInherit && (
-        <CollapsibleSection title={t("sectionInherit")}>
-          <button
-            type="button"
-            onClick={onInherit}
-            aria-pressed={inheriting}
-            className={cn(
-              "flex w-full items-center gap-2 border border-border px-2 py-1.5 text-left text-sm",
-              "hover:bg-accent",
-              transitionClass,
-              focusRingClass,
-              inheriting && "ring-2 ring-ring ring-offset-1 ring-offset-background",
-            )}
-          >
-            <span
-              aria-hidden="true"
-              style={{ backgroundColor: target.inherit.value }}
-              className="size-4 shrink-0 rounded-full ring-1 ring-inset ring-black/10"
-            />
-            <span className="min-w-0 flex-1 truncate text-foreground">
-              {tKey(target.inherit.useLabel)}
-            </span>
-            {inheriting && (
-              <Check className="size-4 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden="true" />
-            )}
-          </button>
-        </CollapsibleSection>
+      {!designPalette && target.inherit && onInherit && (
+        <InheritSection inherit={target.inherit} inheriting={inheriting} onInherit={onInherit} />
       )}
 
       {/* Never rendered empty: an empty labelled group is noise to a screen
@@ -378,7 +414,97 @@ export function ColorPanel({
           ))}
         </div>
       </CollapsibleSection>
+        </>
+      )}
 
+    </div>
+  );
+}
+
+/** "Follow the theme" for an optional colour: its own section, wherever the
+ *  panel puts it. */
+function InheritSection({
+  inherit,
+  inheriting,
+  onInherit,
+}: {
+  inherit: NonNullable<ResolvedColorTarget["inherit"]>;
+  inheriting: boolean;
+  onInherit: () => void;
+}) {
+  const tKey = useTranslations();
+  const t = useTranslations("Storefront.colorPanel");
+  return (
+    <CollapsibleSection title={t("sectionInherit")}>
+      <button
+        type="button"
+        onClick={onInherit}
+        aria-pressed={inheriting}
+        className={cn(
+          "flex w-full items-center gap-2 border border-border px-2 py-1.5 text-left text-sm",
+          "hover:bg-accent",
+          transitionClass,
+          focusRingClass,
+          inheriting && "ring-2 ring-ring ring-offset-1 ring-offset-background",
+        )}
+      >
+        <span
+          aria-hidden="true"
+          style={{ backgroundColor: inherit.value }}
+          className="size-4 shrink-0 rounded-full ring-1 ring-inset ring-black/10"
+        />
+        <span className="min-w-0 flex-1 truncate text-foreground">
+          {tKey(inherit.useLabel)}
+        </span>
+        {inheriting && (
+          <Check className="size-4 shrink-0 text-foreground" strokeWidth={2.5} aria-hidden="true" />
+        )}
+      </button>
+    </CollapsibleSection>
+  );
+}
+
+/**
+ * The palette's five colours, each under its name: the first thing the panel
+ * offers once the designer has handed it a palette. All five are shown even
+ * when two share a colour (a new storefront's text and accent are one ink),
+ * because here the NAME is what is being chosen.
+ */
+function PaletteSwatches({
+  palette,
+  isActive,
+  onPick,
+}: {
+  palette: StorefrontPalette;
+  isActive: (hex: string) => boolean;
+  onPick: (hex: string) => void;
+}) {
+  const tKey = useTranslations();
+  return (
+    <div
+      role="group"
+      aria-label={tKey("EditorType.panel.palette.group")}
+      className={PALETTE_CHIPS_CLASS}
+    >
+      {PALETTE_SLOT_ORDER.map((slot) => {
+        const hex = palette[slot].toLowerCase();
+        const labels = PALETTE_SLOT_LABELS[slot];
+        return (
+          <div key={slot} className={PALETTE_CHIP_CLASS}>
+            <div className="w-7 shrink-0">
+              <ColorDot
+                color={hex}
+                label={tKey(labels.label, { value: hex })}
+                active={isActive(hex)}
+                onSelect={() => onPick(hex)}
+              />
+            </div>
+            <span aria-hidden="true" className={infoTextClass}>
+              {tKey(labels.name)}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

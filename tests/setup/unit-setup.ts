@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
 
 /**
  * jsdom has no IntersectionObserver, and a component that uses one to know
@@ -44,3 +45,20 @@ if (!("IntersectionObserver" in globalThis)) {
 if (typeof Element !== "undefined" && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = function scrollIntoView(): void {};
 }
+
+/**
+ * EDITOR UPGRADE, TYPE AND COLOR. next/font/local only works inside the Next
+ * compiler, which turns each call into a stylesheet at build time; called for
+ * real it throws. The storefront's font pairing faces are declared with it
+ * (src/app/fonts/pairing-faces.ts), and every board imports them, so under
+ * test each call answers with the shape the compiler hands back: a `variable`
+ * class named the way next/font names it (`__variable…`), after the CSS
+ * variable it declares, so a test can tell which faces a board put on its root.
+ */
+vi.mock("next/font/local", () => ({
+  default: (options: { variable?: string }) => ({
+    className: "",
+    style: { fontFamily: "" },
+    variable: options.variable ? `__variable${options.variable}` : "",
+  }),
+}));

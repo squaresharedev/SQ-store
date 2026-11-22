@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Palette",
+      "hint": "Changez une couleur ici et tout ce qui la porte change avec elle.",
+      "group": "Couleurs de la palette",
+      "allColors": "Toutes les couleurs",
+      "slots": {
+        "background": {
+          "name": "Arrière-plan",
+          "label": "Arrière-plan de la palette ({value})"
+        },
+        "text": {
+          "name": "Texte",
+          "label": "Texte de la palette ({value})"
+        },
+        "accent": {
+          "name": "Accent",
+          "label": "Accent de la palette ({value})"
+        },
+        "surface": {
+          "name": "Surface",
+          "label": "Surface de la palette ({value})"
+        },
+        "muted": {
+          "name": "Atténué",
+          "label": "Couleur atténuée de la palette ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Paire de polices",
+      "group": "Paires de polices",
+      "editorial": {
+        "name": "Éditorial",
+        "hint": "Un empattement doux pour les titres, un texte net en dessous"
+      },
+      "classic": {
+        "name": "Classique",
+        "hint": "Un empattement élégant avec une linéale facile à lire"
+      },
+      "modern": {
+        "name": "Moderne",
+        "hint": "Des titres géométriques avec un texte neutre"
+      },
+      "soft": {
+        "name": "Douce",
+        "hint": "Un empattement arrondi avec une linéale chaleureuse"
+      },
+      "studio": {
+        "name": "Atelier",
+        "hint": "Un empattement fin avec une linéale aérée"
+      }
+    },
+    "typography": {
+      "singleFont": "Une police pour tout",
+      "singleFontHint": "Choisir une police ici désactive la paire."
+    },
+    "textStyles": {
+      "title": "Styles de texte",
+      "hint": "Réglez chaque style une fois. Chaque bloc de texte de ce style le suit.",
+      "pick": "Style à modifier",
+      "face": "Police",
+      "faceHeading": "Titre",
+      "faceBody": "Texte",
+      "uppercase": "Majuscules",
+      "colorDefault": "Par défaut du style",
+      "useColorDefault": "Utiliser la valeur par défaut du style",
+      "reset": "Réinitialiser ce style"
+    },
+    "valign": {
+      "label": "Alignement vertical",
+      "group": "Alignement vertical du texte",
+      "top": "Aligner en haut",
+      "middle": "Aligner au milieu",
+      "bottom": "Aligner en bas"
+    }
+  },
   "board": {}
 }

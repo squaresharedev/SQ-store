@@ -98,6 +98,8 @@ import {
   type ColorTargetRef,
 } from "@/lib/theme/color-target";
 import { collectStorefrontColors } from "@/lib/theme/palette";
+import { recolourPaletteIn } from "@/lib/storefront/palette";
+import { paletteContext } from "@/lib/theme/palette-swatches";
 import { ColorPanel, type PanelTypography } from "./ColorPanel";
 import type {
   InlineFormatKey,
@@ -3309,6 +3311,11 @@ export function StorefrontDesigner({
       case "title-shadow":
         setTitleShadowColor(ref, hex);
         return;
+      // A palette colour recolours the whole design, in one undo step.
+      case "palette":
+        recordChange(`palette:${ref.slot}`);
+        applySnapshot(recolourPaletteIn(snapshot(), ref.slot, hex));
+        return;
     }
   }
 
@@ -4030,6 +4037,7 @@ export function StorefrontDesigner({
         activeRef: activeColorTarget,
         open: openColorTarget,
         close: () => setColorTarget(null),
+        ...paletteContext(theme),
       }}
     >
     <SettingTargetProvider
@@ -4728,6 +4736,7 @@ export function StorefrontDesigner({
                     <TextBlockEditor
                       block={selectedBlock}
                       accent={theme.accent}
+                      textStyles={theme.textStyles}
                       hasCustomFont={theme.customFont !== undefined}
                       summons={blockField}
                       onUpdate={(patch) =>

@@ -7,6 +7,7 @@ import { ColorPicker } from "@/components/ui/ColorPicker";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { BackgroundEditor } from "./BackgroundEditor";
 import { LooksSection } from "./LooksSection";
+import { PaletteRow } from "./PaletteRow";
 
 /**
  * Theme essentials: background (color / gradient / uploaded image) and accent.
@@ -41,6 +42,8 @@ export function ThemePanel({
   return (
     <div className="space-y-4">
       <LooksSection theme={theme} onChange={onChange} />
+      {/* Palette first: the five colours every picker below opens on. */}
+      <PaletteRow theme={theme} onChange={onChange} />
       <BackgroundEditor
         value={theme.background}
         onChange={updateBackground}

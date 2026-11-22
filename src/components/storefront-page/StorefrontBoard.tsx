@@ -21,6 +21,8 @@ import {
   tileFrameClass,
 } from "@/components/storefront/config-maps";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
+import { pairingFontPresentation } from "@/lib/theme/font-pairing-presentation";
+import { paletteInk } from "@/lib/storefront/palette";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/types/product";
 import {
@@ -102,8 +104,10 @@ export function storefrontSurface(page: StorefrontPageData): {
   style: CSSProperties;
 } {
   const { theme } = page;
-  const ink = resolveInk(theme);
-  const presentation = fontPresentation(theme.font);
+  // Type and colour (editor upgrade): a stored palette's Text colour when it
+  // reads on the background, and a font pairing's two faces when there is one.
+  const ink = paletteInk(theme) ?? resolveInk(theme);
+  const presentation = pairingFontPresentation(theme) ?? fontPresentation(theme.font);
   return {
     ink,
     // `wrap-anywhere`, inherited by every word on the page (a shop name, a

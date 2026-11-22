@@ -1,5 +1,5 @@
-import { readableOn, storefrontBackdropHex } from "@/components/product-page/product-page-maps";
-import { mixHex } from "@/lib/format/color";
+import { readableOn, resolveInk, storefrontBackdropHex } from "@/components/product-page/product-page-maps";
+import { contrastRatio, mixHex } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 import { PALETTE_SLOTS, type PaletteSlot, type StorefrontConfig, type StorefrontPalette, type StorefrontTheme } from "@/types/storefront";
 
@@ -90,19 +90,76 @@ export function replaceColor(config: StorefrontConfig, from: string, to: string)
  * into the storefront's own.
  */
 export function recolourPalette(config: StorefrontConfig, slot: PaletteSlot, hex: string): StorefrontConfig {
-  const current = derivePalette(config.theme);
+  return recolourPaletteIn(config, slot, hex);
+}
+
+/**
+ * recolourPalette over anything that carries a theme: a config, or the
+ * designer's own undoable state (theme, blocks, header, the pages and
+ * whatever else rides beside them). The walk is by value, so every member the
+ * state holds is recoloured with no list to keep up to date.
+ */
+export function recolourPaletteIn<T extends { theme: StorefrontTheme }>(state: T, slot: PaletteSlot, hex: string): T {
+  const current = derivePalette(state.theme);
   const old = current[slot];
   const shared = PALETTE_SLOTS.some((other) => other !== slot && sameHex(current[other], old));
-  const recoloured = shared ? config : replaceColor(config, old, hex);
+  const recoloured = shared || sameHex(old, hex) ? state : replaced(state, old, hex);
   const theme: StorefrontTheme = { ...recoloured.theme, palette: { ...current, [slot]: hex } };
   if (slot === "accent") theme.accent = hex;
   if (slot === "background" && theme.background.kind === "solid") {
     theme.background = { kind: "solid", color: hex };
   }
-  if (slot === "surface" && config.theme.cardColor !== undefined && sameHex(config.theme.cardColor, old)) {
+  if (slot === "surface" && state.theme.cardColor !== undefined && sameHex(state.theme.cardColor, old)) {
     theme.cardColor = hex;
   }
   return { ...recoloured, theme };
+}
+
+/** A palette change when only the theme is in reach (a panel that is handed
+ *  the theme alone): the same rule, over the theme's own colours. */
+export function recolourThemePalette(theme: StorefrontTheme, slot: PaletteSlot, hex: string): StorefrontTheme {
+  return recolourPaletteIn({ theme }, slot, hex).theme;
+}
+
+/** WCAG AA for ordinary text: the contrast the palette's Text colour needs
+ *  against the background before it may be the board's ink. */
+export const TEXT_CONTRAST_AA = 4.5;
+
+/**
+ * THE BOARD'S INK: what every word on the board that names no colour of its
+ * own is written in.
+ *
+ * With a stored palette it is the palette's Text colour, as long as that
+ * reads on the background (WCAG AA); otherwise, and always without a stored
+ * palette, the automatic dark-or-light ink every board has had (resolveInk).
+ * A derived palette never changes the ink: it stores nothing, so a storefront
+ * saved before palettes keeps its exact words.
+ */
+export function boardInk(theme: StorefrontTheme): string {
+  return paletteInk(theme) ?? resolveInk(theme);
+}
+
+/**
+ * The palette's half of boardInk: its Text colour when one is stored and reads
+ * on the background, else undefined (and the caller keeps the ink it has
+ * always had: `paletteInk(theme) ?? resolveInk(theme)`).
+ */
+export function paletteInk(theme: StorefrontTheme): string | undefined {
+  const text = theme.palette?.text;
+  if (text && isStrictHexColor(text) && contrastRatio(text, storefrontBackdropHex(theme)) >= TEXT_CONTRAST_AA) {
+    return text.toLowerCase();
+  }
+  return undefined;
+}
+
+/**
+ * The ink as a style, for the designer's canvas, which (unlike the buyer's
+ * board) has never set one and so inherits the editor's own. Empty without a
+ * stored palette, so an old storefront's canvas gains nothing; with one, the
+ * canvas writes in what the buyer will read.
+ */
+export function paletteInkStyle(theme: StorefrontTheme): { color?: string } {
+  return theme.palette ? { color: boardInk(theme) } : {};
 }
 
 /** Set the whole palette at once, one slot after another. */

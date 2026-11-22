@@ -1,4 +1,80 @@
 {
-  "panel": {},
+  "panel": {
+    "palette": {
+      "title": "Paleta",
+      "hint": "Zmień tu kolor, a wszystko w tym kolorze zmieni się razem z nim.",
+      "group": "Kolory palety",
+      "allColors": "Wszystkie kolory",
+      "slots": {
+        "background": {
+          "name": "Tło",
+          "label": "Tło z palety ({value})"
+        },
+        "text": {
+          "name": "Tekst",
+          "label": "Tekst z palety ({value})"
+        },
+        "accent": {
+          "name": "Akcent",
+          "label": "Akcent z palety ({value})"
+        },
+        "surface": {
+          "name": "Powierzchnia",
+          "label": "Powierzchnia z palety ({value})"
+        },
+        "muted": {
+          "name": "Stonowany",
+          "label": "Stonowany kolor z palety ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Para czcionek",
+      "group": "Pary czcionek",
+      "editorial": {
+        "name": "Redakcyjna",
+        "hint": "Miękki szeryf w nagłówkach, czysty tekst pod spodem"
+      },
+      "classic": {
+        "name": "Klasyczna",
+        "hint": "Elegancki szeryf z łatwą w czytaniu czcionką bezszeryfową"
+      },
+      "modern": {
+        "name": "Nowoczesna",
+        "hint": "Geometryczne nagłówki i neutralny tekst"
+      },
+      "soft": {
+        "name": "Łagodna",
+        "hint": "Okrągły szeryf z przyjazną czcionką bezszeryfową"
+      },
+      "studio": {
+        "name": "Pracownia",
+        "hint": "Smukły szeryf z otwartą czcionką bezszeryfową"
+      }
+    },
+    "typography": {
+      "singleFont": "Jedna czcionka do wszystkiego",
+      "singleFontHint": "Wybór czcionki tutaj wyłącza parę czcionek."
+    },
+    "textStyles": {
+      "title": "Style tekstu",
+      "hint": "Ustaw każdy styl raz. Każdy blok tekstu w tym stylu za nim podąża.",
+      "pick": "Styl do edycji",
+      "face": "Krój",
+      "faceHeading": "Nagłówkowy",
+      "faceBody": "Tekstowy",
+      "uppercase": "Wielkie litery",
+      "colorDefault": "Domyślny dla stylu",
+      "useColorDefault": "Użyj domyślnego dla stylu",
+      "reset": "Przywróć ten styl"
+    },
+    "valign": {
+      "label": "Wyrównanie w pionie",
+      "group": "Wyrównanie tekstu w pionie",
+      "top": "Wyrównaj do góry",
+      "middle": "Wyrównaj do środka",
+      "bottom": "Wyrównaj do dołu"
+    }
+  },
   "board": {}
 }
