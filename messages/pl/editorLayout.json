@@ -65,7 +65,8 @@
         "outline": "Obrys",
         "link": "Link"
       },
-      "defaultLabel": "Kup teraz"
+      "defaultLabel": "Kup teraz",
+      "tileLabel": "Przycisk: {label}"
     },
     "header": {
       "logoAndMenu": "Logo i menu",

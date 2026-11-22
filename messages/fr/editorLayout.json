@@ -65,7 +65,8 @@
         "outline": "Contour",
         "link": "Lien"
       },
-      "defaultLabel": "Acheter"
+      "defaultLabel": "Acheter",
+      "tileLabel": "Bouton : {label}"
     },
     "header": {
       "logoAndMenu": "Logo et menu",

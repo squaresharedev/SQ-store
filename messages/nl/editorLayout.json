@@ -65,7 +65,8 @@
         "outline": "Omlijnd",
         "link": "Link"
       },
-      "defaultLabel": "Nu shoppen"
+      "defaultLabel": "Nu shoppen",
+      "tileLabel": "Knop: {label}"
     },
     "header": {
       "logoAndMenu": "Logo en menu",

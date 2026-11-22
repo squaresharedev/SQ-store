@@ -65,7 +65,8 @@
         "outline": "Obrys",
         "link": "Odkaz"
       },
-      "defaultLabel": "Nakupovat"
+      "defaultLabel": "Nakupovat",
+      "tileLabel": "Tlačítko: {label}"
     },
     "header": {
       "logoAndMenu": "Logo a menu",

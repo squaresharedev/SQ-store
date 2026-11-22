@@ -65,7 +65,8 @@
         "outline": "Umriss",
         "link": "Link"
       },
-      "defaultLabel": "Jetzt shoppen"
+      "defaultLabel": "Jetzt shoppen",
+      "tileLabel": "Button: {label}"
     },
     "header": {
       "logoAndMenu": "Logo und Menü",

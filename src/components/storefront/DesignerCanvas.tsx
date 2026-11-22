@@ -391,6 +391,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   seller?: StorefrontSeller;
 }) {
   const t = useTranslations("Storefront");
+  const tButton = useTranslations("EditorLayout.panel.button");
   const productFor = useCallback(
     (block: StorefrontBlock): Product | null =>
       block.type === "product"
@@ -1120,6 +1121,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
               const product = productFor(block);
               if (block.type === "product") return product?.title ?? t("blockTile.removedProduct");
               if (block.type === "shape") return t("blockTile.shape", { kind: block.kind });
+              if (block.type === "button") return tButton("tileLabel", { label: block.label.slice(0, 30) });
               if (block.type === "image") {
                 const alt = block.alt.trim();
                 return alt ? t("blockTile.imageWithAlt", { alt: alt.slice(0, 30) }) : t("blockTile.imageElement");

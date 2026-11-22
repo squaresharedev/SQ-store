@@ -65,7 +65,8 @@
         "outline": "Contorno",
         "link": "Ligação"
       },
-      "defaultLabel": "Comprar já"
+      "defaultLabel": "Comprar já",
+      "tileLabel": "Botão: {label}"
     },
     "header": {
       "logoAndMenu": "Logótipo e menu",

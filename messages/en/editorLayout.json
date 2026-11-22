@@ -65,7 +65,8 @@
         "outline": "Outline",
         "link": "Link"
       },
-      "defaultLabel": "Shop now"
+      "defaultLabel": "Shop now",
+      "tileLabel": "Button: {label}"
     },
     "header": {
       "logoAndMenu": "Logo and menu",
