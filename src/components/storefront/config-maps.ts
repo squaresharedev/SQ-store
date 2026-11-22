@@ -614,6 +614,22 @@ type PriceTagChip = {
  */
 export const TILE_LABEL_READABLE_PX = 11;
 
+/**
+ * The custom property a surface sets to change the readable floor for the
+ * tiles it draws. ONE surface does: a MINIATURE of a board (StorefrontPreview,
+ * the storefront list's cards) sets it to 0px, because a miniature is a
+ * picture of the board, not something to read, and labels held at a readable
+ * size on tiles a few dozen px across stop looking like the board they show.
+ * Unset everywhere else, where the floor is TILE_LABEL_READABLE_PX.
+ */
+export const TILE_LABEL_FLOOR_VAR = "--tile-label-floor";
+
+/** What a miniature's root carries, as a style to spread and an attribute for
+ *  the stylesheet (globals.css stacks a narrow card's name and price on live
+ *  boards only, by `[data-storefront-miniature]`). */
+export const MINIATURE_BOARD_STYLE = { [TILE_LABEL_FLOOR_VAR]: "0px" } as CSSProperties;
+export const MINIATURE_BOARD_ATTR = { "data-storefront-miniature": "" } as const;
+
 /** Rounded to hundredths: these numbers go straight into a CSS expression, and
  *  a full float there is noise in the inspector for a difference under a
  *  hundredth of a pixel. */
@@ -643,18 +659,22 @@ export function roundForCss(value: number): string {
  * hands its cell's side down as `--ss-cell` (globals.css). Outside a grid
  * `--ss-in-grid` is 0 and the tile's own size is used, as before.
  *
- * NEVER UNDER TILE_LABEL_READABLE_PX, whatever the tile or the setting: a
- * price nobody can read cannot sell, and a name that small is not a name.
+ * NEVER UNDER TILE_LABEL_READABLE_PX on a board someone reads, whatever the
+ * tile or the setting: a price nobody can read cannot sell, and a name that
+ * small is not a name. The readable floor is asked through
+ * TILE_LABEL_FLOOR_VAR, so a miniature of a board can draw its labels at the
+ * label's own floor, as miniatures always did.
  */
 export function tileLabelSize(size: number, floorPx: number, scale: ChipScale = DEFAULT_CHIP_SCALE): string {
   const { referencePx, min, max } = TILE_LABEL_AUTO_SCALE;
-  const floor = Math.max(floorPx, size * min, TILE_LABEL_READABLE_PX);
+  const own = Math.max(floorPx, size * min);
+  const floor = `max(${roundForCss(own)}px, var(${TILE_LABEL_FLOOR_VAR}, ${TILE_LABEL_READABLE_PX}px))`;
   const tile = `${roundForCss((size * 100) / referencePx)}cqmin`;
   const preferred =
     scale === "cell"
       ? `calc(var(--ss-cell) * ${roundForCss(size / referencePx)} * var(--ss-in-grid) + ${tile} * (1 - var(--ss-in-grid)))`
       : tile;
-  return `clamp(${roundForCss(floor)}px, ${preferred}, ${roundForCss(size * max)}px)`;
+  return `clamp(${floor}, ${preferred}, ${roundForCss(size * max)}px)`;
 }
 
 /**

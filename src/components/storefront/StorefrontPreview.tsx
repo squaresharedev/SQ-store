@@ -32,6 +32,8 @@ import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import { useFitToBox } from "./useFitToBox";
 import {
+  MINIATURE_BOARD_ATTR,
+  MINIATURE_BOARD_STYLE,
   blockTileClipStyle,
   gridGapStyle,
   scaledCornerRadius,
@@ -253,6 +255,10 @@ export function StorefrontPreview({
   return (
     <div
       ref={boxRef}
+      // A MINIATURE of a board, not one to read: its labels keep their own
+      // floors rather than the readable one, and its narrow cards keep name
+      // and price side by side, so the picture looks like the board it shows.
+      {...MINIATURE_BOARD_ATTR}
       className={cn(
         // The box. Centres the scaled board on both axes, so a board that
         // shrinks to fit its height sits in the middle rather than hugging a
@@ -272,6 +278,7 @@ export function StorefrontPreview({
         ...customFontVars(theme.customFont, customFontUrl),
         ...paletteInkStyle(theme),
         ...canvasFont.style,
+        ...MINIATURE_BOARD_STYLE,
       }}
     >
       <CustomFontFace customFont={theme.customFont} url={customFontUrl} />

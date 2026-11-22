@@ -204,7 +204,7 @@ describe("per-tile style overrides", () => {
     // browser resolves.
     expect(tag.style.fontSize).toBe("var(--tag-font-size)");
     expect(tag.style.getPropertyValue("--tag-font-size")).toBe(
-      `clamp(${Math.max(14 * TILE_LABEL_AUTO_SCALE.min, TILE_LABEL_READABLE_PX)}px, ${
+      `clamp(max(${14 * TILE_LABEL_AUTO_SCALE.min}px, var(--tile-label-floor, ${TILE_LABEL_READABLE_PX}px)), ${
         Math.round(((14 * 100) / TILE_LABEL_AUTO_SCALE.referencePx) * 100) / 100
       }cqmin, ${14 * TILE_LABEL_AUTO_SCALE.max}px)`,
     );

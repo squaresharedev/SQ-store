@@ -190,14 +190,18 @@ describe("shadows", () => {
 
 describe("FIX: the tile labels never go under a readable size", () => {
   it("floors the price and the name, on a tile and on a cell-sized board", () => {
+    // The label's own floor, or the readable one, whichever is higher. The
+    // readable one is asked through a custom property so a miniature of a
+    // board (StorefrontPreview) can draw its labels at their own floor.
+    const readable = `var(--tile-label-floor, ${TILE_LABEL_READABLE_PX}px)`;
     for (const scale of ["tile", "cell"] as const) {
-      expect(tileLabelSize(10, PRICE_TAG_SIZE_MIN, scale)).toMatch(new RegExp(`^clamp\\(${TILE_LABEL_READABLE_PX}px, `));
+      expect(tileLabelSize(10, PRICE_TAG_SIZE_MIN, scale).startsWith(`clamp(max(8px, ${readable}), `)).toBe(true);
     }
-    expect(tileLabelSize(TILE_TITLE_SIZE, TILE_TITLE_SIZE_MIN)).toMatch(new RegExp(`^clamp\\(${TILE_LABEL_READABLE_PX}px, `));
+    expect(tileLabelSize(TILE_TITLE_SIZE, TILE_TITLE_SIZE_MIN).startsWith(`clamp(max(9px, ${readable}), `)).toBe(true);
   });
 
   it("leaves a big authored size its own, higher floor", () => {
-    expect(tileLabelSize(24, PRICE_TAG_SIZE_MIN)).toMatch(/^clamp\(18px, /);
+    expect(tileLabelSize(24, PRICE_TAG_SIZE_MIN).startsWith("clamp(max(18px, ")).toBe(true);
   });
 });
 

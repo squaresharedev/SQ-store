@@ -122,7 +122,12 @@ const SHAPE: ShapeBlock = {
 
 /** The label sizes' floors are the one intended change (see above). */
 function normalise(html: string): string {
-  return html.replace(/clamp\([\d.]+px, (?=[\d.]+cqmin|calc\(var\(--ss-cell\))/g, "clamp(FLOOR, ");
+  // The floor is the label's own or the readable one, whichever is higher
+  // (tileLabelSize): `max(<own>px, var(--tile-label-floor, <readable>px))`.
+  return html.replace(
+    /clamp[(]max[(][0-9.]+px, var[(]--tile-label-floor, [0-9.]+px[)][)], (?=[0-9.]+cqmin|calc[(]var[(]--ss-cell[)])/g,
+    "clamp(FLOOR, ",
+  );
 }
 
 describe("a legacy card draws exactly as before the card look", () => {

@@ -521,15 +521,27 @@
    price alone fills the strip and the name beside it is cut to a letter. The
    strip grows by a line and the photo gives that up, which is the right trade
    for a card whose name could not be read. Only where the price sits in the
-   strip (a floated price is not in it), and never on a wider card. */
+   strip (a floated price is not in it), and never on a wider card.
+
+   The price lines up with the name above it: the name carries one of
+   TEXT_ALIGN_CLASSES (config-maps) for the title's spot, and the price takes
+   the same side. NOT IN A MINIATURE (StorefrontPreview, the storefront list's
+   cards): that is a picture of the board, and its labels are not held at a
+   readable size either (TILE_LABEL_FLOOR_VAR), so they still fit in a row. */
 @container (max-width: 8.5rem) {
-  [data-title-band]:has(> [data-tile-price]) {
+  [data-title-band]:has(> [data-tile-price]):not([data-storefront-miniature] *) {
     flex-direction: column;
     align-items: stretch;
     gap: 0;
   }
-  [data-title-band] > [data-tile-price] {
+  [data-title-band]:not([data-storefront-miniature] *) > [data-tile-price] {
     align-self: flex-start;
+  }
+  [data-title-band]:has(.text-center):not([data-storefront-miniature] *) > [data-tile-price] {
+    align-self: center;
+  }
+  [data-title-band]:has(.text-right):not([data-storefront-miniature] *) > [data-tile-price] {
+    align-self: flex-end;
   }
 }
 /* ONE CELL'S SIDE, handed down to every tile for what should be the same
