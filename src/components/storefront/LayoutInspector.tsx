@@ -1,24 +1,23 @@
 "use client";
 
-import type { Product } from "@/types/product";
 import { linkedBandIds } from "@/lib/storefront/bands";
 import {
   blockKey,
-  boardProductIds,
   type ButtonBlock,
-  type StorefrontBand,
   type StorefrontBlock,
   type StorefrontHeader,
   type StorefrontTheme,
 } from "@/types/storefront";
 import { BandEditor } from "./BandEditor";
-import { ButtonBlockEditor, type LinkableStorefront } from "./ButtonBlockEditor";
+import { ButtonBlockEditor } from "./ButtonBlockEditor";
 import type { useLayoutEditing } from "./useLayoutEditing";
 
 /**
  * The inspector for what the layout workstream adds: a selected band's panel,
  * or a selected button's. Null for anything else, so the designer drops it
- * into its own chain of block editors in two places and nothing more.
+ * into its own chain of block editors in two places and nothing more. Where
+ * links may lead and the uploads' display URLs come from the hook's editor
+ * value (the same one LayoutEditorProvider hands the header's section).
  */
 export function LayoutInspector({
   layout,
@@ -26,11 +25,6 @@ export function LayoutInspector({
   theme,
   blocks,
   header,
-  bands,
-  productsById,
-  storefronts,
-  photoUrls,
-  onPhotoUrl,
   onDuplicate,
   onRemove,
 }: {
@@ -40,16 +34,10 @@ export function LayoutInspector({
   theme: StorefrontTheme;
   blocks: readonly StorefrontBlock[];
   header: StorefrontHeader;
-  bands: readonly StorefrontBand[];
-  productsById: ReadonlyMap<string, Product>;
-  /** This store's storefronts a button may lead to. */
-  storefronts: readonly LinkableStorefront[];
-  /** Display URLs by object key (the designer's page photo map). */
-  photoUrls: Readonly<Record<string, string>>;
-  onPhotoUrl: (key: string, url: string) => void;
   onDuplicate: (keys: readonly string[]) => void;
   onRemove: (key: string) => void;
 }) {
+  const { editor } = layout;
   const band = layout.selectedBand;
   if (band) {
     return (
@@ -57,10 +45,10 @@ export function LayoutInspector({
         key={band.id}
         band={band}
         theme={theme}
-        imageUrl={band.background.kind === "image" ? (photoUrls[band.background.key] ?? null) : null}
+        imageUrl={band.background.kind === "image" ? (editor.photoUrls[band.background.key] ?? null) : null}
         linked={linkedBandIds(blocks, header.links).has(band.id)}
         onPaint={(background) => layout.paintBand(band.id, background)}
-        onPhotoUrl={onPhotoUrl}
+        onPhotoUrl={editor.onPhotoUrl}
         onRemove={() => layout.removeBand(band.id)}
       />
     );
@@ -71,12 +59,7 @@ export function LayoutInspector({
     <ButtonBlockEditor
       key={button.id}
       block={button}
-      products={boardProductIds(blocks).flatMap((id) => {
-        const product = productsById.get(id);
-        return product ? [{ id, title: product.title }] : [];
-      })}
-      bands={bands}
-      storefronts={storefronts}
+      choices={editor}
       onUpdate={(patch) => layout.updateButton(key, patch)}
       onDuplicate={() => onDuplicate([key])}
       onRemove={() => onRemove(key)}

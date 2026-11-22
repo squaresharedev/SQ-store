@@ -37,6 +37,10 @@ const ID = {
 /** The gallery's band photo: a picture the app already serves. */
 export const GALLERY_BAND_PHOTO = "/sample-storefront/succulent.webp";
 
+/** The gallery's header logo, likewise, and the key it stands in for. */
+export const GALLERY_LOGO = "/img/logo.png";
+const GALLERY_LOGO_KEY = "elements/gallery/logo.png";
+
 export type LayoutBoardOptions = {
   /** Tilt one block, which makes the board freely arranged (no reflow). */
   free: boolean;
@@ -88,6 +92,7 @@ export function layoutBoardConfig(sample: SampleStorefront, options: LayoutBoard
       show: true,
       name: "Parallel Goods",
       bio: "Objects for slow mornings.",
+      logo: { key: GALLERY_LOGO_KEY, size: "small" },
       links: [
         { label: "Shop", link: { kind: "product", productId: camera } },
         { label: "Returns", link: { kind: "band", bandId: ID.strip } },
@@ -103,6 +108,7 @@ export function layoutBoardConfig(sample: SampleStorefront, options: LayoutBoard
 export function galleryPage(
   sample: SampleStorefront,
   config: StorefrontConfig,
+  { cart = false }: { cart?: boolean } = {},
 ): StorefrontPageData {
   const products: StorefrontTileProduct[] = sample.products.map((product) => ({
     id: product.id,
@@ -153,5 +159,8 @@ export function galleryPage(
       ? { bandImageUrls: Object.fromEntries(bands.filter((band) => band.background.kind === "image").map((band) => [band.id, GALLERY_BAND_PHOTO])) }
       : {}),
     ...(Object.keys(links).length ? { links } : {}),
+    ...(config.header?.logo ? { logoUrl: GALLERY_LOGO } : {}),
+    // The sample is no real storefront: a cart here shows, and adds nothing.
+    ...(cart ? { cart: {} } : {}),
   };
 }

@@ -173,3 +173,56 @@ describe("a board with none of the layout fields", () => {
     }
   });
 });
+
+describe("the header's logo and menu", () => {
+  const withMenu = (over: Partial<StorefrontPageData> = {}) =>
+    page({
+      header: {
+        show: true,
+        name: "Shop",
+        bio: "",
+        logo: { key: "elements/u/logo.svg", size: "small" },
+        links: [
+          { label: "Buy", link: { kind: "product", productId: PRODUCT } },
+          { label: "Journal", link: { kind: "url", url: "https://example.com/j" } },
+        ],
+      },
+      logoUrl: "https://r2.example/logo.svg",
+      links: {
+        b_web: { kind: "url", href: "https://example.com/j" },
+        b_buy: { kind: "product", href: `/s/sf/p/${PRODUCT}` },
+        "header-0": { kind: "product", href: `/s/sf/p/${PRODUCT}` },
+        "header-1": { kind: "url", href: "https://example.com/j" },
+      },
+      ...over,
+    });
+
+  it("draws the logo and the resolved links beside the name", () => {
+    const { container } = render(<StorefrontPageView page={withMenu()} />);
+    const logo = container.querySelector("[data-masthead-logo]") as HTMLImageElement;
+    expect(logo.getAttribute("src")).toBe("https://r2.example/logo.svg");
+    expect(logo.className).toContain("h-8");
+    const links = [...container.querySelectorAll<HTMLAnchorElement>("[data-masthead-nav] a")];
+    expect(links.map((link) => link.textContent)).toEqual(["Buy", "Journal"]);
+    expect(links[1].rel).toBe(EXTERNAL_LINK_REL);
+  });
+
+  it("leaves out a menu entry the server could not resolve", () => {
+    const { container } = render(<StorefrontPageView page={withMenu({ links: { "header-1": { kind: "url", href: "https://example.com/j" } } })} />);
+    expect([...container.querySelectorAll("[data-masthead-nav] a")].map((link) => link.textContent)).toEqual(["Journal"]);
+  });
+
+  it("takes the cart into its menu, and the page draws no cart row of its own", () => {
+    const { container } = render(<StorefrontPageView page={withMenu({ cart: {} })} />);
+    expect(container.querySelector("[data-masthead-nav] [data-cart-button], [data-masthead-nav] button, [data-masthead-nav] a[href*='cart']")).not.toBeNull();
+    expect(container.querySelector(".sticky")).toBeNull();
+  });
+
+  it("keeps a header without either exactly as it was, cart row and all", () => {
+    const { container } = render(<StorefrontPageView page={page({ header: { show: true, name: "Shop", bio: "Hi" }, cart: {} })} />);
+    expect(container.querySelector("[data-masthead-row]")).toBeNull();
+    expect(container.querySelector(".sticky")).not.toBeNull();
+    const masthead = container.querySelector("main > div") as HTMLElement;
+    expect(masthead.className).toBe("space-y-1 mb-4");
+  });
+});

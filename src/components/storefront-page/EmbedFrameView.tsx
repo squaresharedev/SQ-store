@@ -10,6 +10,7 @@ import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { LEGAL_LINKS, SQUARESHARE_SITE } from "@/lib/legal/links";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
 import { BAND_FRAME_CLASS } from "@/lib/storefront/bands";
+import { headerHasMenu } from "@/lib/storefront/links";
 import { REPORT_FRAGMENT } from "@/lib/storefront/product-page-url";
 import { cn } from "@/lib/utils";
 import type { StorefrontPageData } from "@/types/storefront-page";
@@ -52,6 +53,8 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
 
   const cart = page.cart ?? null;
   const bands = Boolean(page.bands?.length);
+  // A header with a logo or a menu takes the cart into its menu row.
+  const cartInMenu = cart !== null && headerHasMenu(page.header);
 
   return (
     <StorefrontCart
@@ -81,7 +84,7 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
           part of that page. It is named one level down, and its two parts are
           plain boxes. (The hosted page, which IS the page, uses all three.) */}
       <h2 className="sr-only">{displayName}</h2>
-      {cart && (
+      {cart && !cartInMenu && (
         // The cart on our page, in a new tab: a link like everything else
         // here. The frame grows with its content, so no panel opens inside
         // it. It stores nothing until a card adds to the cart (only while the
@@ -96,7 +99,18 @@ export function EmbedFrameView({ page }: { page: StorefrontPageData }) {
       {/* With bands, this box tells them how far the frame reaches past the
           board (BAND_FRAME_CLASS), while the board keeps its margins. */}
       <div className={cn("w-full px-4 py-5 @md:px-6", bands && BAND_FRAME_CLASS)}>
-        <StorefrontBoard page={page} displayName={displayName} tilesOpenNewTab />
+        <StorefrontBoard
+          page={page}
+          displayName={displayName}
+          tilesOpenNewTab
+          headerCart={
+            cartInMenu ? (
+              <span style={chipStyle(surface.ink, theme.cornerRadius)}>
+                <CartButton ink={surface.ink} />
+              </span>
+            ) : undefined
+          }
+        />
       </div>
       <div className="w-full border-t" style={{ borderColor: ruleColor(surface.ink) }} data-embed-frame-footer="">
         {/* opacity-70: the muted level the hosted pages' footer already proved

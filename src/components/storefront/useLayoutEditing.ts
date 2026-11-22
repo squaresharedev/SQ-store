@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { useTranslations } from "next-intl";
 import type { GridInset, GridPlacement } from "@/components/grid/gridConstants";
 import {
@@ -11,6 +11,9 @@ import {
   replaceBand,
 } from "@/lib/storefront/bands";
 import { defaultButtonLink, newButtonBlock, withButtonPatch, withFine, withoutDeadLinks } from "@/lib/storefront/layout-blocks";
+import type { Product } from "@/types/product";
+import { linkChoicesFor, type LayoutEditorValue } from "./layout-editor-context";
+import type { LinkableStorefront } from "./LinkDestinationField";
 import {
   blockKey,
   type BandBackground,
@@ -61,6 +64,15 @@ export type LayoutEditingDeps = {
   /** This storefront, which a new button leads to when the board has nothing
    *  else to point it at. */
   storefrontId: string;
+  /** The catalogue, for naming the products a link may lead to. */
+  productsById: ReadonlyMap<string, Product>;
+  /** The store's storefronts a link may lead to. Absent = this one alone,
+   *  under its own name. */
+  storefronts?: readonly LinkableStorefront[];
+  storefrontName: string;
+  /** Display URLs by object key, and the way to add one (an upload). */
+  photoUrls: Readonly<Record<string, string>>;
+  onPhotoUrl: (key: string, url: string) => void;
 };
 
 export function useLayoutEditing(deps: LayoutEditingDeps) {
@@ -160,8 +172,21 @@ export function useLayoutEditing(deps: LayoutEditingDeps) {
         ? { title: t("button.title"), close: t("button.close") }
         : null;
 
+  // What the layout panels read through LayoutEditorProvider.
+  const { blocks, bands, productsById, photoUrls, storefrontId, storefrontName } = deps;
+  const storefronts = useMemo(
+    () => deps.storefronts ?? [{ id: storefrontId, name: storefrontName }],
+    [deps.storefronts, storefrontId, storefrontName],
+  );
+  const onPhotoUrl = useCallback((key: string, url: string) => live.current.onPhotoUrl(key, url), []);
+  const editor = useMemo<LayoutEditorValue>(
+    () => ({ ...linkChoicesFor(blocks, bands, productsById, storefronts), photoUrls, onPhotoUrl }),
+    [blocks, bands, productsById, storefronts, photoUrls, onPhotoUrl],
+  );
+
   return {
     selectedBand,
+    editor,
     inspectorTitle,
     updateButton,
     selectBand,

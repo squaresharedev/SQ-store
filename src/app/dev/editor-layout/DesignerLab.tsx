@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { DesignerCanvas } from "@/components/storefront/DesignerCanvas";
 import { LayoutInspector } from "@/components/storefront/LayoutInspector";
+import { HeaderSection } from "@/components/storefront/HeaderSection";
+import { LayoutEditorProvider } from "@/components/storefront/layout-editor-context";
 import { useLayoutEditing } from "@/components/storefront/useLayoutEditing";
 import { findFreeCell } from "@/components/grid/gridConstants";
 import { pinOnPhone } from "@/lib/storefront/mobile-layout";
@@ -15,7 +17,7 @@ import {
   type StorefrontConfig,
   type StorefrontHeader,
 } from "@/types/storefront";
-import { GALLERY_BAND_PHOTO } from "./fixtures";
+import { GALLERY_BAND_PHOTO, GALLERY_LOGO } from "./fixtures";
 
 /**
  * The designer's canvas with the layout workstream's pieces live on it: the
@@ -38,12 +40,15 @@ export function DesignerLab({
   const [previewMode, setPreviewMode] = useState(device);
   const [photoUrls, setPhotoUrls] = useState<Record<string, string>>(() =>
     Object.fromEntries(
-      (config.bands ?? []).flatMap((band) => (band.background.kind === "image" ? [[band.background.key, GALLERY_BAND_PHOTO]] : [])),
+      [
+        ...(config.bands ?? []).flatMap((band) => (band.background.kind === "image" ? [[band.background.key, GALLERY_BAND_PHOTO]] : [])),
+        ...(config.header?.logo ? [[config.header.logo.key, GALLERY_LOGO]] : []),
+      ],
     ),
   );
-  const header: StorefrontHeader = config.header ?? { show: false, name: "", bio: "" };
+  const [header, setHeader] = useState<StorefrontHeader>(config.header ?? { show: false, name: "", bio: "" });
   const theme = config.theme;
-  const productsById = new Map(products.map((product) => [product.id, product]));
+  const [productsById] = useState(() => new Map(products.map((product) => [product.id, product])));
 
   const layout = useLayoutEditing({
     theme,
@@ -54,6 +59,10 @@ export function DesignerLab({
     setBlocks,
     recordChange: () => {},
     storefrontId: "sample",
+    storefrontName: "Parallel Goods",
+    productsById,
+    photoUrls,
+    onPhotoUrl: (key, url) => setPhotoUrls((current) => ({ ...current, [key]: url })),
     blocksSelected: selectedKeys.length > 0,
     clearBlockSelection: () => setSelectedKeys([]),
     insertBlock: (build, w, h) => {
@@ -134,16 +143,14 @@ export function DesignerLab({
           theme={theme}
           blocks={blocks}
           header={header}
-          bands={bands}
-          productsById={productsById}
-          storefronts={[{ id: "sample", name: "Parallel Goods" }]}
-          photoUrls={photoUrls}
-          onPhotoUrl={(key, url) => setPhotoUrls((current) => ({ ...current, [key]: url }))}
           onDuplicate={() => {}}
           onRemove={(key) => setBlocks((current) => layout.withoutDeadLinks(current.filter((block) => blockKey(block) !== key), bands))}
         />
+        <LayoutEditorProvider value={layout.editor}>
+          <HeaderSection header={header} onChange={setHeader} />
+        </LayoutEditorProvider>
         <pre className="overflow-auto text-2xs" data-lab-state="">
-          {JSON.stringify({ bands: bands.map(({ id, y, h }) => ({ id: id.slice(-2), y, h })), fine: blocks.flatMap((block) => ("fine" in block && block.fine ? [{ key: blockKey(block).slice(-2), x: block.x, y: block.y, w: block.w, h: block.h, fine: block.fine }] : [])), buttons: blocks.flatMap((block) => (block.type === "button" ? [{ key: blockKey(block).slice(-2), label: block.label, link: block.link, look: block.look }] : [])) }, null, 1)}
+          {JSON.stringify({ bands: bands.map(({ id, y, h }) => ({ id: id.slice(-2), y, h })), fine: blocks.flatMap((block) => ("fine" in block && block.fine ? [{ key: blockKey(block).slice(-2), x: block.x, y: block.y, w: block.w, h: block.h, fine: block.fine }] : [])), header: { logo: header.logo, links: header.links }, buttons: blocks.flatMap((block) => (block.type === "button" ? [{ key: blockKey(block).slice(-2), label: block.label, link: block.link, look: block.look }] : [])) }, null, 1)}
         </pre>
       </aside>
     </div>

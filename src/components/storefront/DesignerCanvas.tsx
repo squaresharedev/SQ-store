@@ -8,7 +8,7 @@ import type { Product } from "@/types/product";
 import type { PagePhotoView } from "@/types/product-page";
 import { pagePhotoView } from "@/lib/storefront/product-page";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
-import { CART_SWITCHED_OFF } from "@/lib/storefront/cart-page";
+import { CART_SWITCHED_OFF, cartSwitchedOn } from "@/lib/storefront/cart-page";
 import {
   CANVAS_ROWS_MAX,
   blockFine,
@@ -54,6 +54,7 @@ import {
 } from "@/components/grid/gridConstants";
 import { DESIGNER_BAND_BLEED, blockBackdrop } from "@/lib/storefront/bands";
 import { isFreelyArrangedAsDrawn, takesFine } from "@/lib/storefront/layout-blocks";
+import { headerHasMenu } from "@/lib/storefront/links";
 import { BandChrome } from "./BandChrome";
 import { bandUnderlays, followUnderlays } from "./band-underlays";
 import {
@@ -1021,6 +1022,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
           onLineTextChange={changeHeaderText}
           onToggleLineFormat={toggleHeaderFormat}
           onEditDone={endHeaderEdit}
+          // The logo and the menu as buyers see them (words only: nothing on
+          // the canvas navigates), and the cart icon where the cart is on.
+          logoUrl={header.logo ? pagePhotoUrls?.[header.logo.key] : null}
+          nav={header.links?.map((entry) => ({ label: entry.label }))}
+          cart={headerHasMenu(header) && cartPage && cartSwitchedOn({ cartPage }) ? <ShoppingBag className="size-5" strokeWidth={1.75} aria-hidden="true" /> : undefined}
+          foldNav={false}
         />
 
         {blocks.length === 0 && !suggestion ? (

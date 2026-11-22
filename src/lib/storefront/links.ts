@@ -7,6 +7,7 @@ import {
   type LinkTargetKind,
   type StorefrontBand,
   type StorefrontBlock,
+  type StorefrontHeader,
 } from "@/types/storefront";
 
 // LINKS (types/storefront, LinkTarget): where a button or a header menu entry
@@ -117,4 +118,14 @@ export function linkAnchorProps(
   if (link.kind === "url") return { href: link.href, target: "_blank", rel: EXTERNAL_LINK_REL };
   const href = link.kind === "band" && newTab ? `${pageUrl}${link.href}` : link.href;
   return newTab ? { href, target: "_blank", rel: "noopener noreferrer" } : { href };
+}
+
+/**
+ * Whether a header makes a menu row of the masthead: shown, with a logo or a
+ * menu link. Where it does, the page's cart joins that menu instead of
+ * standing on its own row above the board (StorefrontPageView,
+ * EmbedFrameView); a header without either leaves the page exactly as it was.
+ */
+export function headerHasMenu(header: StorefrontHeader | undefined): boolean {
+  return Boolean(header?.show && (header.logo || header.links?.length));
 }

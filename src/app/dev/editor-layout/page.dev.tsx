@@ -22,6 +22,7 @@ import { galleryPage, layoutBoardConfig } from "./fixtures";
 //                   instead of reflowing
 //   &phone=own      give the board a phone layout of its own (4 columns)
 //   &radius=<0..40> the theme's corner radius (default 12)
+//   &cart=1         the storefront has a cart: its icon joins the header menu
 //
 // Phone pictures are a 390px wide screenshot of the same page: the board
 // switches to its phone tier by the width it is given, as on a real phone.
@@ -31,7 +32,7 @@ export const metadata = { title: "Layout and navigation: dev gallery" };
 export default async function EditorLayoutGallery({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string; layout?: string; phone?: string; radius?: string; frame?: string; device?: string }>;
+  searchParams: Promise<{ view?: string; layout?: string; phone?: string; radius?: string; frame?: string; device?: string; cart?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
   const query = await searchParams;
@@ -47,7 +48,7 @@ export default async function EditorLayoutGallery({
     return <DesignerLab config={config} products={sample.products} device={query.device === "mobile" ? "mobile" : "desktop"} />;
   }
   if (query.view === "legacy") {
-    const page = galleryPage(sample, sample.config);
+    const page = galleryPage(sample, sample.config, { cart: query.cart === "1" });
     return query.frame === "embed" ? (
       <div className="h-screen overflow-y-auto">
         <EmbedFrameView page={page} />
@@ -56,7 +57,7 @@ export default async function EditorLayoutGallery({
       <StorefrontPageView page={page} />
     );
   }
-  const page = galleryPage(sample, config);
+  const page = galleryPage(sample, config, { cart: query.cart === "1" });
   if (query.view === "embed") {
     // A real frame is exactly as tall as its content; shown as a page of its
     // own it has to scroll (see /dev/embed-frame).

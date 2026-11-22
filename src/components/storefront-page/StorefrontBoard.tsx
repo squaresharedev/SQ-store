@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, type CSSProperties, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
@@ -38,7 +38,7 @@ import type { TileQuickAddAction } from "@/components/storefront/ProductTileCont
 import { useCart } from "@/components/cart/CartContext";
 import { bandUnderlays } from "@/components/storefront/band-underlays";
 import { bandsBottom, blockBackdrop } from "@/lib/storefront/bands";
-import { buttonLinkKey, linkAnchorProps } from "@/lib/storefront/links";
+import { buttonLinkKey, headerLinkKey, linkAnchorProps } from "@/lib/storefront/links";
 import { isFreelyArrangedAsDrawn } from "@/lib/storefront/layout-blocks";
 import { QuickAddTile } from "./QuickAddTile";
 
@@ -135,7 +135,10 @@ export function StorefrontBoard({
   displayName,
   tilesOpenNewTab = false,
   assumedWidth,
+  headerCart,
 }: {
+  /** The page's cart button, when it joins the header's menu (headerHasMenu). */
+  headerCart?: ReactNode;
   page: StorefrontPageData;
   /** The shop's name as buyers know it, for the grid's label and empty line. */
   displayName: string;
@@ -147,7 +150,18 @@ export function StorefrontBoard({
   assumedWidth?: number;
 }) {
   const t = useTranslations("ProductPage.storefront");
+  const tLayout = useTranslations("EditorLayout.board");
   const { theme, header } = page;
+  // The header's menu, its links resolved on the server (page.links); an
+  // entry that led nowhere was dropped there.
+  const menu = useMemo(
+    () =>
+      (header?.links ?? []).flatMap((entry, index) => {
+        const link = page.links?.[headerLinkKey(index)];
+        return link ? [{ label: entry.label, anchor: linkAnchorProps(link, { newTab: tilesOpenNewTab, pageUrl: page.url }) }] : [];
+      }),
+    [header, page.links, page.url, tilesOpenNewTab],
+  );
   // Cards add to the cart only inside a page that has one.
   const cart = useCart();
 
@@ -198,7 +212,14 @@ export function StorefrontBoard({
 
   return (
     <>
-      <StorefrontMasthead header={header ?? EMPTY_STOREFRONT_HEADER} theme={theme} />
+      <StorefrontMasthead
+        header={header ?? EMPTY_STOREFRONT_HEADER}
+        theme={theme}
+        logoUrl={page.logoUrl}
+        logoAlt={tLayout("logoFallback", { store: displayName })}
+        nav={menu}
+        cart={headerCart}
+      />
       {gridBlocks.length === 0 ? (
         <p className="py-16 text-center text-sm opacity-70" data-storefront-empty="">
           {t("empty", { store: displayName })}

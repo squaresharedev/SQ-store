@@ -163,6 +163,7 @@ import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
 import { useLayoutEditing } from "./useLayoutEditing";
 import { LayoutInspector } from "./LayoutInspector";
+import { LayoutEditorProvider } from "./layout-editor-context";
 import type { LinkableStorefront } from "./ButtonBlockEditor";
 import { bandsForSave } from "@/lib/storefront/bands";
 import { headerForSave } from "@/lib/storefront/layout-blocks";
@@ -738,7 +739,9 @@ export function StorefrontDesigner({
   const selectedBlock = selectedBlocks.length === 1 ? selectedBlocks[0] : null;
   // Bands, half-cell placement and buttons (the layout workstream's edits).
   const layout = useLayoutEditing({
-    theme, blocks, header, bands, setBands, setBlocks, recordChange, storefrontId,
+    theme, blocks, header, bands, setBands, setBlocks, recordChange, storefrontId, productsById,
+    storefronts: linkStorefronts, storefrontName: name, photoUrls: pagePhotoUrls,
+    onPhotoUrl: (key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url })),
     blocksSelected: inspector !== null,
     clearBlockSelection: () => setInspector(null),
     insertBlock: (build, w, h) => insertBlock(build, w, h, takeInsertHint()),
@@ -4007,12 +4010,7 @@ export function StorefrontDesigner({
   const layoutInspector = (
     <LayoutInspector
       layout={layout} button={selectedBlock?.type === "button" ? selectedBlock : null}
-      theme={theme} blocks={blocks} header={header} bands={bands} productsById={productsById}
-      storefronts={linkStorefronts ?? [{ id: storefrontId, name }]}
-      photoUrls={pagePhotoUrls}
-      onPhotoUrl={(key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url }))}
-      onDuplicate={duplicateBlocks}
-      onRemove={removeBlock}
+      theme={theme} blocks={blocks} header={header} onDuplicate={duplicateBlocks} onRemove={removeBlock}
     />
   );
   const inspectorTitle =
@@ -4068,6 +4066,7 @@ export function StorefrontDesigner({
     // ColorPanel. Only the OPENER travels through context; the panel's data
     // comes down as props from here.
     <SampleModeProvider value={isSample}>
+    <LayoutEditorProvider value={layout.editor}>
     <AutoFitRegistryProvider value={autoFitRegistry}>
     <ColorTargetProvider
       value={{
@@ -4898,6 +4897,7 @@ export function StorefrontDesigner({
     </SettingTargetProvider>
     </ColorTargetProvider>
     </AutoFitRegistryProvider>
+    </LayoutEditorProvider>
     </SampleModeProvider>
   );
 }
