@@ -704,7 +704,11 @@ async function testSnapshot(request) {
       await page.waitForSelector(request.waitForSelector.selector, { state: "attached", timeout: request.waitForSelector.timeout });
     }
     const options = request.screenshotOptions ?? {};
-    const screenshot = await page.screenshot({ fullPage: options.fullPage, type: options.type, quality: options.quality });
+    // A `selector` crops to that one element's box, as Browser Run does (a
+    // preview of a region of the board, lib/agent/preview/snapshot.ts).
+    const screenshot = request.selector
+      ? await page.locator(request.selector).screenshot({ type: options.type, quality: options.quality })
+      : await page.screenshot({ fullPage: options.fullPage, type: options.type, quality: options.quality });
     return { success: true, result: { screenshot: screenshot.toString("base64"), content: await page.content() } };
   } finally {
     await page.close();
