@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Titolo",
     "subheading": "Sottotitolo",
-    "body": "Testo del corpo"
+    "body": "Testo del corpo",
+    "label": "Etichetta piccola"
   },
   "layoutPresets": {
     "standard": "Standard",
@@ -85,7 +86,10 @@
     "product": "Prodotto",
     "text": "Testo",
     "shape": "Forma",
-    "image": "Immagine"
+    "image": "Immagine",
+    "button": "Pulsante",
+    "marquee": "Testo scorrevole",
+    "carousel": "Carosello"
   },
   "settings": {
     "groups": {

@@ -34,6 +34,7 @@ import {
   tileFrameClass,
   type CardHoverTrigger,
 } from "./config-maps";
+import { blockWords } from "./block-label";
 import type { TileLook } from "@/lib/storefront/tile-look";
 import type {
   InlineFormatKey,
@@ -207,8 +208,8 @@ export const BlockTile = memo(function BlockTile({
             block.alt.trim()
             ? t("blockTile.imageWithAlt", { alt: block.alt.trim().slice(0, 30) })
             : t("blockTile.imageElement")
-          : block.text.trim()
-            ? t("blockTile.textWithContent", { text: block.text.trim().slice(0, 30) })
+          : blockWords(block)
+            ? t("blockTile.textWithContent", { text: blockWords(block).slice(0, 30) })
             : t("blockTile.textBlock");
 
   // While the words are being typed, the tile is a text field and nothing

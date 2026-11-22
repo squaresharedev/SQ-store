@@ -210,6 +210,11 @@
       "tooLong": "Il testo alternativo dell’elemento deve avere al massimo {maximum} caratteri.",
       "unsupported": "Il testo alternativo dell’elemento contiene caratteri non supportati."
     },
+    "linkLabel": {
+      "required": "Il testo del link è obbligatorio.",
+      "tooLong": "Il testo del link deve avere al massimo {maximum} caratteri.",
+      "unsupported": "Il testo del link contiene caratteri non supportati."
+    },
     "notificationTitle": {
       "required": "Il titolo della notifica è obbligatorio.",
       "tooLong": "Il titolo della notifica deve avere al massimo {maximum} caratteri.",
@@ -564,7 +569,8 @@
     "spanRange": "Un intervallo formattato deve terminare dopo il suo inizio.",
     "blocksTooMany": "Una vetrina può contenere fino a {maximum} blocchi. Rimuovi alcuni blocchi o dividi questa vetrina in due.",
     "blocksDuplicate": "I blocchi della griglia devono essere univoci.",
-    "blockOutsideCanvas": "Un blocco si trova fuori dall’area di lavoro."
+    "blockOutsideCanvas": "Un blocco si trova fuori dall’area di lavoro.",
+    "linkTargetMissing": "Un link porta a qualcosa che non è in questa vetrina."
   },
   "discountCode": {
     "code": "Un codice è composto da {min} a {max} lettere o numeri, e può contenere anche - o _."

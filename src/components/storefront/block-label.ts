@@ -42,7 +42,24 @@ export function blockLabel(
       return t(`Storefront.shapes.name.${block.kind}`);
     case "image":
       return block.alt.trim().length > 0 ? block.alt.trim() : t(BLOCK_KIND_LABELS.image);
+    case "button":
+    case "marquee": {
+      const words = blockWords(block);
+      return words.length > 0 ? words : t(BLOCK_KIND_LABELS[block.type]);
+    }
+    case "carousel":
+      return t(BLOCK_KIND_LABELS.carousel);
   }
+}
+
+/**
+ * The seller's own words on a block that is made of words: a text block's
+ * text, a button's label, a scrolling strip's line. Trimmed, on one line.
+ * Empty for every other kind, and for one of these with nothing typed yet.
+ */
+export function blockWords(block: StorefrontBlock): string {
+  const words = block.type === "text" || block.type === "marquee" ? block.text : block.type === "button" ? block.label : "";
+  return words.trim().replace(/\s+/g, " ");
 }
 
 /** The kind, spelled out under the name. A text block's name IS its words, so
@@ -52,6 +69,9 @@ export const BLOCK_KIND_LABELS: Record<StorefrontBlock["type"], MessageKey> = {
   text: "Storefront.blockKinds.text",
   shape: "Storefront.blockKinds.shape",
   image: "Storefront.blockKinds.image",
+  button: "Storefront.blockKinds.button",
+  marquee: "Storefront.blockKinds.marquee",
+  carousel: "Storefront.blockKinds.carousel",
 };
 
 /**
@@ -71,5 +91,11 @@ export function blockKeywords(block: StorefrontBlock): string[] {
       return ["shape", block.kind, "graphic"];
     case "image":
       return ["element", "picture", "graphic", "artwork", "logo"];
+    case "button":
+      return ["button", "link", "call to action"];
+    case "marquee":
+      return ["scrolling text", "ticker", "strip", "marquee"];
+    case "carousel":
+      return ["carousel", "slider", "products", "row"];
   }
 }

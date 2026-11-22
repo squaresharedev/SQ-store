@@ -77,7 +77,7 @@ import {
   updateEmbedSettings,
   deleteStorefront,
 } from "@/lib/storefront/actions";
-import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { DEFAULT_STOREFRONT_CONFIG, newStorefrontConfig } from "@/types/storefront";
 import { storefrontVersion } from "@/lib/storefront/version";
 
 // ---- test constants ------------------------------------------------------
@@ -160,10 +160,11 @@ describe("createStorefront - happy path", () => {
     expect(insertPayload.name).toBe("Untitled storefront");
     // Nothing is asked first, so nothing is stored about the store.
     expect(insertPayload).not.toHaveProperty("brief");
-    // SF-02/SF-03/SF-04: the default look, the name in the header, and
-    // indexing on for a storefront created from now on.
+    // SF-02/SF-03/SF-04: the look a NEW storefront starts with (the coded
+    // default with NEW_STOREFRONT_THEME on top, given at creation only), the
+    // name in the header, and indexing on for a storefront created from now on.
     const config = insertPayload.config as Record<string, unknown>;
-    expect(config.theme).toMatchObject(DEFAULT_STOREFRONT_CONFIG.theme);
+    expect(config.theme).toEqual(newStorefrontConfig().theme);
     expect((config.header as Record<string, unknown>).show).toBe(true);
     expect((config.header as Record<string, unknown>).name).toBe("Untitled storefront");
     expect((config.productPage as Record<string, unknown>).allowIndexing).toBe(true);

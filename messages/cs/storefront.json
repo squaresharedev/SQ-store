@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Nadpis",
     "subheading": "Podnadpis",
-    "body": "Běžný text"
+    "body": "Běžný text",
+    "label": "Malý popisek"
   },
   "layoutPresets": {
     "standard": "Standardní",
@@ -85,7 +86,10 @@
     "product": "Produkt",
     "text": "Text",
     "shape": "Tvar",
-    "image": "Obrázek"
+    "image": "Obrázek",
+    "button": "Tlačítko",
+    "marquee": "Běžící text",
+    "carousel": "Karusel"
   },
   "settings": {
     "groups": {

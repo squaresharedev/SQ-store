@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Nagłówek",
     "subheading": "Podnagłówek",
-    "body": "Tekst podstawowy"
+    "body": "Tekst podstawowy",
+    "label": "Mała etykieta"
   },
   "layoutPresets": {
     "standard": "Standardowy",
@@ -85,7 +86,10 @@
     "product": "Produkt",
     "text": "Tekst",
     "shape": "Kształt",
-    "image": "Obraz"
+    "image": "Obraz",
+    "button": "Przycisk",
+    "marquee": "Przewijany tekst",
+    "carousel": "Karuzela"
   },
   "settings": {
     "groups": {

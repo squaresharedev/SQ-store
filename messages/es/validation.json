@@ -210,6 +210,11 @@
       "tooLong": "El texto alternativo del elemento debe tener como máximo {maximum} caracteres.",
       "unsupported": "El texto alternativo del elemento contiene caracteres no admitidos."
     },
+    "linkLabel": {
+      "required": "El texto del enlace es obligatorio.",
+      "tooLong": "El texto del enlace debe tener como máximo {maximum} caracteres.",
+      "unsupported": "El texto del enlace contiene caracteres no admitidos."
+    },
     "notificationTitle": {
       "required": "El título de la notificación es obligatorio.",
       "tooLong": "El título de la notificación debe tener como máximo {maximum} caracteres.",
@@ -564,7 +569,8 @@
     "spanRange": "Un intervalo con formato debe terminar después de empezar.",
     "blocksTooMany": "Un escaparate puede tener hasta {maximum} bloques. Quita algunos bloques o divide este escaparate en dos.",
     "blocksDuplicate": "Los bloques de la cuadrícula deben ser únicos.",
-    "blockOutsideCanvas": "Un bloque está fuera del lienzo."
+    "blockOutsideCanvas": "Un bloque está fuera del lienzo.",
+    "linkTargetMissing": "Un enlace lleva a algo que no está en este escaparate."
   },
   "discountCode": {
     "code": "Un código tiene de {min} a {max} letras o números, y puede usar también - o _."

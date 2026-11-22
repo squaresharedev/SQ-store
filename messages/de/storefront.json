@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Überschrift",
     "subheading": "Unterüberschrift",
-    "body": "Fließtext"
+    "body": "Fließtext",
+    "label": "Kleine Beschriftung"
   },
   "layoutPresets": {
     "standard": "Standard",
@@ -85,7 +86,10 @@
     "product": "Produkt",
     "text": "Text",
     "shape": "Form",
-    "image": "Bild"
+    "image": "Bild",
+    "button": "Button",
+    "marquee": "Lauftext",
+    "carousel": "Karussell"
   },
   "settings": {
     "groups": {

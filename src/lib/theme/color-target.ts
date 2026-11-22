@@ -459,6 +459,11 @@ export function primaryColorTarget(block: StorefrontBlock): ColorTargetRef | nul
     // An uploaded element carries no color of its own — its appearance is the
     // artwork. Selecting one opens the inspector but no color panel.
     case "image":
+    // A button wears the storefront's own button paint, and a carousel the
+    // theme's cards. A scrolling strip's ink is set in its inspector.
+    case "button":
+    case "marquee":
+    case "carousel":
       return null;
   }
 }

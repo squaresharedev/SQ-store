@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Título",
     "subheading": "Subtítulo",
-    "body": "Texto do corpo"
+    "body": "Texto do corpo",
+    "label": "Etiqueta pequena"
   },
   "layoutPresets": {
     "standard": "Padrão",
@@ -85,7 +86,10 @@
     "product": "Produto",
     "text": "Texto",
     "shape": "Forma",
-    "image": "Imagem"
+    "image": "Imagem",
+    "button": "Botão",
+    "marquee": "Texto em movimento",
+    "carousel": "Carrossel"
   },
   "settings": {
     "groups": {

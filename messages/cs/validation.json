@@ -210,6 +210,11 @@
       "tooLong": "Alternativní text prvku může mít nejvýše {maximum} znaků.",
       "unsupported": "Alternativní text prvku obsahuje nepodporované znaky."
     },
+    "linkLabel": {
+      "required": "Vyplňte text odkazu.",
+      "tooLong": "Text odkazu může mít nejvýše {maximum} znaků.",
+      "unsupported": "Text odkazu obsahuje nepodporované znaky."
+    },
     "notificationTitle": {
       "required": "Vyplňte nadpis oznámení.",
       "tooLong": "Nadpis oznámení může mít nejvýše {maximum} znaků.",
@@ -564,7 +569,8 @@
     "spanRange": "Formátovaný úsek musí končit až za svým začátkem",
     "blocksTooMany": "Výloha může obsahovat nejvýše {maximum} bloků. Některé bloky odeberte, nebo výlohu rozdělte na dvě.",
     "blocksDuplicate": "Bloky v mřížce musí být jedinečné.",
-    "blockOutsideCanvas": "Jeden z bloků leží mimo plátno."
+    "blockOutsideCanvas": "Jeden z bloků leží mimo plátno.",
+    "linkTargetMissing": "Odkaz vede na něco, co na této výloze není."
   },
   "discountCode": {
     "code": "Kód musí mít {min} až {max} písmen nebo číslic a může také obsahovat - nebo _."

@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Heading",
     "subheading": "Subheading",
-    "body": "Body text"
+    "body": "Body text",
+    "label": "Small label"
   },
   "layoutPresets": {
     "standard": "Standard",
@@ -85,7 +86,10 @@
     "product": "Product",
     "text": "Text",
     "shape": "Shape",
-    "image": "Image"
+    "image": "Image",
+    "button": "Button",
+    "marquee": "Scrolling text",
+    "carousel": "Carousel"
   },
   "settings": {
     "groups": {

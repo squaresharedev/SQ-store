@@ -344,7 +344,8 @@ function maskStyle(mask: {
 /** A block's blur and the way it runs, or null when the block is sharp.
  *  Products blur their photo only (photoBlurStyle), never their labels. */
 function blockBlur(block: StorefrontBlock): { amount: number; direction: BlurDirection } | null {
-  if (block.type === "product" || !block.blur) return null;
+  // Only the kinds that carry a blur of their own.
+  if (!("blur" in block) || !block.blur) return null;
   return { amount: block.blur, direction: block.blurDirection ?? DEFAULT_BLUR_DIRECTION };
 }
 
@@ -492,6 +493,7 @@ export const TEXT_VARIANT_WEIGHT_CLASSES: Record<TextVariant, string> = {
   heading: "font-semibold",
   subheading: "font-medium",
   body: "font-normal",
+  label: "font-medium",
 };
 
 /**
@@ -751,6 +753,7 @@ export const TEXT_VARIANT_LABELS: Record<TextVariant, MessageKey> = {
   heading: "Storefront.textVariants.heading",
   subheading: "Storefront.textVariants.subheading",
   body: "Storefront.textVariants.body",
+  label: "Storefront.textVariants.label",
 };
 
 export const TEXT_ALIGN_CLASSES: Record<TextAlign, string> = {

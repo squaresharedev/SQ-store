@@ -98,12 +98,33 @@ import {
   TITLE_DISPLAYS,
   TITLE_INSET_MAX,
   TITLE_STYLES,
+  BAND_DIMS,
+  BANDS_MAX,
+  BUTTON_LABEL_MAX,
+  BUTTON_LOOKS,
+  CAROUSEL_PRODUCTS_MAX,
+  FONT_PAIRINGS,
+  FONT_ROLES,
+  HEADER_LINK_LABEL_MAX,
+  HEADER_LINKS_MAX,
+  HEADER_LOGO_SIZES,
+  LINK_URL_MAX,
+  MARQUEE_SPEEDS,
+  MARQUEE_TEXT_MAX,
+  MOTION_PRESETS,
+  PHOTO_EDGES,
+  PHOTO_SHAPES,
+  SHADOW_PRESETS,
+  TEXT_VALIGNS,
+  TEXTURES,
+  WHITE_BLENDS,
   blockKey,
+  boardProductIds,
   type CheckoutCelebration,
   type StorefrontBackground,
   type StorefrontConfig,
 } from "@/types/storefront";
-import { OBJECT_KEY_PATTERN } from "@/lib/validation/product";
+import { OBJECT_KEY_PATTERN, purchaseUrlSchema } from "@/lib/validation/product";
 import { LEGACY_BACKGROUND_GRADIENTS } from "@/components/storefront/background-presets";
 
 // The security contract for storefront configs. Parsed server-side on EVERY
@@ -152,6 +173,11 @@ const backgroundSchema = z.discriminatedUnion("kind", [
     from: hexColorSchema,
     to: hexColorSchema,
     angle: z.number().int().min(0).max(360),
+    // A third colour between the two. Optional, so a two-colour gradient
+    // saved before it existed parses untouched.
+    via: hexColorSchema
+      .optional()
+      .describe("An optional third colour between from and to. Build gradients from theme.palette colours."),
   }),
   z.strictObject({
     kind: z.literal("image"),
@@ -292,6 +318,163 @@ const cardExtrasFields = {
   showLowStock: z.boolean().optional(),
 };
 
+// ── Editor upgrade (EDITOR UPGRADE CONTRACT, types/storefront.ts) ────────
+// Every member below is OPTIONAL wherever it is spread: absent is what a
+// storefront saved before the upgrade carries, and it must keep parsing and
+// keep rendering exactly as it did. The descriptions travel into get_schema,
+// where they are what steers an assistant toward presets and the palette.
+
+/**
+ * The card look (card colour, white-background blend, name strip, photo
+ * outline, shadow), identical on the theme and on a per-tile override: spread
+ * into both so the two can never drift.
+ */
+const cardLookFields = {
+  cardColor: hexColorSchema
+    .optional()
+    .describe("The card's own colour, behind the photo and through a blended one. Use a theme.palette colour (usually surface)."),
+  whiteBlend: z
+    .enum(WHITE_BLENDS)
+    .optional()
+    .describe("Blend a photo's white background into the card colour: auto (only photos with near-white edges, the usual choice), on, off. Absent is off."),
+  titleBarColor: hexColorSchema.optional().describe("The name strip's fill. Absent follows cardColor. Use a theme.palette colour."),
+  titleTextColor: hexColorSchema
+    .optional()
+    .describe("The product name's colour. Leave absent: a readable light or dark ink is picked for the strip."),
+  titleFont: z.enum(FONT_ROLES).optional().describe("The product name's face under theme.fontPairing: heading or body. Absent is body."),
+  photoShape: z.enum(PHOTO_SHAPES).optional().describe("The photo's outline: rectangle, rounded, arch or circle. Absent fills the frame."),
+  shadow: z.enum(SHADOW_PRESETS).optional().describe("A drop shadow preset: none, soft or lifted. Absent is none."),
+};
+
+/** The five colours every picker opens on. All five or none. */
+const paletteSchema = z
+  .strictObject({
+    background: hexColorSchema,
+    text: hexColorSchema,
+    accent: hexColorSchema,
+    surface: hexColorSchema,
+    muted: hexColorSchema,
+  })
+  .describe(
+    "The storefront's five named colours. Take every colour you set anywhere on this storefront from here, so one palette change recolours the whole design.",
+  );
+
+/** One saved text style. Bounded like a text block's own fields. */
+const textStyleDefSchema = z.strictObject({
+  font: z.enum(FONT_ROLES).optional(),
+  size: z.number().int().min(TEXT_SIZE_MIN).max(TEXT_SIZE_MAX).optional(),
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+  uppercase: z.boolean().optional(),
+  letterSpacing: z.number().int().min(TEXT_LETTER_SPACING_MIN).max(TEXT_LETTER_SPACING_MAX).optional(),
+  lineHeight: z.number().int().min(TEXT_LINE_HEIGHT_MIN).max(TEXT_LINE_HEIGHT_MAX).optional(),
+  color: hexColorSchema.optional(),
+});
+
+/** The saved text styles, one per text variant; each optional. */
+const textStylesSchema = z
+  .strictObject({
+    heading: textStyleDefSchema.optional(),
+    subheading: textStyleDefSchema.optional(),
+    body: textStyleDefSchema.optional(),
+    label: textStyleDefSchema.optional(),
+  })
+  .describe(
+    "What Headline (heading), Subheading, Body and Small label look like on this storefront. Set them once here; a text block names one with its variant and only overrides what differs.",
+  );
+
+/** A gradient, as on the background: colours and a whole-degree angle. */
+const gradientFillSchema = z
+  .strictObject({
+    from: hexColorSchema,
+    via: hexColorSchema.optional(),
+    to: hexColorSchema,
+    angle: z.number().int().min(0).max(360),
+  })
+  .describe("A gradient of two or three theme.palette colours and an angle in degrees.");
+
+/** Half-cell insets (FinePlacement). `true` or absent, never false, so a
+ *  block back on whole cells stores nothing. */
+const fineSchema = z
+  .strictObject({
+    left: z.literal(true).optional(),
+    right: z.literal(true).optional(),
+    top: z.literal(true).optional(),
+    bottom: z.literal(true).optional(),
+  })
+  .describe(
+    "Half-cell steps for small text, shape and button blocks: each side set to true is pulled in by half a cell, so the block stays inside x/y/w/h. A 1x1 block with right and bottom is half a cell square.",
+  );
+
+/** An https link, by the purchase link's own rule (a real domain, no
+ *  credentials), with a cap that fits a panel field. */
+const linkUrlSchema = purchaseUrlSchema.refine((value) => value.length <= LINK_URL_MAX, {
+  error: issueKey("Validation.product.purchaseLinkTooLong"),
+});
+
+/** Where a button or a header link goes (LinkTarget). That a product or a
+ *  band named here EXISTS on this storefront is checked config-wide below. */
+const linkTargetSchema = z
+  .discriminatedUnion("kind", [
+    z.strictObject({ kind: z.literal("product"), productId: z.uuid() }),
+    z.strictObject({ kind: z.literal("storefront"), storefrontId: z.uuid() }),
+    z.strictObject({ kind: z.literal("band"), bandId: uuidField("blockId") }),
+    z.strictObject({ kind: z.literal("url"), url: linkUrlSchema }),
+  ])
+  .describe(
+    "Where a link goes: a product on this storefront {kind:product,productId}, another storefront of this store {kind:storefront,storefrontId}, a band on this page {kind:band,bandId}, or an https address {kind:url,url}.",
+  );
+
+/** An uploaded artwork's key: the `elements/` prefix, like an image block's. */
+const elementKeySchema = z
+  .string()
+  .max(600)
+  .regex(OBJECT_KEY_PATTERN)
+  .refine((key) => key.startsWith("elements/"), {
+    error: issueKey("Validation.storefront.elementKind"),
+  });
+
+/** An uploaded photo's key: the `images/` prefix, like the background's. */
+const imageKeySchema = z
+  .string()
+  .max(600)
+  .regex(OBJECT_KEY_PATTERN)
+  .refine((key) => key.startsWith("images/"), {
+    error: issueKey("Validation.storefront.backgroundImageKind"),
+  });
+
+/** A band's backdrop: a colour, a gradient or a photo with an optional veil. */
+const bandBackgroundSchema = z.discriminatedUnion("kind", [
+  z.strictObject({ kind: z.literal("solid"), color: hexColorSchema }),
+  z.strictObject({
+    kind: z.literal("gradient"),
+    from: hexColorSchema,
+    via: hexColorSchema.optional(),
+    to: hexColorSchema,
+    angle: z.number().int().min(0).max(360),
+  }),
+  z.strictObject({
+    kind: z.literal("image"),
+    key: imageKeySchema,
+    x: z.number().int().min(0).max(100),
+    y: z.number().int().min(0).max(100),
+    scale: z.number().int().min(IMAGE_SCALE_MIN).max(IMAGE_SCALE_MAX),
+    dim: z.enum(BAND_DIMS).optional().describe("A veil over the photo so words on it stay readable: none, light (for dark words) or dark (for light words)."),
+  }),
+]);
+
+/** A full-width band behind a run of the board's rows. */
+const bandSchema = z
+  .strictObject({
+    id: uuidField("blockId"),
+    y: z.number().int().min(0).max(CANVAS_ROWS_MAX - 1),
+    h: z.number().int().min(1).max(CANVAS_ROWS_MAX),
+    background: bandBackgroundSchema,
+  })
+  .describe(
+    "A strip of colour, gradient or photo running the full width of the page behind rows y to y+h. Blocks keep their places and sit on top of it; on a phone it follows them by itself.",
+  );
+
 /** Legacy chip size enum -> px, matching the text sizes each one rendered at
  *  (text-[0.625rem] / text-xs / text-sm). */
 const LEGACY_PRICE_TAG_SIZE_PX: Record<string, number> = {
@@ -359,6 +542,22 @@ const themeObjectSchema = z.strictObject({
   hideSoldOut: z.boolean(),
   // The phone board's width. Absent = no phone layout (see PHONE LAYOUT).
   mobileColumns: z.number().int().min(MOBILE_COLUMNS_MIN).max(MOBILE_COLUMNS_MAX).optional(),
+  // The editor upgrade's theme members. All optional: see the note above
+  // cardLookFields.
+  palette: paletteSchema.optional(),
+  fontPairing: z
+    .enum(FONT_PAIRINGS)
+    .optional()
+    .describe(
+      "A heading face and a body face chosen to sit together: editorial, classic, modern, soft or studio. Prefer this to `font`. Absent sets the whole board in `font`.",
+    ),
+  textStyles: textStylesSchema.optional(),
+  motion: z
+    .enum(MOTION_PRESETS)
+    .optional()
+    .describe("How the board arrives on screen: none, subtle (a fade as blocks scroll into view) or lively (a fade with a slight rise, staggered). Still under reduced motion."),
+  texture: z.enum(TEXTURES).optional().describe("A paper grain over the background: none, light or strong."),
+  ...cardLookFields,
 });
 
 /** Legacy text-size enum -> px, matching the classes each one rendered at
@@ -483,6 +682,26 @@ const headerSchema = z.strictObject({
   // resolves to the theme's upload, or simply inherits when there is none.
   nameFont: z.enum(STOREFRONT_FONTS).optional(),
   bioFont: z.enum(STOREFRONT_FONTS).optional(),
+  // The logo: an uploaded element (SVG review included), its alt text and one
+  // of three sizes. Absent = no logo.
+  logo: z
+    .strictObject({
+      key: elementKeySchema,
+      alt: singleLineText({ field: "elementAlt", max: IMAGE_ALT_MAX, min: 0 }).optional(),
+      size: z.enum(HEADER_LOGO_SIZES).optional(),
+    })
+    .optional(),
+  // The menu: a few labelled links. Absent = no menu.
+  links: z
+    .array(
+      z.strictObject({
+        label: singleLineText({ field: "linkLabel", max: HEADER_LINK_LABEL_MAX }),
+        link: linkTargetSchema,
+      }),
+    )
+    .max(HEADER_LINKS_MAX)
+    .optional()
+    .describe("Up to 4 menu links in the header. A cart icon is added by itself wherever the cart is live."),
 });
 
 
@@ -784,6 +1003,7 @@ const cardStyleOverridesSchema = z.preprocess((value) => {
   ...hoverTimingFields,
   ...saleBadgeFields,
   ...cardExtrasFields,
+  ...cardLookFields,
 }));
 
 /** Focal point + zoom for an image inside a frame. The same bounded ints the
@@ -806,6 +1026,8 @@ const productBlockSchema = z.strictObject({
   // drops it again when framing returns to centred — so an unframed tile is
   // indistinguishable from one saved before framing existed.
   imagePlacement: imagePlacementSchema.optional(),
+  // A cached measurement for whiteBlend "auto" (PHOTO_EDGES); safe to drop.
+  photoEdge: z.enum(PHOTO_EDGES).optional(),
 });
 
 /**
@@ -865,6 +1087,8 @@ const textBlockSchema = z.strictObject({
   lineHeight: z.number().int().min(TEXT_LINE_HEIGHT_MIN).max(TEXT_LINE_HEIGHT_MAX).optional(),
   blur: blurSchema.optional(),
   blurDirection: blurDirectionSchema.optional(),
+  valign: z.enum(TEXT_VALIGNS).optional().describe("Where the words sit in the box: top, middle or bottom. Absent is middle."),
+  fine: fineSchema.optional(),
 });
 
 // Decorative shape: allowlisted kind + regex-gated color, nothing free-form.
@@ -884,6 +1108,10 @@ const shapeBlockSchema = z.strictObject({
   // generation only), optional for the same back-compat reason.
   roundness: z.number().int().min(0).max(SHAPE_ROUNDNESS_MAX).optional(),
   points: z.number().int().min(SHAPE_POINTS_MIN).max(SHAPE_POINTS_MAX).optional(),
+  // Painted instead of `color` when present.
+  gradient: gradientFillSchema.optional(),
+  shadow: z.enum(SHADOW_PRESETS).optional().describe("A drop shadow preset: none, soft or lifted."),
+  fine: fineSchema.optional(),
 });
 
 // A seller's own artwork. Holds an R2 object KEY (shape-checked here; ownership
@@ -910,13 +1138,62 @@ const imageBlockSchema = z.strictObject({
   opacity: z.number().int().min(0).max(100).optional(),
   blur: blurSchema.optional(),
   blurDirection: blurDirectionSchema.optional(),
+  shape: z.enum(PHOTO_SHAPES).optional().describe("The outline the picture is cut to: rectangle, rounded, arch or circle."),
+  shadow: z.enum(SHADOW_PRESETS).optional().describe("A drop shadow preset: none, soft or lifted."),
 });
+
+// A button: a few plain words and a destination. Its paint is the
+// storefront's own button, so there is no colour here to gate.
+const buttonBlockSchema = z
+  .strictObject({
+    type: z.literal("button"),
+    id: uuidField("blockId"),
+    label: singleLineText({ field: "linkLabel", max: BUTTON_LABEL_MAX }),
+    link: linkTargetSchema,
+    look: z.enum(BUTTON_LOOKS).optional().describe("solid (the default), outline or link. Its colours follow the storefront's own button."),
+    ...placementFields,
+    fine: fineSchema.optional(),
+  })
+  .describe("A button that leads to a product, another storefront, a band on this page or an https address.");
+
+// A scrolling text strip: one line of plain words.
+const marqueeBlockSchema = z
+  .strictObject({
+    type: z.literal("marquee"),
+    id: uuidField("blockId"),
+    text: singleLineText({ field: "blockText", max: MARQUEE_TEXT_MAX }),
+    speed: z.enum(MARQUEE_SPEEDS).optional().describe("slow or normal (the default)."),
+    variant: z.enum(TEXT_VARIANTS).optional(),
+    color: hexColorSchema.optional(),
+    ...placementFields,
+  })
+  .describe("One line of text scrolling across its block. It pauses under the pointer and stands still under reduced motion.");
+
+// A product carousel: the seller's own products (ownership re-checked in
+// saveStorefront, like a product block's), each at most once.
+const carouselBlockSchema = z
+  .strictObject({
+    type: z.literal("carousel"),
+    id: uuidField("blockId"),
+    productIds: z
+      .array(z.uuid())
+      .min(1)
+      .max(CAROUSEL_PRODUCTS_MAX)
+      .refine((ids) => new Set(ids).size === ids.length, {
+        error: issueKey("Validation.storefront.blocksDuplicate"),
+      }),
+    ...placementFields,
+  })
+  .describe("A row of products in one block: swiped on a phone, stepped with arrows on a desktop. Give it at least 3 columns.");
 
 const blockSchema = z.discriminatedUnion("type", [
   productBlockSchema,
   textBlockSchema,
   shapeBlockSchema,
   imageBlockSchema,
+  buttonBlockSchema,
+  marqueeBlockSchema,
+  carouselBlockSchema,
 ]);
 
 const configObjectSchema = z
@@ -939,6 +1216,14 @@ const configObjectSchema = z
     productPage: productPageSchema.optional(),
     checkoutPage: checkoutPageSchema.optional(),
     cartPage: cartPageSchema.optional(),
+    // Full-width bands. Optional: absent on every storefront saved before them.
+    bands: z
+      .array(bandSchema)
+      .max(BANDS_MAX)
+      .refine((bands) => new Set(bands.map((band) => band.id)).size === bands.length, {
+        error: issueKey("Validation.storefront.blocksDuplicate"),
+      })
+      .optional(),
     // No `policies` or `shippingProfiles` member: shipping and returns terms
     // are account-level now (profiles.shipping_policy, bounded by
     // lib/validation/shipping-policy.ts). See RETIRED_TOP_LEVEL_FIELDS.
@@ -984,7 +1269,48 @@ const configObjectSchema = z
           message: issueKey("Validation.storefront.blockOutsideCanvas"),
         });
       }
+      // Half-cell insets leave something to draw: a one-cell side cannot be
+      // pulled in from both ends.
+      const fine = "fine" in block ? block.fine : undefined;
+      if (fine && ((block.w === 1 && fine.left && fine.right) || (block.h === 1 && fine.top && fine.bottom))) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["blocks", index, "fine"],
+          message: issueKey("Validation.storefront.blockOutsideCanvas"),
+        });
+      }
     });
+
+    // A band runs behind rows the board has.
+    const bands = config.bands ?? [];
+    bands.forEach((band, index) => {
+      if (band.y + band.h > rows) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["bands", index],
+          message: issueKey("Validation.storefront.blockOutsideCanvas"),
+        });
+      }
+    });
+
+    // A link leads somewhere that exists: a product this board shows (which
+    // is what gives it a page here), or one of this page's own bands. Another
+    // storefront is checked against the store in saveStorefront, and an
+    // address by its own schema.
+    const shown = new Set(boardProductIds(config.blocks));
+    const bandIds = new Set(bands.map((band) => band.id));
+    const checkLink = (link: { kind: string; productId?: string; bandId?: string }, path: (string | number)[]) => {
+      const missing =
+        (link.kind === "product" && !shown.has(link.productId ?? "")) ||
+        (link.kind === "band" && !bandIds.has(link.bandId ?? ""));
+      if (missing) {
+        ctx.addIssue({ code: "custom", path, message: issueKey("Validation.storefront.linkTargetMissing") });
+      }
+    };
+    config.blocks.forEach((block, index) => {
+      if (block.type === "button") checkLink(block.link, ["blocks", index, "link"]);
+    });
+    (config.header?.links ?? []).forEach((entry, index) => checkLink(entry.link, ["header", "links", index, "link"]));
   });
 
 /**

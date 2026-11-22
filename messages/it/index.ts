@@ -23,6 +23,10 @@ import Settings from "./settings.json";
 import Products from "./products.json";
 import ProductPage from "./productPage.json";
 import Storefront from "./storefront.json";
+import EditorCards from "./editorCards.json";
+import EditorType from "./editorType.json";
+import EditorLayout from "./editorLayout.json";
+import EditorFinish from "./editorFinish.json";
 
 const messages = {
   Common,
@@ -45,6 +49,10 @@ const messages = {
   Products,
   ProductPage,
   Storefront,
+  EditorCards,
+  EditorType,
+  EditorLayout,
+  EditorFinish,
 };
 
 export default messages;

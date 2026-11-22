@@ -210,6 +210,11 @@
       "tooLong": "Alternatívny text prvku smie mať najviac {maximum} znakov.",
       "unsupported": "Alternatívny text prvku obsahuje nepodporované znaky."
     },
+    "linkLabel": {
+      "required": "Text odkazu je povinný.",
+      "tooLong": "Text odkazu smie mať najviac {maximum} znakov.",
+      "unsupported": "Text odkazu obsahuje nepodporované znaky."
+    },
     "notificationTitle": {
       "required": "Nadpis upozornenia je povinný.",
       "tooLong": "Nadpis upozornenia smie mať najviac {maximum} znakov.",
@@ -564,7 +569,8 @@
     "spanRange": "Formátovaný rozsah musí skončiť za svojím začiatkom",
     "blocksTooMany": "Výklad môže obsahovať najviac {maximum} blokov. Niektoré bloky odstráňte alebo výklad rozdeľte na dva.",
     "blocksDuplicate": "Bloky v mriežke musia byť jedinečné.",
-    "blockOutsideCanvas": "Blok leží mimo plátna."
+    "blockOutsideCanvas": "Blok leží mimo plátna.",
+    "linkTargetMissing": "Odkaz vedie na niečo, čo na tejto výklade nie je."
   },
   "discountCode": {
     "code": "Kód má {min} až {max} znakov: písmená alebo číslice, prípadne - alebo _."

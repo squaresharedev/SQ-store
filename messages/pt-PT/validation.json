@@ -210,6 +210,11 @@
       "tooLong": "O texto alternativo do elemento não pode ter mais de {maximum} carateres.",
       "unsupported": "O texto alternativo do elemento contém carateres não suportados."
     },
+    "linkLabel": {
+      "required": "O texto da ligação é obrigatório.",
+      "tooLong": "O texto da ligação não pode ter mais de {maximum} carateres.",
+      "unsupported": "O texto da ligação contém carateres não suportados."
+    },
     "notificationTitle": {
       "required": "O título da notificação é obrigatório.",
       "tooLong": "O título da notificação não pode ter mais de {maximum} carateres.",
@@ -564,7 +569,8 @@
     "spanRange": "Um intervalo formatado tem de terminar depois de começar",
     "blocksTooMany": "Uma montra pode ter até {maximum} blocos. Remova alguns blocos ou divida esta montra em duas.",
     "blocksDuplicate": "Os blocos da grelha têm de ser únicos.",
-    "blockOutsideCanvas": "Um bloco está fora da tela."
+    "blockOutsideCanvas": "Um bloco está fora da tela.",
+    "linkTargetMissing": "Uma ligação aponta para algo que não está nesta montra."
   },
   "discountCode": {
     "code": "Um código tem entre {min} e {max} letras ou números, podendo também usar - ou _."

@@ -322,9 +322,14 @@ async function publicBlocks(
   // product pages off, so the widget renders an inert tile rather than a link
   // to a 404.
   const productPagesOn = resolveProductPage(config).enabled;
-  const visible = readingOrder(config.blocks).filter(
-    (block) => block.type !== "product" || !removedProducts.has(block.productId),
-  );
+  const visible = readingOrder(config.blocks)
+    .filter(
+      // The kinds this payload has always described. Buttons, scrolling text
+      // and carousels are drawn by the embed frame (StorefrontBoard), which is
+      // what sellers' websites show; this JSON has no consumer to teach them to.
+      (block) => block.type === "product" || block.type === "text" || block.type === "shape" || block.type === "image",
+    )
+    .filter((block) => block.type !== "product" || !removedProducts.has(block.productId));
   return Promise.all(
     visible.map(async (block) => {
       // Tilt travels with the placement for the same reason a product tile's

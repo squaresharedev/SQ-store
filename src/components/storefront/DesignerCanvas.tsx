@@ -74,6 +74,7 @@ import {
   scaledCornerRadius,
   tileClipStyle,
 } from "./config-maps";
+import { blockWords } from "./block-label";
 import { jumpToElement, type CanvasViewport } from "./useCanvasViewport";
 import { CanvasCameraProvider, type CanvasCamera } from "@/lib/storefront/canvas-camera";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
@@ -1072,7 +1073,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 const alt = block.alt.trim();
                 return alt ? t("blockTile.imageWithAlt", { alt: alt.slice(0, 30) }) : t("blockTile.imageElement");
               }
-              const text = block.text.trim();
+              const text = blockWords(block);
               return text ? t("blockTile.textWithContent", { text: text.slice(0, 30) }) : t("blockTile.textBlock");
             }}
             onMove={

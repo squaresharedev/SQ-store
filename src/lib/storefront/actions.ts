@@ -15,6 +15,7 @@ import {
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
   DEFAULT_STOREFRONT_CONFIG,
+  newStorefrontConfig,
   DEFAULT_STOREFRONT_HEADER,
   DEFAULT_STOREFRONT_NAME,
   HEADER_NAME_MAX,
@@ -180,7 +181,9 @@ export async function createStorefront(): Promise<CreateStorefrontResult> {
     owner_id: account.accountId,
     name: finalName,
     config: {
-      ...DEFAULT_STOREFRONT_CONFIG,
+      // The nicer starting point (NEW_STOREFRONT_THEME), given at creation
+      // only: a stored config never gains it by being read.
+      ...newStorefrontConfig(),
       header: initialHeader,
       productPage: initialProductPage,
       ...(previous ? carryOverDesign(previous) : {}),

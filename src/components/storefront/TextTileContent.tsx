@@ -56,6 +56,8 @@ export function TextTileContent({
 }: {
   block: TextBlock;
   theme: StorefrontTheme;
+  /** The hex the words are read against (see BlockFace). Absent = not known. */
+  backdrop?: string;
   /** True when this block's words are being typed in place. */
   editing?: boolean;
   /** Start with everything selected, so typing replaces the block's text.

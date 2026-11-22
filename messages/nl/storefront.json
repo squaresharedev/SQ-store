@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Kop",
     "subheading": "Subkop",
-    "body": "Hoofdtekst"
+    "body": "Hoofdtekst",
+    "label": "Klein label"
   },
   "layoutPresets": {
     "standard": "Standaard",
@@ -85,7 +86,10 @@
     "product": "Product",
     "text": "Tekst",
     "shape": "Vorm",
-    "image": "Afbeelding"
+    "image": "Afbeelding",
+    "button": "Knop",
+    "marquee": "Lopende tekst",
+    "carousel": "Carrousel"
   },
   "settings": {
     "groups": {
