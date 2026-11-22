@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Movimento",
+      "none": "Nenhum",
+      "subtle": "Subtil",
+      "lively": "Animado",
+      "hint": "É reproduzido na sua loja quando os compradores percorrem a página. O editor fica parado."
+    }
+  },
   "board": {}
 }

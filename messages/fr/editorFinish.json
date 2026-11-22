@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Mouvement",
+      "none": "Aucun",
+      "subtle": "Discret",
+      "lively": "Vivant",
+      "hint": "S’anime sur votre boutique quand les acheteurs font défiler la page. L’éditeur reste immobile."
+    }
+  },
   "board": {}
 }

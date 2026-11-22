@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Ruch",
+      "none": "Brak",
+      "subtle": "Subtelny",
+      "lively": "Żywy",
+      "hint": "Działa w Twoim sklepie, gdy kupujący przewijają stronę. Edytor pozostaje nieruchomy."
+    }
+  },
   "board": {}
 }

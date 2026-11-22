@@ -37,6 +37,7 @@ import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefro
 import type { TileQuickAddAction } from "@/components/storefront/ProductTileContent";
 import { useCart } from "@/components/cart/CartContext";
 import { QuickAddTile } from "./QuickAddTile";
+import { BoardMotion } from "@/components/storefront/BoardMotion";
 
 /**
  * A SELLER'S BOARD, AS A BUYER SEES IT: the masthead and the grid of tiles,
@@ -181,6 +182,7 @@ export function StorefrontBoard({
 
   return (
     <>
+      <BoardMotion motion={theme.motion} />
       <StorefrontMasthead header={header ?? EMPTY_STOREFRONT_HEADER} theme={theme} />
       {gridBlocks.length === 0 ? (
         <p className="py-16 text-center text-sm opacity-70" data-storefront-empty="">

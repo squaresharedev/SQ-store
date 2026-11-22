@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Pohyb",
+      "none": "Žiadny",
+      "subtle": "Jemný",
+      "lively": "Živý",
+      "hint": "Prehráva sa vo vašom obchode, keď zákazníci posúvajú stránku. Editor zostáva pokojný."
+    }
+  },
   "board": {}
 }

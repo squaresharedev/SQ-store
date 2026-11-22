@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Movimento",
+      "none": "Nessuno",
+      "subtle": "Discreto",
+      "lively": "Vivace",
+      "hint": "Si anima nel tuo negozio mentre gli acquirenti scorrono. L’editor resta fermo."
+    }
+  },
   "board": {}
 }

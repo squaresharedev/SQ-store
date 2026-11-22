@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Motion",
+      "none": "None",
+      "subtle": "Subtle",
+      "lively": "Lively",
+      "hint": "Plays on your storefront as buyers scroll. The editor stays still."
+    }
+  },
   "board": {}
 }

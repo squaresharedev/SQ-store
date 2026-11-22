@@ -1,4 +1,12 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Bewegung",
+      "none": "Keine",
+      "subtle": "Dezent",
+      "lively": "Lebhaft",
+      "hint": "Spielt in deinem Shop ab, wenn Käufer scrollen. Der Editor bleibt ruhig."
+    }
+  },
   "board": {}
 }
