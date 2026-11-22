@@ -131,7 +131,7 @@ const bandBackground = z
     via: color.nullable().optional(),
     to: color.optional(),
     angle: z.number().int().optional().describe("Degrees, 0 to 360."),
-    file: z.string().max(200).optional().describe("A photo: an upload_id from upload_image."),
+    file: z.string().max(200).optional().describe("A photo: an upload_id from upload_image, or from copy_product_photo as a photo."),
     x: z.number().int().optional().describe("The photo's focal point, percent from the left."),
     y: z.number().int().optional().describe("The photo's focal point, percent from the top."),
     scale: z.number().int().optional().describe("The photo's zoom in percent; 100 covers the band."),
@@ -200,7 +200,7 @@ export const designOpSchema = z.discriminatedUnion("op", [
   }),
   z.strictObject({
     op: z.literal("add_image"),
-    file: z.string().max(200).describe("An upload_id from upload_element."),
+    file: z.string().max(200).describe("An upload_id from upload_element, or from copy_product_photo as artwork."),
     alt: z.string().max(IMAGE_ALT_MAX).optional().describe("What it shows, for screen readers. Empty for decoration."),
     fit: z.enum(IMAGE_FITS).optional(),
     opacity: z.number().int().optional(),
@@ -423,17 +423,17 @@ function assertArtwork(file: unknown): void {
   if (keyPrefixOf(file) === objectKeyPrefix("image")) {
     throw new DesignOpRefused(
       "That file was uploaded as a photo (upload_image), and add_image places artwork.",
-      "Upload it with upload_element and use that upload_id. A photo belongs in a band's background.",
+      "Upload it with upload_element, or copy a product's photo with copy_product_photo as artwork, and use that upload_id. A photo belongs in a band's background.",
     );
   }
 }
 
-/** A band's photo must be an image upload; refuse artwork in words. */
+/** A band's (or the board's) photo must be an image upload; refuse artwork in words. */
 function assertBandPhoto(file: unknown): void {
   if (keyPrefixOf(file) === objectKeyPrefix("element")) {
     throw new DesignOpRefused(
-      "That file was uploaded as artwork (upload_element), and a band's background takes a photo.",
-      "Upload it with upload_image and use that upload_id.",
+      "That file was uploaded as artwork (upload_element), and a background takes a photo.",
+      "Upload it with upload_image, or copy a product's photo with copy_product_photo as a photo, and use that upload_id.",
     );
   }
 }
@@ -596,13 +596,31 @@ function assertLinksLand(config: StorefrontConfig): void {
   for (const entry of config.header?.links ?? []) check(entry?.link, `The header link "${entry?.label}"`);
 }
 
-/** The header's logo as an assistant writes it: `file` for the upload, kept as `key`. */
-function logoFrom(value: unknown): unknown {
+/**
+ * A member that holds a file, as an assistant writes it: `file` for the upload,
+ * kept as `key`, after `assert` has checked it came through the right door.
+ * Anything else is left for the schema.
+ */
+function withFile(value: unknown, assert: (file: unknown) => void): unknown {
   if (!value || typeof value !== "object" || !("file" in value)) return value;
   const { file, ...rest } = value as Fields;
-  assertArtwork(file);
+  assert(file);
   return { ...rest, key: file };
 }
+
+/** A typeface must be a font upload; refuse anything else in words. */
+function assertFont(file: unknown): void {
+  const prefix = keyPrefixOf(file);
+  if (prefix !== null && prefix !== objectKeyPrefix("font")) {
+    throw new DesignOpRefused("That file is not a typeface upload.", "Upload the font with upload_font and use that upload_id.");
+  }
+}
+
+/** The theme's members that hold a file, and the door each must come through. */
+const THEME_FILES: Record<string, (file: unknown) => void> = {
+  customFont: assertFont,
+  background: assertBandPhoto,
+};
 
 /**
  * Apply `ops` in order, each seeing the board the one before it left. Returns the
@@ -882,12 +900,18 @@ export function applyDesignOps(
         // stored on its own it would name five colours the board does not wear.
         const { palette, ...others } = op.changes;
         if (palette && typeof palette === "object") setPalette(palette as Record<string, unknown>);
-        theme = patched(theme, palette === undefined || (palette && typeof palette === "object") ? others : op.changes);
+        const kept = palette === undefined || (palette && typeof palette === "object") ? others : op.changes;
+        theme = patched(
+          theme,
+          Object.fromEntries(
+            Object.entries(kept).map(([field, value]) => [field, Object.hasOwn(THEME_FILES, field) ? withFile(value, THEME_FILES[field]) : value]),
+          ),
+        );
         break;
       }
       case "header": {
         const { logo, ...others } = op.changes;
-        header = patched(header ?? EMPTY_STOREFRONT_HEADER, logo === undefined ? others : { ...others, logo: logoFrom(logo) });
+        header = patched(header ?? EMPTY_STOREFRONT_HEADER, logo === undefined ? others : { ...others, logo: withFile(logo, assertArtwork) });
         break;
       }
     }

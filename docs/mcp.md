@@ -115,13 +115,36 @@ products. A new text block with no `variant` starts in `heading` for a few words
 and `body` for a sentence or more, and carries no size of its own, so it follows
 `theme.textStyles`.
 
+Files for a storefront come in as upload ids, never keys:
+
+- `upload_element` (artwork, `lib/uploads/store-element.ts`) and `upload_image`
+  (photos, `lib/uploads/store-image.ts`), as before.
+- `upload_font` stores a typeface through `lib/uploads/store-font.ts`, the one
+  function `/api/uploads/font` also calls: WOFF2, WOFF, TTF or OTF by its bytes,
+  2 MB at most, under the uploader's own `fonts/` key. `theme` changes
+  `{customFont: {file, name}, font: "custom", fontPairing: null}` use it; the save
+  checks it with the same `verifyUpload` a font chosen in the editor gets.
+- `copy_product_photo` puts one of the store's product photos on a storefront
+  without a re-upload (`lib/agent/product-photo.ts`): the product is read under
+  row level security and the store's id, a taken-down or paused one is refused,
+  and the photo's bytes are read back from R2 (`getObject`, bounded) and stored
+  anew through `storeElement` (as artwork, 2 MB at most) or `storeImage` (as a
+  photo, for a band or the board), so the copy is the caller's own upload under
+  the prefix its place demands, with that door's own type, size and moderation
+  rules. It takes a product id and which photo, never a key or a URL.
+
+`file` is the word everywhere an operation takes one: `add_image`, a band's
+background, `header.logo`, `theme.customFont` and an image `theme.background`.
+Each is checked to have come through the right door (artwork, photo, font) and
+refused in words if not.
+
 Phone layouts (`viewport: "mobile"`, `mobile_reset`, `theme.mobileColumns`) and
 `preview_storefront`, which returns screenshots of the real renderer and an MCP
 Apps view, are designed in `docs/mcp-apps.md`.
 
 ## Not exposed yet
 
-Digital file, font and document uploads; review CSV import and export;
+Digital file and document uploads; review CSV import and export;
 payments (`getPaymentsOverview`), until Stripe Connect is live.
 
 ## Operations

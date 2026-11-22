@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { bytesFromImageInput, imageInputShape } from "@/lib/agent/image-input";
+import { bytesFromImageInput, fileInputShape, imageInputShape } from "@/lib/agent/image-input";
 import { collectObjectKeys, rememberUpload, restoreObjectKeys, withholdObjectKeys } from "@/lib/agent/object-refs";
+import { PRODUCT_PHOTO_USES, copyProductPhoto } from "@/lib/agent/product-photo";
 import { DESTRUCTIVE, READ, ToolFailure, WRITE, defineTool, formDataFrom, unwrap, unwrapState } from "@/lib/agent/tool";
 import {
   GET as getCheckoutPageRoute,
@@ -25,9 +26,10 @@ import {
 import { DesignOpRefused, applyDesignOps, boardSummary, designOpSchema } from "@/lib/storefront/design-ops";
 import { getShippingChoices, getStorefront, listStorefronts } from "@/lib/storefront/queries";
 import { storeElement } from "@/lib/uploads/store-element";
+import { storeFont } from "@/lib/uploads/store-font";
 import { msg } from "@/i18n/types";
 import { firstIssue } from "@/lib/validation/messages";
-import { ELEMENT_MAX_BYTES, productWriteSchema } from "@/lib/validation/product";
+import { ELEMENT_MAX_BYTES, FONT_MAX_BYTES, productWriteSchema } from "@/lib/validation/product";
 import { shippingPolicySchema } from "@/lib/validation/shipping-policy";
 import { discountInputSchema } from "@/lib/validation/discounts";
 import { storefrontConfigSchema } from "@/lib/validation/storefront";
@@ -100,6 +102,11 @@ const pageSettings = z
 
 /** How many changes one edit_storefront call may make: a whole board's worth. */
 const DESIGN_OPS_MAX = 200;
+
+const BYTES_PER_MB = 1024 * 1024;
+/** The caps in the words the descriptions use. */
+const FONT_MAX_MB = Math.round(FONT_MAX_BYTES / BYTES_PER_MB);
+const ELEMENT_MAX_MB = Math.round(ELEMENT_MAX_BYTES / BYTES_PER_MB);
 
 /** Of `productIds`, those that are not this store's (or no longer exist),
  *  read under row level security the way saveStorefront reads them. */
@@ -359,6 +366,84 @@ export const storefrontTools = [
         );
       }
       const uploadId = await rememberUpload({ grantId, kind: "element", objectKey: stored.key });
+      if (!uploadId) throw new ToolFailure(serverError("agentTools"));
+      return { uploadId };
+    },
+  }),
+
+  defineTool({
+    name: "upload_font",
+    title: "Upload a typeface for a storefront",
+    description:
+      `Store the seller's own typeface (WOFF2, WOFF, TTF or OTF, up to ${FONT_MAX_MB} MB; judged by its bytes, not its name) and get an upload_id. ` +
+      "Use it with edit_storefront: theme changes {customFont: {file: <upload_id>, name: <the face's name>}, font: \"custom\", fontPairing: null} (a pairing wins over font). " +
+      "Every buyer downloads it, so a WOFF2 is best. Only upload a face the seller holds a licence to put on a website. An upload_id lasts 24 hours.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: { ...WRITE, openWorldHint: true },
+    input: z.strictObject(fileInputShape("font file")),
+    handler: async (input, { account, grantId }) => {
+      const cannotRead = refused("That font file could not be read.", "Send a public HTTPS url, or base64 within about 3 MB.");
+      if (!input.url && !input.base64) throw cannotRead;
+      if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
+        throw new ToolFailure(rateLimited("agentTools"));
+      }
+      const bytes = await bytesFromImageInput(input, FONT_MAX_BYTES);
+      if (!bytes) throw cannotRead;
+      const stored = await storeFont(bytes, input.filename, account.userId);
+      if (!stored.ok) {
+        if (stored.reason === "store_failed") throw new ToolFailure(serverError("agentTools"));
+        throw refused("That file cannot be used as a typeface.", `Send a WOFF2, WOFF, TTF or OTF file within ${FONT_MAX_MB} MB.`);
+      }
+      const uploadId = await rememberUpload({ grantId, kind: "font", objectKey: stored.key });
+      if (!uploadId) throw new ToolFailure(serverError("agentTools"));
+      return { uploadId };
+    },
+  }),
+
+  defineTool({
+    name: "copy_product_photo",
+    title: "Use a product photo on a storefront",
+    description:
+      "Put one of this store's product photos on a storefront without uploading it again (product image links expire; this copy does not). Answers with an upload_id: " +
+      `as artwork, for edit_storefront's add_image (up to ${ELEMENT_MAX_MB} MB), or as a photo, for a band's background {file} or the board's photo background. ` +
+      "index 0 is the main photo, 1 and on the gallery in get_product's order. An upload_id lasts 24 hours.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: WRITE,
+    input: z.strictObject({
+      productId: z.string().max(64).describe("The product's id."),
+      index: z.number().int().min(0).optional().describe("Which photo: 0 (the default) is the main one."),
+      as: z.enum(PRODUCT_PHOTO_USES).describe("artwork (an image block) or photo (a background)."),
+    }),
+    handler: async ({ productId, index = 0, as }, { account, grantId }) => {
+      if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
+        throw new ToolFailure(rateLimited("agentTools"));
+      }
+      const copied = await copyProductPhoto({ productId, photo: index, use: as, accountId: account.accountId, uploaderId: account.userId });
+      if (!copied.ok) {
+        switch (copied.reason) {
+          case "no_product":
+            throw new ToolFailure(notFound("product"));
+          case "taken_down":
+            throw refused("That product has been taken down, so its photos cannot be used.");
+          case "no_photo":
+            throw refused(
+              copied.photos ? `That product has ${copied.photos} photo${copied.photos === 1 ? "" : "s"}, so there is no photo ${index}.` : "That product has no photo.",
+              copied.photos ? `index is 0 to ${copied.photos - 1}.` : "Give it one with update_product first.",
+            );
+          case "too_large":
+            throw refused(
+              `That photo is past the ${ELEMENT_MAX_MB} MB artwork may be.`,
+              "Use it as a photo (a band's background) instead, or upload a smaller copy with upload_element.",
+            );
+          case "unavailable":
+            throw new ToolFailure(serverError("agentTools"));
+          default:
+            throw refused("That photo cannot be copied.", "Upload the picture with upload_element or upload_image instead.");
+        }
+      }
+      const uploadId = await rememberUpload({ grantId, kind: as === "artwork" ? "element" : "image", objectKey: copied.key });
       if (!uploadId) throw new ToolFailure(serverError("agentTools"));
       return { uploadId };
     },

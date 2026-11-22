@@ -2,18 +2,24 @@ import { z } from "zod";
 import { FETCH_USER_AGENT, isPublicHttpsUrl } from "@/lib/agent/oauth/public-url";
 
 /**
- * How a picture reaches a tool: a URL this server fetches, or the bytes inline.
+ * How a file reaches a tool: a URL this server fetches, or the bytes inline.
  * Inline is bounded by /mcp's request size, so anything big has to be a URL.
+ * `what` is the file's kind in the descriptions ("image", "font file").
  */
-export const imageInputShape = {
-  url: z.string().max(2000).optional().describe("A public HTTPS link to the image."),
-  base64: z
-    .string()
-    .max(4_000_000)
-    .optional()
-    .describe("The image's bytes, base64 encoded. About 3 MB at most: use url for anything larger."),
-  filename: z.string().max(200).optional().describe("A name for the file. Optional."),
-};
+export function fileInputShape(what: string) {
+  return {
+    url: z.string().max(2000).optional().describe(`A public HTTPS link to the ${what}.`),
+    base64: z
+      .string()
+      .max(4_000_000)
+      .optional()
+      .describe(`The ${what}'s bytes, base64 encoded. About 3 MB at most: use url for anything larger.`),
+    filename: z.string().max(200).optional().describe("A name for the file. Optional."),
+  };
+}
+
+/** How a picture reaches a tool. */
+export const imageInputShape = fileInputShape("image");
 
 export type ImageInput = { url?: string; base64?: string; filename?: string };
 
