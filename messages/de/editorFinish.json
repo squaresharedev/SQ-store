@@ -1,4 +1,53 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Bewegung",
+      "none": "Keine",
+      "subtle": "Dezent",
+      "lively": "Lebhaft",
+      "hint": "Spielt in deinem Shop ab, wenn Käufer scrollen. Der Editor bleibt ruhig."
+    },
+    "gradient": {
+      "readyLabel": "Fertige Farbverläufe",
+      "custom": "Eigener",
+      "middle": "Mitte",
+      "shapeLabel": "Oder ein Farbverlauf",
+      "names": {
+        "soft": "Sanft",
+        "light": "Hell",
+        "glow": "Schimmer",
+        "wash": "Hauch",
+        "sunset": "Abendrot",
+        "accent": "Akzent",
+        "deep": "Tief",
+        "bright": "Strahlend",
+        "dusk": "Dämmerung",
+        "ink": "Tinte"
+      }
+    },
+    "more": "Mehr",
+    "texture": {
+      "label": "Papierstruktur",
+      "none": "Aus",
+      "light": "Leicht",
+      "strong": "Stark",
+      "hint": "Eine feine Körnung über dem Hintergrund, wie bedrucktes Papier."
+    },
+    "marquee": {
+      "textLabel": "Text",
+      "speedLabel": "Tempo",
+      "speeds": {
+        "slow": "Langsam",
+        "normal": "Normal"
+      },
+      "colorLabel": "Farbe",
+      "autoColor": "Automatisch",
+      "useAutoColor": "Automatische Farbe verwenden",
+      "defaultText": "Kostenloser Versand bei jeder Bestellung",
+      "add": "Lauftext hinzufügen",
+      "inspectorTitle": "Lauftext",
+      "inspectorClose": "Lauftext-Bereich schließen"
+    }
+  },
   "board": {}
 }

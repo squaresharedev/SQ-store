@@ -9,7 +9,7 @@ import { BlockFace } from "@/components/storefront/BlockFace";
 import { BlockBlurCopies } from "@/components/storefront/BlockBlurCopies";
 import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { StorefrontMasthead } from "@/components/storefront/StorefrontMasthead";
-import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
+import { boardBackgroundStyle } from "@/components/storefront/background-presets";
 import {
   cardHoverFrameClass,
   TILE_FACE_CLASS,
@@ -39,6 +39,7 @@ import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefro
 import type { TileQuickAddAction } from "@/components/storefront/ProductTileContent";
 import { useCart } from "@/components/cart/CartContext";
 import { QuickAddTile } from "./QuickAddTile";
+import { BoardMotion } from "@/components/storefront/BoardMotion";
 
 /**
  * A SELLER'S BOARD, AS A BUYER SEES IT: the masthead and the grid of tiles,
@@ -116,7 +117,7 @@ export function storefrontSurface(page: StorefrontPageData): {
     // which clips, it is cut off. The product page does the same (PageShell).
     className: cn("wrap-anywhere", presentation.className),
     style: {
-      ...resolveBackgroundStyle(theme.background, page.backgroundImageUrl),
+      ...boardBackgroundStyle(theme, page.backgroundImageUrl),
       ...gridGapStyle(theme.gridGap),
       ...customFontVars(theme.customFont, page.customFontUrl),
       color: ink,
@@ -185,6 +186,7 @@ export function StorefrontBoard({
 
   return (
     <>
+      <BoardMotion motion={theme.motion} />
       <StorefrontMasthead header={header ?? EMPTY_STOREFRONT_HEADER} theme={theme} />
       {gridBlocks.length === 0 ? (
         <p className="py-16 text-center text-sm opacity-70" data-storefront-empty="">

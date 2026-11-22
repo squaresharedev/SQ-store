@@ -69,7 +69,7 @@ import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { SuggestedTile } from "./SuggestedTile";
-import { resolveBackgroundStyle } from "./background-presets";
+import { boardBackgroundStyle } from "./background-presets";
 import {
   blockTileClipStyle,
   gridGapStyle,
@@ -951,7 +951,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       // a bounded integer. gridGapStyle sets the --grid-gap token the
       // .ss-grid rule inherits.
       style={{
-        ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
+        ...boardBackgroundStyle(theme, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
         ...customFontVars(theme.customFont, customFontUrl),
         ...paletteInkStyle(theme),

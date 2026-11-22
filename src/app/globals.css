@@ -2270,3 +2270,149 @@ textarea {
     transform: scaleX(0.6);
   }
 }
+
+/* ============================================================
+   EDITOR UPGRADE, WORKSTREAM 4: MOTION AND FINISH
+   ============================================================ */
+
+/* THE BOARD'S ARRIVAL (theme.motion): components/storefront/BoardMotion,
+   lib/storefront/motion and board-reveal. StorefrontBoard renders a hidden
+   `[data-board-motion]` anchor just before its grid, on buyers' pages and the
+   embed frame only, so the designer's canvas never moves. Absent motion, no
+   anchor, and none of this matches.
+
+   Only opacity and translate move, so nothing is laid out again. Every rule
+   that hides or moves sits under screen + no-preference: reduced motion and
+   print show the board exactly as it rests.
+
+   On first paint every block plays the arrival, pure CSS, `backwards` fill so
+   it ends on the block's own style (a card's hover lift is never overridden
+   afterwards): with no script at all the board still ends up visible. Script
+   then marks each cell (`data-reveal`): `wait` hides one the observer has
+   reported off screen, `in` plays the arrival again when it scrolls in, with
+   `--reveal-step` its place in that batch's stagger, and `still` shows all at
+   once (an automated browser photographing a preview). */
+/* How long one block takes to arrive: the motion scale's slow step, three
+   times over, because a block entering a page is read, not clicked. */
+:root {
+  --board-arrival: calc(var(--transition-duration-slow) * 3);
+}
+@keyframes board-arrive {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes board-arrive-rise {
+  from {
+    opacity: 0;
+    translate: 0 var(--board-rise);
+  }
+}
+@media screen and (prefers-reduced-motion: no-preference) {
+  [data-board-motion] ~ * [data-grid-cell] {
+    /* How far a lively block rises, and one step of the stagger. */
+    --board-rise: 0.75rem;
+    --board-step: var(--transition-duration-fast);
+    animation: board-arrive var(--board-arrival) var(--ease-entrance) backwards;
+  }
+  [data-board-motion="lively"] ~ * [data-grid-cell] {
+    animation-name: board-arrive-rise;
+  }
+  /* Lively's first-paint stagger, in reading order (the grid's DOM order).
+     Six places (REVEAL_STAGGER_STEPS); later blocks share the last. */
+  [data-board-motion="lively"] ~ * [data-grid-cell]:nth-child(2) {
+    animation-delay: var(--board-step);
+  }
+  [data-board-motion="lively"] ~ * [data-grid-cell]:nth-child(3) {
+    animation-delay: calc(var(--board-step) * 2);
+  }
+  [data-board-motion="lively"] ~ * [data-grid-cell]:nth-child(4) {
+    animation-delay: calc(var(--board-step) * 3);
+  }
+  [data-board-motion="lively"] ~ * [data-grid-cell]:nth-child(5) {
+    animation-delay: calc(var(--board-step) * 4);
+  }
+  [data-board-motion="lively"] ~ * [data-grid-cell]:nth-child(n + 6) {
+    animation-delay: calc(var(--board-step) * 5);
+  }
+  [data-board-motion] ~ * [data-grid-cell][data-reveal="in"] {
+    animation-delay: calc(var(--board-step) * var(--reveal-step, 0));
+  }
+  [data-board-motion] ~ * [data-grid-cell][data-reveal="wait"] {
+    animation: none;
+    opacity: 0;
+  }
+  /* Focus reaches a block before the observer does (a keyboard tab, a find
+     in page): shown at once, never faded in under the reader's eyes. */
+  [data-board-motion] ~ * [data-grid-cell][data-reveal="still"],
+  [data-board-motion] ~ * [data-grid-cell]:focus-within {
+    animation: none;
+    opacity: 1;
+  }
+}
+/* The Motion control's preview (components/storefront/FinishControls): three
+   small blocks playing the board's own arrival once, so a seller sees what a
+   preset does while the canvas itself stays still. */
+@media (prefers-reduced-motion: no-preference) {
+  .board-motion-preview[data-preset="subtle"] > * {
+    animation: board-arrive var(--board-arrival) var(--ease-entrance) backwards;
+  }
+  .board-motion-preview[data-preset="lively"] > * {
+    --board-rise: 0.375rem;
+    animation: board-arrive-rise var(--board-arrival) var(--ease-entrance) backwards;
+  }
+  .board-motion-preview[data-preset="lively"] > :nth-child(2) {
+    animation-delay: var(--transition-duration-fast);
+  }
+  .board-motion-preview[data-preset="lively"] > :nth-child(3) {
+    animation-delay: calc(var(--transition-duration-fast) * 2);
+  }
+}
+/* THE SCROLLING TEXT STRIP (marquee block): components/storefront/
+   MarqueeTileContent, lib/storefront/marquee. The track is two equal halves
+   of the words; sliding it by one half loops without a seam. Its pace is per
+   character (--marquee-chars, set on the track), so a long line crosses at the
+   speed a short one does. It pauses under the pointer and while focused, and
+   under reduced motion it stands still with the words shown once. */
+@keyframes board-marquee {
+  to {
+    translate: -50% 0;
+  }
+}
+.board-marquee {
+  /* Time per character at each speed, and the space after each copy. */
+  --marquee-pace: 0.12s;
+  --marquee-gap: 2em;
+}
+.board-marquee[data-speed="slow"] {
+  --marquee-pace: 0.2s;
+}
+.board-marquee-copy {
+  padding-inline-end: var(--marquee-gap);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .board-marquee-track {
+    animation: board-marquee calc(var(--marquee-chars) * var(--marquee-pace)) linear infinite;
+  }
+  .board-marquee:hover .board-marquee-track,
+  .board-marquee:focus-within .board-marquee-track {
+    animation-play-state: paused;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-marquee {
+    justify-content: center;
+    text-align: center;
+  }
+  .board-marquee-track {
+    width: auto;
+    flex-shrink: 1;
+  }
+  .board-marquee-copy {
+    padding-inline-end: 0;
+    white-space: normal;
+  }
+  .board-marquee-copy:not(:first-child) {
+    display: none;
+  }
+}

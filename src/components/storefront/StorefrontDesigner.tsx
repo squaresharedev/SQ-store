@@ -160,6 +160,10 @@ import { LayersPanel } from "./LayersPanel";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
+import { derivePalette } from "@/lib/storefront/palette";
+import { newMarqueeBlock } from "@/lib/storefront/marquee";
+import { MarqueeBlockEditor, type MarqueeBlockPatch } from "./MarqueeBlockEditor";
+import { MarqueeLibraryEntry } from "./MarqueeLibraryEntry";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
 import {
@@ -479,6 +483,7 @@ export function StorefrontDesigner({
   initialVersion?: string | null;
 }) {
   const t = useTranslations("Storefront.designer");
+  const tStrip = useTranslations("EditorFinish.panel.marquee");
   const locale = useLocale();
   const tCommon = useTranslations("Common.actions");
   const tKey = useTranslations();
@@ -2364,6 +2369,18 @@ export function StorefrontDesigner({
     if (block) selectBlock(blockKey(block), false, block);
   }
 
+  /** A scrolling text strip, the board's full width (lib/storefront/marquee). */
+  function addMarqueeBlock(text: string) {
+    const block = insertBlock((placement) => newMarqueeBlock(placement, text), theme.columns, 1, takeInsertHint());
+    if (block) selectBlock(blockKey(block), false, block);
+  }
+
+  /** A strip's own fields, as its inspector changes them. */
+  function updateMarqueeBlock(key: string, patch: MarqueeBlockPatch) {
+    recordChange(`marquee:${key}`);
+    setBlocks((current) => current.map((b) => (b.type === "marquee" && blockKey(b) === key ? { ...b, ...patch } : b)));
+  }
+
   /**
    * Upload the seller's own artwork and drop it on the canvas.
    *
@@ -3314,7 +3331,8 @@ export function StorefrontDesigner({
       // picked with six shapes selected paints six shapes, in one undo step
       // (see updateShapeBlocks and shapeColorKeys).
       case "shape-fill":
-        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex });
+        // A colour is a solid fill: it takes a gradient off (shape-fill.ts).
+        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex, gradient: undefined });
         return;
       case "shape-border":
         updateShapeBlocks(shapeColorKeys(ref.blockKey), { borderColor: hex });
@@ -4006,14 +4024,16 @@ export function StorefrontDesigner({
               : "text";
   // The title and the close button's label are separate messages rather than
   // one spliced into the other, so each language can inflect them its own way.
+  // A scrolling strip is named from its own catalogue (EditorFinish).
+  const stripSelected = selectedBlocks.length === 1 && selectedBlock?.type === "marquee";
   const inspectorTitle =
     inspectorKind === "blocks"
       ? t("inspector.title.blocks", { count: selectedBlocks.length })
-      : t(`inspector.title.${inspectorKind}`);
+      : stripSelected ? tStrip("inspectorTitle") : t(`inspector.title.${inspectorKind}`);
   const inspectorCloseLabel =
     inspectorKind === "blocks"
       ? t("inspector.close.blocks", { count: selectedBlocks.length })
-      : t(`inspector.close.${inspectorKind}`);
+      : stripSelected ? tStrip("inspectorClose") : t(`inspector.close.${inspectorKind}`);
   const showInspector =
     inspector?.kind === "picker" || selectedBlocks.length > 0;
 
@@ -4387,6 +4407,7 @@ export function StorefrontDesigner({
                   onPlaceUpload={placeUpload}
                   onAddShape={addShapeBlock}
                   onClose={() => setLeftPanel(null)}
+                  moreBlocks={<MarqueeLibraryEntry onAdd={addMarqueeBlock} disabled={blocks.length >= MAX_BLOCKS} />}
                 />
               )}
               </div>
@@ -4750,6 +4771,7 @@ export function StorefrontDesigner({
                     <ShapeBlockEditor
                       block={selectedBlock}
                       summons={blockField}
+                      palette={derivePalette(theme)}
                       onUpdate={(patch) =>
                         updateShapeBlocks([blockKey(selectedBlock)], patch)
                       }
@@ -4804,6 +4826,14 @@ export function StorefrontDesigner({
                       onDuplicate={() =>
                         duplicateBlocks([blockKey(selectedBlock)])
                       }
+                      onRemove={() => removeBlock(blockKey(selectedBlock))}
+                    />
+                  ) : selectedBlock?.type === "marquee" ? (
+                    <MarqueeBlockEditor
+                      block={selectedBlock}
+                      theme={theme}
+                      onUpdate={(patch) => updateMarqueeBlock(blockKey(selectedBlock), patch)}
+                      onDuplicate={() => duplicateBlocks([blockKey(selectedBlock)])}
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
                   ) : null}

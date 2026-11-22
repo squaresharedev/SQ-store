@@ -6,6 +6,7 @@ import type { StorefrontBackground, StorefrontTheme } from "@/types/storefront";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { infoTextClass } from "@/components/ui/control-styles";
 import { BackgroundEditor } from "./BackgroundEditor";
+import { derivePalette } from "@/lib/storefront/palette";
 import { LooksSection } from "./LooksSection";
 import { PaletteRow } from "./PaletteRow";
 
@@ -50,6 +51,7 @@ export function ThemePanel({
         imageUrl={backgroundImageUrl}
         onImageChange={onBackgroundImageChange}
         accent={theme.accent}
+        palette={derivePalette(theme)}
       />
       {/* "Accent" is a role, not a thing on the page, so the line under it
           names what it colours. */}

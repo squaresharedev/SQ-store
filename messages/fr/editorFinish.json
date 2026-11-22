@@ -1,4 +1,53 @@
 {
-  "panel": {},
+  "panel": {
+    "motion": {
+      "label": "Mouvement",
+      "none": "Aucun",
+      "subtle": "Discret",
+      "lively": "Vivant",
+      "hint": "S’anime sur votre boutique quand les acheteurs font défiler la page. L’éditeur reste immobile."
+    },
+    "gradient": {
+      "readyLabel": "Dégradés prêts à l’emploi",
+      "custom": "Personnalisé",
+      "middle": "Milieu",
+      "shapeLabel": "Ou un dégradé",
+      "names": {
+        "soft": "Doux",
+        "light": "Clair",
+        "glow": "Lueur",
+        "wash": "Voile",
+        "sunset": "Couchant",
+        "accent": "Accent",
+        "deep": "Profond",
+        "bright": "Éclatant",
+        "dusk": "Crépuscule",
+        "ink": "Encre"
+      }
+    },
+    "more": "Plus",
+    "texture": {
+      "label": "Texture papier",
+      "none": "Non",
+      "light": "Légère",
+      "strong": "Marquée",
+      "hint": "Un grain fin sur le fond, comme du papier imprimé."
+    },
+    "marquee": {
+      "textLabel": "Texte",
+      "speedLabel": "Vitesse",
+      "speeds": {
+        "slow": "Lente",
+        "normal": "Normale"
+      },
+      "colorLabel": "Couleur",
+      "autoColor": "Automatique",
+      "useAutoColor": "Utiliser la couleur automatique",
+      "defaultText": "Livraison offerte sur toutes les commandes",
+      "add": "Ajouter un texte défilant",
+      "inspectorTitle": "Texte défilant",
+      "inspectorClose": "Fermer le panneau du texte défilant"
+    }
+  },
   "board": {}
 }

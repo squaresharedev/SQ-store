@@ -30,6 +30,7 @@ import { PanelSearchField } from "./PanelSearchField";
 import type { EditorJump, EditorSearchEntry } from "./editor-search";
 import { FONT_LABELS } from "./config-maps";
 import { ThemePanel } from "./ThemePanel";
+import { FinishControls } from "./FinishControls";
 import { HeaderSection } from "./HeaderSection";
 import { CardsSection } from "./CardsSection";
 import { PriceTagSection } from "./PriceTagSection";
@@ -429,6 +430,7 @@ export function ControlsPanel({
               backgroundImageUrl={backgroundImageUrl}
               onBackgroundImageChange={onBackgroundImageChange}
             />
+            <FinishControls theme={theme} onChange={onThemeChange} />
           </CollapsibleSection>
           <CollapsibleSection title={t("canvas")} summon={summonedTheme === "canvas"}>
             <LayoutSection

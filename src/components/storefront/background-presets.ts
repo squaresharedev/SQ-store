@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
-import type { StorefrontBackground } from "@/types/storefront";
+import type { StorefrontBackground, StorefrontTheme } from "@/types/storefront";
+import { gradientCss } from "@/lib/storefront/gradients";
+import { withTextureLayer } from "@/lib/storefront/texture";
 
 // The ONLY place background CSS is defined. The config stores structured,
 // validated data (hex colors, an integer angle, or an image object key); this
@@ -58,10 +60,13 @@ export function resolveBackgroundStyle(
   switch (background.kind) {
     case "solid":
       return { backgroundColor: background.color };
-    case "gradient":
-      return {
-        backgroundImage: `linear-gradient(${background.angle}deg, ${background.from}, ${background.to})`,
-      };
+    case "gradient": {
+      // gradients.ts spells a two-stop gradient exactly as this always did,
+      // and adds the middle only when `via` is present. Off-contract stops
+      // draw nothing, which is what the browser made of them before.
+      const css = gradientCss(background);
+      return css ? { backgroundImage: css } : {};
+    }
     case "image": {
       if (!imageUrl) return { backgroundColor: IMAGE_BACKGROUND_BASE };
       return {
@@ -73,4 +78,17 @@ export function resolveBackgroundStyle(
       };
     }
   }
+}
+
+/**
+ * The BOARD's backdrop: its background, with the paper grain laid on top when
+ * it has one (lib/storefront/texture). For the buyer's board and the
+ * designer's canvas; the product page and the checkout borrow the background
+ * alone. Without a texture it is resolveBackgroundStyle's own object.
+ */
+export function boardBackgroundStyle(
+  theme: Pick<StorefrontTheme, "background" | "texture">,
+  imageUrl?: string | null,
+): CSSProperties {
+  return withTextureLayer(resolveBackgroundStyle(theme.background, imageUrl), theme.texture);
 }
