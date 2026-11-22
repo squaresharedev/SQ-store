@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Rozloženie",
+      "groupLabel": "Pridať prvok rozloženia",
+      "name": {
+        "band": "Pás",
+        "button": "Tlačidlo"
+      },
+      "add": {
+        "band": "Pridať pás cez celú šírku",
+        "button": "Pridať tlačidlo"
+      },
+      "noRoom": "Za každým riadkom už je nejaký pás."
+    },
+    "bandChrome": {
+      "rail": "Pás za riadkami {from} až {to}. Potiahnutím ho presuniete, stlačením upravíte.",
+      "stretch": "Potiahnutím zmeníte, cez koľko riadkov pás vedie"
+    },
+    "band": {
+      "title": "Pás",
+      "close": "Zavrieť pás",
+      "background": "Pozadie",
+      "kind": {
+        "solid": "Farba",
+        "gradient": "Prechod",
+        "image": "Fotka"
+      },
+      "palette": "Vaše farby",
+      "custom": "Vlastná farba",
+      "gradients": "Hotové prechody",
+      "gradientOption": "Prechod {n}",
+      "photo": "Fotka",
+      "shade": "Závoj",
+      "shadeInfo": "Svetlý alebo tmavý závoj cez fotku udrží text na nej čitateľný.",
+      "dim": {
+        "none": "Žiadny",
+        "light": "Svetlý",
+        "dark": "Tmavý"
+      },
+      "moveHint": "Pás presuniete úchytom vedľa plochy. Na telefóne ide s blokmi, ktoré na ňom ležia.",
+      "linked": "Na tento pás vedie odkaz. Skôr ako pás odstránite, nasmerujte odkaz inam.",
+      "remove": "Odstrániť pás"
+    },
+    "button": {
+      "title": "Tlačidlo",
+      "close": "Zavrieť tlačidlo",
+      "label": "Text",
+      "labelProblem": "Tlačidlo potrebuje pár slov.",
+      "charsLeft": "{n, plural, one {Zostáva # znak} few {Zostávajú # znaky} other {Zostáva # znakov}}",
+      "destination": "Vedie na",
+      "kind": {
+        "product": "Produkt",
+        "band": "Pás na tejto stránke",
+        "storefront": "Výklad",
+        "url": "Webová adresa"
+      },
+      "bandName": "Pás v riadkoch {from} až {to}",
+      "url": "Webová adresa",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Zadajte celú adresu, ktorá sa začína https://",
+      "look": "Vzhľad",
+      "looks": {
+        "solid": "Plné",
+        "outline": "Obrys",
+        "link": "Odkaz"
+      },
+      "defaultLabel": "Nakupovať",
+      "tileLabel": "Tlačidlo: {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo a menu",
+      "logo": "Logo",
+      "uploadLogo": "Nahrať logo",
+      "replaceLogo": "Vymeniť logo",
+      "removeLogo": "Odstrániť logo",
+      "logoAlt": "Čo je na logu",
+      "logoSize": "Veľkosť loga",
+      "sizes": {
+        "small": "Malé",
+        "medium": "Stredné",
+        "large": "Veľké"
+      },
+      "menu": "Odkazy v menu",
+      "addLink": "Pridať odkaz",
+      "linkLabel": "Text",
+      "linkDestination": "Vedie na",
+      "removeLink": "Odstrániť tento odkaz",
+      "newLinkLabel": "Obchod",
+      "menuFull": "Menu pojme najviac 4 odkazy.",
+      "cartNote": "Ikona košíka sa do menu pridá sama všade, kde je košík zapnutý."
+    }
+  },
+  "board": {
+    "navLabel": "Menu výkladu",
+    "openMenu": "Otvoriť menu",
+    "closeMenu": "Zavrieť menu",
+    "logoFallback": "Logo {store}"
+  }
 }

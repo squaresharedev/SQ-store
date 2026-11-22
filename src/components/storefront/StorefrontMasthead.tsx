@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, KeyboardEvent, MouseEvent } from "react";
+import type { CSSProperties, KeyboardEvent, MouseEvent, ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   headerStyleValue,
@@ -20,6 +20,7 @@ import type { TextRange } from "@/lib/storefront/text-selection";
 import { cn } from "@/lib/utils";
 import { TEXT_ALIGN_CLASSES, textSizeStyle } from "./config-maps";
 import { useEditorSlots } from "./editor-slots";
+import { MastheadLogo, MastheadNav, type MastheadLink } from "./MastheadNav";
 
 /**
  * The storefront masthead (store name + bio) rendered above the grid — shared
@@ -49,9 +50,26 @@ export function StorefrontMasthead({
   onLineTextChange,
   onToggleLineFormat,
   onEditDone,
+  logoUrl,
+  logoAlt,
+  nav,
+  cart,
+  foldNav = true,
 }: {
   header: StorefrontHeader;
   theme: StorefrontTheme;
+  /** The header logo's display URL (signed on the server, or local after an
+   *  upload). Absent draws no logo, whatever the header stores. */
+  logoUrl?: string | null;
+  /** The logo's words for a screen reader when it has none of its own. */
+  logoAlt?: string;
+  /** The header's menu, its links already resolved (buyer pages) or as
+   *  words only (the canvas). Absent or empty = no menu. */
+  nav?: readonly MastheadLink[];
+  /** The cart's button, joining the menu wherever the cart is live. */
+  cart?: ReactNode;
+  /** Fold the menu behind one button on a narrow page (MastheadNav). */
+  foldNav?: boolean;
   compact?: boolean;
   /** The line the style panel is currently editing, if any. */
   activeLine?: HeaderLine | null;
@@ -89,7 +107,11 @@ export function StorefrontMasthead({
   // On the buyer-facing page (editable=false) we respect the existing rule:
   // no content means no masthead rendered at all.
   const editorVisible = editable && header.show;
-  if (!header.show || (!name && !bio && !editingLine && !editorVisible)) return null;
+  // A logo, a menu or the cart make a navigation row of the masthead (absent
+  // on every header saved before them, which keep exactly their old markup).
+  const logo = header.logo && logoUrl && !compact ? { src: logoUrl, alt: header.logo.alt || logoAlt || header.name, size: header.logo.size } : null;
+  const navRow = !compact && (logo !== null || Boolean(nav?.length) || Boolean(cart));
+  if (!header.show || (!name && !bio && !editingLine && !editorVisible && !navRow)) return null;
 
   // Every color is re-gated on the way out: a config is parsed from a jsonb
   // column and these land in a style attribute.
@@ -227,8 +249,8 @@ export function StorefrontMasthead({
     formatClass("bio"),
   );
 
-  return (
-    <div className={cn("space-y-1", compact ? "mb-2" : "mb-4")}>
+  const lines = (
+    <>
       {editing("name") && MastheadLineEditor ? (
         <MastheadLineEditor
           line="name"
@@ -289,6 +311,17 @@ export function StorefrontMasthead({
           </p>
         )
       )}
-    </div>
+    </>
   );
+
+  if (navRow) {
+    return (
+      <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2" data-masthead-row="">
+        {logo && <MastheadLogo src={logo.src} alt={logo.alt} size={logo.size} />}
+        <div className="min-w-0 flex-1 space-y-1">{lines}</div>
+        <MastheadNav links={nav ?? []} cart={cart} fold={foldNav} />
+      </div>
+    );
+  }
+  return <div className={cn("space-y-1", compact ? "mb-2" : "mb-4")}>{lines}</div>;
 }

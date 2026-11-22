@@ -145,9 +145,13 @@ export const BlockTile = memo(function BlockTile({
   onTypeEnd,
   onSpotChange,
   onOpenSpotSetting,
+  backdrop,
 }: {
   /** Identity handed back to the callbacks, so they can stay stable. */
   blockKey: string;
+  /** What the block's words are read against (lib/storefront/bands
+   *  blockBackdrop), handed to the face. Absent = not news here. */
+  backdrop?: string;
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
@@ -772,6 +776,7 @@ export const BlockTile = memo(function BlockTile({
           spotDrag={spotDrag}
           look={look}
           hover={hover}
+          backdrop={backdrop}
           textEditing={typable && isTyping}
           textSelectAll={typingSelectAll}
           onTextChange={

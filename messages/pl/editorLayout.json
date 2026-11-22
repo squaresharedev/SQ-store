@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Układ",
+      "groupLabel": "Dodaj element układu",
+      "name": {
+        "band": "Pas",
+        "button": "Przycisk"
+      },
+      "add": {
+        "band": "Dodaj pas na całą szerokość",
+        "button": "Dodaj przycisk"
+      },
+      "noRoom": "Za każdym wierszem jest już jakiś pas."
+    },
+    "bandChrome": {
+      "rail": "Pas za wierszami od {from} do {to}. Przeciągnij, aby przesunąć, naciśnij, aby edytować.",
+      "stretch": "Przeciągnij, aby zmienić, przez ile wierszy biegnie pas"
+    },
+    "band": {
+      "title": "Pas",
+      "close": "Zamknij pas",
+      "background": "Tło",
+      "kind": {
+        "solid": "Kolor",
+        "gradient": "Gradient",
+        "image": "Zdjęcie"
+      },
+      "palette": "Twoje kolory",
+      "custom": "Własny kolor",
+      "gradients": "Gotowe gradienty",
+      "gradientOption": "Gradient {n}",
+      "photo": "Zdjęcie",
+      "shade": "Zasłona",
+      "shadeInfo": "Jasna lub ciemna zasłona na zdjęciu sprawia, że tekst na nim jest czytelny.",
+      "dim": {
+        "none": "Brak",
+        "light": "Jasna",
+        "dark": "Ciemna"
+      },
+      "moveHint": "Przesuń pas uchwytem obok planszy. Na telefonie podąża za blokami, które na nim leżą.",
+      "linked": "Do tego pasa prowadzi link. Skieruj go gdzie indziej, zanim usuniesz pas.",
+      "remove": "Usuń pas"
+    },
+    "button": {
+      "title": "Przycisk",
+      "close": "Zamknij przycisk",
+      "label": "Tekst",
+      "labelProblem": "Przycisk potrzebuje kilku słów.",
+      "charsLeft": "{n, plural, one {Został # znak} few {Zostały # znaki} many {Zostało # znaków} other {Zostało # znaku}}",
+      "destination": "Prowadzi do",
+      "kind": {
+        "product": "Produkt",
+        "band": "Pas na tej stronie",
+        "storefront": "Witryna",
+        "url": "Adres internetowy"
+      },
+      "bandName": "Pas w wierszach od {from} do {to}",
+      "url": "Adres internetowy",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Wpisz pełny adres zaczynający się od https://",
+      "look": "Wygląd",
+      "looks": {
+        "solid": "Wypełniony",
+        "outline": "Obrys",
+        "link": "Link"
+      },
+      "defaultLabel": "Kup teraz",
+      "tileLabel": "Przycisk: {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo i menu",
+      "logo": "Logo",
+      "uploadLogo": "Prześlij logo",
+      "replaceLogo": "Zmień logo",
+      "removeLogo": "Usuń logo",
+      "logoAlt": "Co jest na logo",
+      "logoSize": "Rozmiar logo",
+      "sizes": {
+        "small": "Małe",
+        "medium": "Średnie",
+        "large": "Duże"
+      },
+      "menu": "Linki w menu",
+      "addLink": "Dodaj link",
+      "linkLabel": "Tekst",
+      "linkDestination": "Prowadzi do",
+      "removeLink": "Usuń ten link",
+      "newLinkLabel": "Sklep",
+      "menuFull": "Menu mieści najwyżej 4 linki.",
+      "cartNote": "Ikona koszyka sama dołącza do menu wszędzie tam, gdzie koszyk jest włączony."
+    }
+  },
+  "board": {
+    "navLabel": "Menu witryny",
+    "openMenu": "Otwórz menu",
+    "closeMenu": "Zamknij menu",
+    "logoFallback": "Logo {store}"
+  }
 }

@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Indeling",
+      "groupLabel": "Een indelingselement toevoegen",
+      "name": {
+        "band": "Band",
+        "button": "Knop"
+      },
+      "add": {
+        "band": "Een band over de volle breedte toevoegen",
+        "button": "Een knop toevoegen"
+      },
+      "noRoom": "Achter elke rij ligt al een band."
+    },
+    "bandChrome": {
+      "rail": "Band achter de rijen {from} tot {to}. Sleep om te verplaatsen, druk om te bewerken.",
+      "stretch": "Sleep om te wijzigen over hoeveel rijen de band loopt"
+    },
+    "band": {
+      "title": "Band",
+      "close": "Band sluiten",
+      "background": "Achtergrond",
+      "kind": {
+        "solid": "Kleur",
+        "gradient": "Verloop",
+        "image": "Foto"
+      },
+      "palette": "Jouw kleuren",
+      "custom": "Eigen kleur",
+      "gradients": "Kant-en-klare verlopen",
+      "gradientOption": "Verloop {n}",
+      "photo": "Foto",
+      "shade": "Waas",
+      "shadeInfo": "Een lichte of donkere waas over de foto houdt tekst erop leesbaar.",
+      "dim": {
+        "none": "Geen",
+        "light": "Licht",
+        "dark": "Donker"
+      },
+      "moveHint": "Verplaats de band met de greep naast het bord. Op een telefoon volgt hij de blokken erop.",
+      "linked": "Er leidt een link naar deze band. Laat die eerst ergens anders heen wijzen.",
+      "remove": "Band verwijderen"
+    },
+    "button": {
+      "title": "Knop",
+      "close": "Knop sluiten",
+      "label": "Tekst",
+      "labelProblem": "Een knop heeft een paar woorden nodig.",
+      "charsLeft": "{n, plural, one {Nog # teken} other {Nog # tekens}}",
+      "destination": "Leidt naar",
+      "kind": {
+        "product": "Product",
+        "band": "Band op deze pagina",
+        "storefront": "Etalage",
+        "url": "Een webadres"
+      },
+      "bandName": "Band in rijen {from} tot {to}",
+      "url": "Webadres",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Gebruik een volledig adres dat begint met https://",
+      "look": "Uiterlijk",
+      "looks": {
+        "solid": "Gevuld",
+        "outline": "Omlijnd",
+        "link": "Link"
+      },
+      "defaultLabel": "Nu shoppen",
+      "tileLabel": "Knop: {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo en menu",
+      "logo": "Logo",
+      "uploadLogo": "Logo uploaden",
+      "replaceLogo": "Logo vervangen",
+      "removeLogo": "Logo verwijderen",
+      "logoAlt": "Wat er op het logo staat",
+      "logoSize": "Logogrootte",
+      "sizes": {
+        "small": "Klein",
+        "medium": "Middel",
+        "large": "Groot"
+      },
+      "menu": "Menulinks",
+      "addLink": "Link toevoegen",
+      "linkLabel": "Tekst",
+      "linkDestination": "Leidt naar",
+      "removeLink": "Deze link verwijderen",
+      "newLinkLabel": "Winkel",
+      "menuFull": "Een menu bevat hooguit 4 links.",
+      "cartNote": "Overal waar de winkelwagen aan staat, komt het pictogram vanzelf in het menu."
+    }
+  },
+  "board": {
+    "navLabel": "Etalagemenu",
+    "openMenu": "Menu openen",
+    "closeMenu": "Menu sluiten",
+    "logoFallback": "Logo van {store}"
+  }
 }

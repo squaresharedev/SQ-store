@@ -121,7 +121,7 @@ export function BlockFace({
     );
   }
   if (block.type === "button") {
-    return <ButtonTileContent block={block} theme={theme} backdrop={backdrop} />;
+    return <ButtonTileContent block={block} theme={theme} backdrop={backdrop} look={look} />;
   }
   if (block.type === "marquee") {
     return <MarqueeTileContent block={block} theme={theme} backdrop={backdrop} />;

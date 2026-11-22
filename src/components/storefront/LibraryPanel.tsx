@@ -43,6 +43,8 @@ export function LibraryPanel({
   onUpload,
   onPlaceUpload,
   onAddShape,
+  onAddBand,
+  onAddButton,
   onClose,
   moreBlocks,
 }: {
@@ -55,6 +57,9 @@ export function LibraryPanel({
   onUpload: (file: File) => void;
   onPlaceUpload: (upload: StorefrontUpload) => void;
   onAddShape: (kind: ShapeKind) => void;
+  /** The Layout group's band and button (LayoutInserts), shown with the shapes. */
+  onAddBand?: () => void;
+  onAddButton?: () => void;
   onClose: () => void;
   /** Other built-in blocks, listed after the shapes (the scrolling strip). */
   moreBlocks?: ReactNode;
@@ -122,7 +127,7 @@ export function LibraryPanel({
             onPlace={onPlaceUpload}
           />
         ) : (
-          <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} />
+          <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} onAddBand={onAddBand} onAddButton={onAddButton} />
         )}
         {tab === "shapes" && moreBlocks}
       </div>

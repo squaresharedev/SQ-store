@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Mise en page",
+      "groupLabel": "Ajouter un élément de mise en page",
+      "name": {
+        "band": "Bande",
+        "button": "Bouton"
+      },
+      "add": {
+        "band": "Ajouter une bande pleine largeur",
+        "button": "Ajouter un bouton"
+      },
+      "noRoom": "Chaque rangée a déjà une bande derrière elle."
+    },
+    "bandChrome": {
+      "rail": "Bande derrière les rangées {from} à {to}. Faites-la glisser pour la déplacer, appuyez pour la modifier.",
+      "stretch": "Faites glisser pour changer le nombre de rangées couvertes"
+    },
+    "band": {
+      "title": "Bande",
+      "close": "Fermer la bande",
+      "background": "Fond",
+      "kind": {
+        "solid": "Couleur",
+        "gradient": "Dégradé",
+        "image": "Photo"
+      },
+      "palette": "Vos couleurs",
+      "custom": "Couleur personnalisée",
+      "gradients": "Dégradés prêts à l'emploi",
+      "gradientOption": "Dégradé {n}",
+      "photo": "Photo",
+      "shade": "Voile",
+      "shadeInfo": "Un voile clair ou sombre sur la photo garde le texte lisible.",
+      "dim": {
+        "none": "Aucun",
+        "light": "Clair",
+        "dark": "Sombre"
+      },
+      "moveHint": "Déplacez la bande avec la poignée à côté du plateau. Sur téléphone, elle suit les blocs posés dessus.",
+      "linked": "Un lien mène à cette bande. Dirigez-le ailleurs avant de retirer la bande.",
+      "remove": "Retirer la bande"
+    },
+    "button": {
+      "title": "Bouton",
+      "close": "Fermer le bouton",
+      "label": "Texte",
+      "labelProblem": "Un bouton a besoin de quelques mots.",
+      "charsLeft": "{n, plural, one {# caractère restant} other {# caractères restants}}",
+      "destination": "Mène à",
+      "kind": {
+        "product": "Produit",
+        "band": "Bande de cette page",
+        "storefront": "Vitrine",
+        "url": "Une adresse web"
+      },
+      "bandName": "Bande des rangées {from} à {to}",
+      "url": "Adresse web",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Saisissez une adresse complète qui commence par https://",
+      "look": "Aspect",
+      "looks": {
+        "solid": "Plein",
+        "outline": "Contour",
+        "link": "Lien"
+      },
+      "defaultLabel": "Acheter",
+      "tileLabel": "Bouton : {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo et menu",
+      "logo": "Logo",
+      "uploadLogo": "Importer un logo",
+      "replaceLogo": "Remplacer le logo",
+      "removeLogo": "Retirer le logo",
+      "logoAlt": "Ce que dit le logo",
+      "logoSize": "Taille du logo",
+      "sizes": {
+        "small": "Petit",
+        "medium": "Moyen",
+        "large": "Grand"
+      },
+      "menu": "Liens du menu",
+      "addLink": "Ajouter un lien",
+      "linkLabel": "Texte",
+      "linkDestination": "Mène à",
+      "removeLink": "Retirer ce lien",
+      "newLinkLabel": "Boutique",
+      "menuFull": "Un menu contient au plus 4 liens.",
+      "cartNote": "L'icône du panier rejoint le menu d'elle-même partout où le panier est activé."
+    }
+  },
+  "board": {
+    "navLabel": "Menu de la vitrine",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "logoFallback": "Logo de {store}"
+  }
 }

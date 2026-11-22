@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Diseño",
+      "groupLabel": "Añadir un elemento de diseño",
+      "name": {
+        "band": "Franja",
+        "button": "Botón"
+      },
+      "add": {
+        "band": "Añadir una franja a todo el ancho",
+        "button": "Añadir un botón"
+      },
+      "noRoom": "Ya hay una franja detrás de cada fila."
+    },
+    "bandChrome": {
+      "rail": "Franja detrás de las filas {from} a {to}. Arrástrala para moverla, pulsa para editarla.",
+      "stretch": "Arrastra para cambiar cuántas filas cubre la franja"
+    },
+    "band": {
+      "title": "Franja",
+      "close": "Cerrar la franja",
+      "background": "Fondo",
+      "kind": {
+        "solid": "Color",
+        "gradient": "Degradado",
+        "image": "Foto"
+      },
+      "palette": "Tus colores",
+      "custom": "Color personalizado",
+      "gradients": "Degradados listos",
+      "gradientOption": "Degradado {n}",
+      "photo": "Foto",
+      "shade": "Velo",
+      "shadeInfo": "Un velo claro u oscuro sobre la foto mantiene legible el texto encima.",
+      "dim": {
+        "none": "Ninguno",
+        "light": "Claro",
+        "dark": "Oscuro"
+      },
+      "moveHint": "Mueve la franja con el asa junto al tablero. En el móvil sigue a los bloques que tiene encima.",
+      "linked": "Un enlace lleva a esta franja. Apúntalo a otro sitio antes de quitar la franja.",
+      "remove": "Quitar franja"
+    },
+    "button": {
+      "title": "Botón",
+      "close": "Cerrar el botón",
+      "label": "Texto",
+      "labelProblem": "Un botón necesita unas palabras.",
+      "charsLeft": "{n, plural, one {Queda # carácter} other {Quedan # caracteres}}",
+      "destination": "Lleva a",
+      "kind": {
+        "product": "Producto",
+        "band": "Franja de esta página",
+        "storefront": "Escaparate",
+        "url": "Una dirección web"
+      },
+      "bandName": "Franja en las filas {from} a {to}",
+      "url": "Dirección web",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Usa una dirección completa que empiece por https://",
+      "look": "Aspecto",
+      "looks": {
+        "solid": "Relleno",
+        "outline": "Contorno",
+        "link": "Enlace"
+      },
+      "defaultLabel": "Comprar ahora",
+      "tileLabel": "Botón: {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo y menú",
+      "logo": "Logo",
+      "uploadLogo": "Subir un logo",
+      "replaceLogo": "Cambiar logo",
+      "removeLogo": "Quitar logo",
+      "logoAlt": "Qué dice el logo",
+      "logoSize": "Tamaño del logo",
+      "sizes": {
+        "small": "Pequeño",
+        "medium": "Mediano",
+        "large": "Grande"
+      },
+      "menu": "Enlaces del menú",
+      "addLink": "Añadir un enlace",
+      "linkLabel": "Texto",
+      "linkDestination": "Lleva a",
+      "removeLink": "Quitar este enlace",
+      "newLinkLabel": "Tienda",
+      "menuFull": "Un menú admite hasta 4 enlaces.",
+      "cartNote": "El icono del carrito se añade solo al menú allí donde el carrito está activado."
+    }
+  },
+  "board": {
+    "navLabel": "Menú del escaparate",
+    "openMenu": "Abrir el menú",
+    "closeMenu": "Cerrar el menú",
+    "logoFallback": "Logo de {store}"
+  }
 }

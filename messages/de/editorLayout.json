@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Layout",
+      "groupLabel": "Ein Layout-Element hinzufügen",
+      "name": {
+        "band": "Band",
+        "button": "Button"
+      },
+      "add": {
+        "band": "Ein Band über die volle Breite hinzufügen",
+        "button": "Einen Button hinzufügen"
+      },
+      "noRoom": "Hinter jeder Zeile liegt schon ein Band."
+    },
+    "bandChrome": {
+      "rail": "Band hinter den Zeilen {from} bis {to}. Ziehen zum Verschieben, drücken zum Bearbeiten.",
+      "stretch": "Ziehen, um zu ändern, über wie viele Zeilen das Band reicht"
+    },
+    "band": {
+      "title": "Band",
+      "close": "Band schließen",
+      "background": "Hintergrund",
+      "kind": {
+        "solid": "Farbe",
+        "gradient": "Verlauf",
+        "image": "Foto"
+      },
+      "palette": "Deine Farben",
+      "custom": "Eigene Farbe",
+      "gradients": "Fertige Verläufe",
+      "gradientOption": "Verlauf {n}",
+      "photo": "Foto",
+      "shade": "Schleier",
+      "shadeInfo": "Ein heller oder dunkler Schleier über dem Foto hält Text darauf lesbar.",
+      "dim": {
+        "none": "Keiner",
+        "light": "Hell",
+        "dark": "Dunkel"
+      },
+      "moveHint": "Verschiebe das Band mit dem Griff neben der Fläche. Auf dem Handy folgt es den Blöcken darauf.",
+      "linked": "Ein Link führt zu diesem Band. Lass ihn woandershin zeigen, bevor du das Band entfernst.",
+      "remove": "Band entfernen"
+    },
+    "button": {
+      "title": "Button",
+      "close": "Button schließen",
+      "label": "Text",
+      "labelProblem": "Ein Button braucht ein paar Wörter.",
+      "charsLeft": "{n, plural, one {Noch # Zeichen} other {Noch # Zeichen}}",
+      "destination": "Führt zu",
+      "kind": {
+        "product": "Produkt",
+        "band": "Band auf dieser Seite",
+        "storefront": "Storefront",
+        "url": "Eine Webadresse"
+      },
+      "bandName": "Band in den Zeilen {from} bis {to}",
+      "url": "Webadresse",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Gib eine vollständige Adresse ein, die mit https:// beginnt",
+      "look": "Aussehen",
+      "looks": {
+        "solid": "Gefüllt",
+        "outline": "Umriss",
+        "link": "Link"
+      },
+      "defaultLabel": "Jetzt shoppen",
+      "tileLabel": "Button: {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo und Menü",
+      "logo": "Logo",
+      "uploadLogo": "Logo hochladen",
+      "replaceLogo": "Logo ersetzen",
+      "removeLogo": "Logo entfernen",
+      "logoAlt": "Was auf dem Logo steht",
+      "logoSize": "Logogröße",
+      "sizes": {
+        "small": "Klein",
+        "medium": "Mittel",
+        "large": "Groß"
+      },
+      "menu": "Menülinks",
+      "addLink": "Link hinzufügen",
+      "linkLabel": "Text",
+      "linkDestination": "Führt zu",
+      "removeLink": "Diesen Link entfernen",
+      "newLinkLabel": "Shop",
+      "menuFull": "Ein Menü fasst bis zu 4 Links.",
+      "cartNote": "Überall, wo der Warenkorb an ist, kommt sein Symbol von selbst ins Menü."
+    }
+  },
+  "board": {
+    "navLabel": "Storefront-Menü",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "logoFallback": "Logo von {store}"
+  }
 }

@@ -1,4 +1,100 @@
 {
-  "panel": {},
-  "board": {}
+  "panel": {
+    "insert": {
+      "group": "Layout",
+      "groupLabel": "Aggiungi un elemento di layout",
+      "name": {
+        "band": "Fascia",
+        "button": "Pulsante"
+      },
+      "add": {
+        "band": "Aggiungi una fascia a tutta larghezza",
+        "button": "Aggiungi un pulsante"
+      },
+      "noRoom": "Dietro ogni riga c'è già una fascia."
+    },
+    "bandChrome": {
+      "rail": "Fascia dietro le righe da {from} a {to}. Trascinala per spostarla, premi per modificarla.",
+      "stretch": "Trascina per cambiare quante righe copre la fascia"
+    },
+    "band": {
+      "title": "Fascia",
+      "close": "Chiudi la fascia",
+      "background": "Sfondo",
+      "kind": {
+        "solid": "Colore",
+        "gradient": "Sfumatura",
+        "image": "Foto"
+      },
+      "palette": "I tuoi colori",
+      "custom": "Colore personalizzato",
+      "gradients": "Sfumature pronte",
+      "gradientOption": "Sfumatura {n}",
+      "photo": "Foto",
+      "shade": "Velo",
+      "shadeInfo": "Un velo chiaro o scuro sulla foto mantiene leggibile il testo sopra.",
+      "dim": {
+        "none": "Nessuno",
+        "light": "Chiaro",
+        "dark": "Scuro"
+      },
+      "moveHint": "Sposta la fascia con la maniglia accanto alla tavola. Sul telefono segue i blocchi che ha sopra.",
+      "linked": "Un link porta a questa fascia. Fallo puntare altrove prima di rimuovere la fascia.",
+      "remove": "Rimuovi fascia"
+    },
+    "button": {
+      "title": "Pulsante",
+      "close": "Chiudi il pulsante",
+      "label": "Testo",
+      "labelProblem": "Un pulsante ha bisogno di qualche parola.",
+      "charsLeft": "{n, plural, one {# carattere rimasto} other {# caratteri rimasti}}",
+      "destination": "Porta a",
+      "kind": {
+        "product": "Prodotto",
+        "band": "Fascia di questa pagina",
+        "storefront": "Vetrina",
+        "url": "Un indirizzo web"
+      },
+      "bandName": "Fascia nelle righe da {from} a {to}",
+      "url": "Indirizzo web",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Usa un indirizzo completo che inizi con https://",
+      "look": "Aspetto",
+      "looks": {
+        "solid": "Pieno",
+        "outline": "Contorno",
+        "link": "Link"
+      },
+      "defaultLabel": "Acquista ora",
+      "tileLabel": "Pulsante: {label}"
+    },
+    "header": {
+      "logoAndMenu": "Logo e menu",
+      "logo": "Logo",
+      "uploadLogo": "Carica un logo",
+      "replaceLogo": "Sostituisci il logo",
+      "removeLogo": "Rimuovi il logo",
+      "logoAlt": "Cosa dice il logo",
+      "logoSize": "Dimensione del logo",
+      "sizes": {
+        "small": "Piccolo",
+        "medium": "Medio",
+        "large": "Grande"
+      },
+      "menu": "Link del menu",
+      "addLink": "Aggiungi un link",
+      "linkLabel": "Testo",
+      "linkDestination": "Porta a",
+      "removeLink": "Rimuovi questo link",
+      "newLinkLabel": "Negozio",
+      "menuFull": "Un menu contiene al massimo 4 link.",
+      "cartNote": "L'icona del carrello entra da sola nel menu ovunque il carrello sia attivo."
+    }
+  },
+  "board": {
+    "navLabel": "Menu della vetrina",
+    "openMenu": "Apri il menu",
+    "closeMenu": "Chiudi il menu",
+    "logoFallback": "Logo di {store}"
+  }
 }
