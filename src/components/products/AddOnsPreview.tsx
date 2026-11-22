@@ -8,6 +8,7 @@ import { fontPresentation } from "@/lib/theme/storefront-fonts";
 import { cn } from "@/lib/utils";
 import { AddOnsProvider } from "@/components/product-page/AddOnsContext";
 import {
+  ADD_ON_ROW_CLASS,
   AddOnAddButton,
   addOnFrameStyle,
   addOnInnerRadius,
@@ -169,8 +170,8 @@ function GhostSection() {
         return (
           <div
             key={row}
-            className="flex items-center gap-3 border p-2"
-            style={addOnFrameStyle(added, INK, RULE, RADIUS)}
+            className={cn(ADD_ON_ROW_CLASS, "flex items-center gap-3")}
+            style={addOnFrameStyle(RULE, RADIUS)}
             data-add-ons-preview-ghost-row={added ? "added" : "offered"}
           >
             <span

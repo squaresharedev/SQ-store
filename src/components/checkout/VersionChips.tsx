@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { chipStyle, ruleColor } from "@/components/product-page/product-page-maps";
+import { chipStyle } from "@/components/product-page/product-page-maps";
+import { SwatchDot } from "@/components/product-page/SwatchDot";
 import type { SelectionChip } from "@/lib/checkout/selection";
 
 /**
@@ -35,15 +36,7 @@ export function VersionChips({
           title={chip.label}
           data-version-chip={chip.swatch ? "swatch" : "text"}
         >
-          {chip.swatch && (
-            <span
-              className="size-3.5 shrink-0 rounded-full"
-              // The hairline in the page's own rule colour keeps a white or
-              // pale swatch visible on a light chip.
-              style={{ backgroundColor: chip.swatch, boxShadow: `inset 0 0 0 1px ${ruleColor(ink)}` }}
-              aria-hidden="true"
-            />
-          )}
+          {chip.swatch && <SwatchDot color={chip.swatch} ink={ink} />}
           <span className="sr-only">{chip.label}: </span>
           <span className="truncate">{chip.value}</span>
         </li>

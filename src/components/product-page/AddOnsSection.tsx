@@ -4,7 +4,7 @@ import { useState, type ComponentProps, type CSSProperties, type ReactNode } fro
 import { Check, EyeOff, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { photoForSelection, previewSelection } from "@/lib/checkout/selection";
+import { optionSwatch, photoForSelection, previewSelection } from "@/lib/checkout/selection";
 import type { AddOnCard, AddOnHiddenReason, HiddenAddOn } from "@/types/product";
 import {
   DEFAULT_PRODUCT_PAGE_ADD_ON_LAYOUT,
@@ -16,6 +16,7 @@ import { AddOnDetails } from "./AddOnDetails";
 import { PageSelect } from "./PageSelect";
 import { SalePrice } from "./SalePrice";
 import { readableOn, subtleFill } from "./product-page-maps";
+import { usePickersBeside } from "./usePickersBeside";
 
 /** The keyboard ring on the things a buyer presses; its colour is the page's ink. */
 const FOCUS_RING = "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
@@ -210,18 +211,27 @@ export function addOnInnerRadius(radius: number): number {
   return Math.max(0, radius - 4);
 }
 
-/** An add-on row's frame. A taken one's edge reads twice as heavy, in the page's ink. */
-export function addOnFrameStyle(added: boolean, ink: string, rule: string, radius: number): CSSProperties {
-  return {
-    borderColor: added ? ink : rule,
-    borderRadius: radius,
-    boxShadow: added ? `inset 0 0 0 1px ${ink}` : undefined,
-  };
+/** An add-on card's frame: the page's hairline, the same whether it is in the
+ *  order or not. The filled "Added" button is what says it is taken. */
+export function addOnFrameStyle(rule: string, radius: number): CSSProperties {
+  return { borderColor: rule, borderRadius: radius };
 }
+
+/** The height of every control in an add-on row: Add, and the version
+ *  pickers beside it, so they line up as one strip. */
+const ADD_ON_CONTROL_HEIGHT = "h-10";
+
+/**
+ * An add-on row's box. The photo (size-14, 56px) sits 8px in; the right inset
+ * is the 40px button's distance from the top and bottom as well: centred on
+ * the photo, it has 8px + 8px above and below, so 16px on the right too.
+ * Shared with the product form's ghost rows, so the two never drift apart.
+ */
+export const ADD_ON_ROW_CLASS = "border py-2 pl-2 pr-4";
 
 /** The add button's two sizes: a row's, and a small tile's. */
 const ADD_BUTTON_SIZE = {
-  md: { button: "gap-1.5 px-3 py-1.5 text-sm", icon: "size-4" },
+  md: { button: cn(ADD_ON_CONTROL_HEIGHT, "gap-1.5 px-3 text-sm"), icon: "size-4" },
   sm: { button: "gap-1 px-2 py-1 text-xs", icon: "size-3.5" },
 } as const;
 
@@ -307,12 +317,18 @@ function AddOnItem({
   const photo = photoForSelection(card.images, selection);
   const inner = addOnInnerRadius(radius);
   const tiles = layout === "tiles";
+  // A row in the order with versions to choose draws its pickers inside the
+  // card: beside Add where the name and price still show whole, else on a
+  // line of their own under them.
+  const hasPickers = !tiles && added && card.optionGroups.length > 0;
+  const { ref: rowRef, beside } = usePickersBeside(hasPickers, optionIds.join());
 
   const picture = (
     <span
       className={cn("shrink-0 overflow-hidden", tiles ? "aspect-square w-full" : "size-14")}
       style={{ borderRadius: inner, background: subtleFill(ink) }}
       aria-hidden="true"
+      data-product-add-on-photo=""
     >
       {photo && (
         // eslint-disable-next-line @next/next/no-img-element -- signed R2 URL with query params; next/image adds no value here.
@@ -328,9 +344,15 @@ function AddOnItem({
     tiles && added
       ? card.optionGroups.flatMap((group) => (selection[group.id] ? [selection[group.id]!.name] : [])).join(", ")
       : "";
+  // A row's three lines fill the photo's 56px exactly (20 + 20 + 16), so the
+  // photo sets the row's height and the button's even inset holds. Each line
+  // is as wide as its words (`items-start`), which is what the fit measures.
   const words = (
-    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-      <span className={cn("truncate font-medium", tiles ? "text-xs" : "text-sm")}>{card.title}</span>
+    <span
+      className={cn("flex min-w-0 flex-1 flex-col items-start", tiles ? "gap-0.5" : "gap-0")}
+      data-product-add-on-words=""
+    >
+      <span className={cn("max-w-full truncate font-medium", tiles ? "text-xs" : "text-sm")}>{card.title}</span>
       <SalePrice
         priceCents={card.priceCents}
         currency={card.currency}
@@ -340,7 +362,7 @@ function AddOnItem({
         saleStyle={saleStyle}
       />
       {chosenVersion && (
-        <span className="truncate text-xs underline underline-offset-2 opacity-70" data-product-add-on-version="">
+        <span className="max-w-full truncate text-xs underline underline-offset-2 opacity-70" data-product-add-on-version="">
           {chosenVersion}
         </span>
       )}
@@ -359,14 +381,20 @@ function AddOnItem({
       aria-label={t("addNamed", { title: card.title })}
       onClick={onToggle}
       // A tile's button sits at its foot, so a row's buttons line up even
-      // where a sale price takes two lines.
-      className={cn(tiles && "mt-auto w-full", FOCUS_RING)}
+      // where a sale price takes two lines. A row's is the last column of
+      // its first line, whichever side of it the pickers are.
+      className={cn(tiles ? "mt-auto w-full" : cn("row-start-1", beside ? "col-start-3" : "col-start-2"), FOCUS_RING)}
       data-product-add-on-toggle=""
     />
   );
 
-  const versions = !tiles && added && card.optionGroups.length > 0 && (
-    <div className="mt-2 flex flex-wrap gap-2">
+  // One dropdown per group, each as wide as its words up to a cap; a colour
+  // group's carries the colour as a dot.
+  const pickers = hasPickers && (
+    <div
+      className={cn("flex gap-2", beside ? "col-start-2 row-start-1" : "col-span-full row-start-2 flex-wrap")}
+      data-product-add-on-pickers={beside ? "beside" : "below"}
+    >
       {card.optionGroups.map((group) => {
         const chosen = selection[group.id];
         return (
@@ -379,18 +407,22 @@ function AddOnItem({
               value: option.id,
               label: option.name,
               disabled: !option.available,
+              swatch: optionSwatch(group, option),
             }))}
             onChange={(optionId) => onChoose(group.id, optionId)}
             radius={radius}
             ink={ink}
-            className="min-w-32"
+            className="min-w-0 max-w-44 shrink-0"
+            // A touch tighter than the page's own picker, so one fits beside
+            // Add in a desktop buy box more often.
+            triggerClassName={cn(ADD_ON_CONTROL_HEIGHT, "gap-1.5 px-2.5 py-0")}
           />
         );
       })}
     </div>
   );
 
-  const frame = addOnFrameStyle(added, ink, rule, radius);
+  const frame = addOnFrameStyle(rule, radius);
   const detailsButton = (children: ReactNode) => (
     <button
       type="button"
@@ -429,9 +461,20 @@ function AddOnItem({
     );
   }
 
+  // A grid, so the pickers move between beside and below without being drawn
+  // twice. Button before pickers in the markup: once a buyer adds, the next
+  // Tab is the version.
   return (
     <li data-product-add-on={card.id} data-product-add-on-state={added ? "added" : "offered"} data-setting-skip="">
-      <div className="flex items-center gap-3 border p-2" style={frame}>
+      <div
+        ref={rowRef}
+        className={cn(
+          ADD_ON_ROW_CLASS,
+          "grid items-center gap-2",
+          beside ? "grid-cols-[minmax(0,1fr)_auto_auto]" : "grid-cols-[minmax(0,1fr)_auto]",
+        )}
+        style={frame}
+      >
         {detailsButton(
           <>
             {picture}
@@ -439,8 +482,8 @@ function AddOnItem({
           </>,
         )}
         {addButton}
+        {pickers}
       </div>
-      {versions}
     </li>
   );
 }

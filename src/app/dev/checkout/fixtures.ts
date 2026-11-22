@@ -141,9 +141,17 @@ export function harnessAddOns(digital: boolean): AddOnCard[] {
   ];
 }
 
-/** Two more posted cards, so `?addons=4` offers the most a product can (four). */
+/** Two more posted cards, so `?addons=4` offers the most a product can (four):
+ *  one with a colour (swatches), one with a colour and a size, so a taken row
+ *  draws one picker and two. */
 export function harnessMoreAddOns(): AddOnCard[] {
-  const card = (id: string, title: string, priceCents: number, image: string): AddOnCard => ({
+  const card = (
+    id: string,
+    title: string,
+    priceCents: number,
+    image: string,
+    optionGroups: AddOnCard["optionGroups"],
+  ): AddOnCard => ({
     id,
     title,
     description: "",
@@ -152,15 +160,42 @@ export function harnessMoreAddOns(): AddOnCard[] {
     currency: "EUR",
     sale: null,
     images: [{ url: image, alt: title }],
-    optionGroups: [],
+    optionGroups,
     isDigital: false,
     digitalFormat: null,
     shippingProfileId: null,
     rating: null,
   });
+  const colours = (id: string, name: string, entries: [string, string][]): AddOnCard["optionGroups"][number] => ({
+    id,
+    name,
+    display: "swatch",
+    options: entries.map(([option, swatch]) => ({ id: `${id}-${option}`, name: option, swatch, available: true })),
+  });
   return [
-    card("5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a14", "Linen tea towel", 1400, "/sample-storefront/succulent.webp"),
-    card("5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a15", "Beeswax candle", 1100, "/sample-storefront/headphones.webp"),
+    card("5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a14", "Alder rocking chair", 74500, "/sample-storefront/succulent.webp", [
+      colours("g-chair-finish", "Finish", [
+        ["Natural oak", "#c8a165"],
+        ["Smoked oak", "#6b4a2f"],
+        ["Walnut", "#4a3426"],
+      ]),
+    ]),
+    card("5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a15", "Braid knit pouffe", 21000, "/sample-storefront/headphones.webp", [
+      colours("g-pouffe-finish", "Finish", [
+        ["Natural oak", "#c8a165"],
+        ["Smoked oak", "#6b4a2f"],
+        ["White", "#ffffff"],
+      ]),
+      {
+        id: "g-pouffe-fill",
+        name: "Fill",
+        display: "chip",
+        options: [
+          { id: "o-hard", name: "Hard", available: true },
+          { id: "o-soft", name: "Soft", available: true },
+        ],
+      },
+    ]),
   ];
 }
 

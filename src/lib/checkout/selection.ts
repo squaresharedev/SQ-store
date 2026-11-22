@@ -1,4 +1,5 @@
 import type { ProductOption, ProductOptionGroup, ProductPageImage } from "@/types/product";
+import { isStrictHexColor } from "@/lib/validation/predicates";
 
 // Which version of a product an order is for. Pure and client-safe: the
 // checkout page, its editor preview and the server-side quote all read the
@@ -87,13 +88,19 @@ export function selectionChips(
     const label = group.name.trim();
     const value = chosen?.name.trim();
     if (!label || !value) return [];
-    return [
-      {
-        label,
-        value,
-        ...(group.display === "swatch" && chosen.swatch ? { swatch: chosen.swatch } : {}),      },
-    ];
+    const swatch = optionSwatch(group, chosen);
+    return [{ label, value, ...(swatch ? { swatch } : {}) }];
   });
+}
+
+/** The colour a version is drawn in: its swatch, where its group shows as
+ *  swatches and the seller gave it a well-formed one. A chip group's stray
+ *  swatch is never drawn, as on the product page. */
+export function optionSwatch(
+  group: Pick<ProductOptionGroup, "display">,
+  option: Pick<ProductOption, "swatch">,
+): string | undefined {
+  return group.display === "swatch" && option.swatch && isStrictHexColor(option.swatch) ? option.swatch : undefined;
 }
 
 /** The ids of a selection, in group order, for the `?o=` a link carries. */

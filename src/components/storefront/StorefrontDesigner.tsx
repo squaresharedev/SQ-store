@@ -83,7 +83,6 @@ import { HeroMark } from "@/components/ui/HeroMark";
 import {
   barButtonSizeClass,
   ghostButtonClass,
-  helpTextClass,
   iconButtonClass,
   iconNudgeLeftClass,
   iconNudgeRightClass,
@@ -4119,7 +4118,7 @@ export function StorefrontDesigner({
               </button>
             </div>
           ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <DesignerSearchButton />
             {/* The one thing the header says is whether there is work not yet
                 written. What HAPPENED when Save was pressed is a toast, which
@@ -4127,59 +4126,61 @@ export function StorefrontDesigner({
                 `hidden sm:inline`, so tapping Save on a 390px screen confirmed
                 nothing at all. */}
             {dirty && !saving && (
-              // A PHONE GETS NO WORDS HERE, and never a bare dot: a lone dot in
-              // a row of framed controls reads as a control with its label
-              // missing rather than as a state. The phrase has no room on a
-              // phone, so there it is announced and not drawn, and Save itself
-              // carries the state (it fills in only while there is work to save).
+              // ANNOUNCED, NOT DRAWN, at every width, and never a bare dot: a
+              // lone dot in a row of framed controls reads as a control with
+              // its label missing rather than as a state. Save carries the
+              // state on screen (it fills in only while there is work to save),
+              // so the phrase beside it was a second copy of the same news in a
+              // bar that should be all controls.
               //
-              // `max-sm:sr-only` rather than a second element: sr-only is
-              // absolutely positioned, so it stops being a flex item too, and
-              // the row closes up instead of keeping a gap.
-              <span
-                role="status"
-                className={`shrink-0 max-sm:sr-only ${helpTextClass}`}
-              >
+              // sr-only is absolutely positioned, so it is not a flex item and
+              // the row keeps no gap for it.
+              <span role="status" className="sr-only">
                 {t("header.unsaved")}
               </span>
             )}
             {/* What buyers see, once there is something saved to see. While
-                edits are pending it stays, and says it is the SAVED page: a
-                link that vanished read as the page having gone. */}
+                edits are pending it stays, and its label says it is the SAVED
+                page: a link that vanished read as the page having gone.
+                Icon-only like search beside it; the words are on hover. */}
             {livePagePath && (
-              <a
-                href={livePagePath}
-                target="_blank"
-                rel="noopener"
-                className={cn(ghostButtonClass, barButtonSizeClass, "gap-1.5 px-3")}
-                data-designer-view-page=""
-              >
-                <ExternalLink className="size-4" strokeWidth={2} aria-hidden="true" />
-                <span className="max-sm:sr-only">
-                  {dirty ? t("header.viewSavedPage") : t("header.viewPage")}
-                </span>
-              </a>
+              <Tooltip label={dirty ? t("header.viewSavedPage") : t("header.viewPage")}>
+                <a
+                  href={livePagePath}
+                  target="_blank"
+                  rel="noopener"
+                  aria-label={dirty ? t("header.viewSavedPage") : t("header.viewPage")}
+                  className={iconButtonClass}
+                  data-designer-view-page=""
+                >
+                  <ExternalLink className="size-4" strokeWidth={2} aria-hidden="true" />
+                </a>
+              </Tooltip>
             )}
             {/* Where its link and embed live, one click from the design, or
                 the phone's own share sheet (see shareStorefront). The
                 dashboard's seller-details banner has no seat in this editor,
                 so while details are missing Share wears the dot; the page it
-                opens names what is missing. */}
-            <button
-              type="button"
-              onClick={() => void shareStorefront()}
-              className={cn(ghostButtonClass, barButtonSizeClass, "relative gap-1.5 px-3")}
-              data-designer-share=""
-            >
-              <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
-              <span className="max-sm:sr-only">{tKey("Storefront.card.share")}</span>
-              {sellerDetailsMissing && (
-                <>
-                  <span className={attentionDotClass} aria-hidden="true" />
-                  <span className="sr-only">{t("header.shareSetupNeeded")}</span>
-                </>
-              )}
-            </button>
+                opens names what is missing. The name is spoken from the sr-only
+                text rather than an aria-label, so the missing-details note
+                stays part of it. */}
+            <Tooltip label={tKey("Storefront.card.share")}>
+              <button
+                type="button"
+                onClick={() => void shareStorefront()}
+                className={cn(iconButtonClass, "relative")}
+                data-designer-share=""
+              >
+                <Share2 className="size-4" strokeWidth={2} aria-hidden="true" />
+                <span className="sr-only">{tKey("Storefront.card.share")}</span>
+                {sellerDetailsMissing && (
+                  <>
+                    <span className={attentionDotClass} aria-hidden="true" />
+                    <span className="sr-only">{t("header.shareSetupNeeded")}</span>
+                  </>
+                )}
+              </button>
+            </Tooltip>
             {/* Names its shortcut on hover, like undo and redo below. */}
             <Tooltip label={t("header.saveTip")}>
               <Button

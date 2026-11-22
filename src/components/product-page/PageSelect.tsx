@@ -9,6 +9,7 @@ import {
   overlaySurfaceClass,
 } from "@/components/ui/control-styles";
 import { storefrontOverlayVars } from "./product-page-maps";
+import { SwatchDot } from "./SwatchDot";
 
 /**
  * The product page's dropdown: one control, used by the version picker and the
@@ -43,6 +44,9 @@ export type PageSelectOption = {
   /** Shown, greyed, and not selectable — an option a buyer should learn exists
    *  and is gone, rather than wonder whether they missed. */
   disabled?: boolean;
+  /** A colour drawn as a dot before the name (a version from a group shown as
+   *  swatches). When any option has one, every row gets a dot so names line up. */
+  swatch?: string;
 };
 
 export function PageSelect({
@@ -54,6 +58,7 @@ export function PageSelect({
   radius,
   ink,
   className,
+  triggerClassName,
 }: {
   id?: string;
   /** Accessible name; there is no visible label inside the control. */
@@ -68,11 +73,21 @@ export function PageSelect({
   /** Width, set by the caller: a quantity is two characters, a colour name is
    *  not. */
   className?: string;
+  /** The trigger's height, where it has to match the controls beside it. */
+  triggerClassName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listboxId = `${id ?? label}-listbox`;
   const selectedIndex = options.findIndex((option) => option.value === value);
+  const swatched = options.some((option) => option.swatch);
+  /** An option's name, after its colour where the list draws colours. */
+  const named = (option: PageSelectOption | undefined) => (
+    <span className="flex min-w-0 items-center gap-2">
+      {swatched && option && <SwatchDot color={option.swatch} ink={ink} />}
+      <span className="truncate">{option?.label ?? ""}</span>
+    </span>
+  );
   const [activeIndex, setActiveIndex] = useState(Math.max(0, selectedIndex));
 
   // Close on a press anywhere else. Pointerdown rather than click, so the list
@@ -158,9 +173,9 @@ export function PageSelect({
         aria-activedescendant={open ? `${listboxId}-option-${activeIndex}` : undefined}
         onClick={() => (open ? setOpen(false) : openList())}
         onKeyDown={onKeyDown}
-        className={cn(fieldBaseClass, "flex items-center justify-between gap-2 text-left text-sm")}
+        className={cn(fieldBaseClass, "flex items-center justify-between gap-2 text-left text-sm", triggerClassName)}
       >
-        <span className="truncate">{options[selectedIndex]?.label ?? ""}</span>
+        {named(options[selectedIndex])}
         <ChevronDown
           aria-hidden="true"
           className={cn(
@@ -218,7 +233,7 @@ export function PageSelect({
                   option.disabled && "cursor-not-allowed opacity-45",
                 )}
               >
-                <span className="truncate">{option.label}</span>
+                {named(option)}
                 {index === selectedIndex && (
                   <Check className="size-4 shrink-0" strokeWidth={2.5} aria-hidden="true" />
                 )}
