@@ -6,6 +6,24 @@
       "subtle": "Discret",
       "lively": "Vivant",
       "hint": "S’anime sur votre boutique quand les acheteurs font défiler la page. L’éditeur reste immobile."
+    },
+    "gradient": {
+      "readyLabel": "Dégradés prêts à l’emploi",
+      "custom": "Personnalisé",
+      "middle": "Milieu",
+      "shapeLabel": "Ou un dégradé",
+      "names": {
+        "soft": "Doux",
+        "light": "Clair",
+        "glow": "Lueur",
+        "wash": "Voile",
+        "sunset": "Couchant",
+        "accent": "Accent",
+        "deep": "Profond",
+        "bright": "Éclatant",
+        "dusk": "Crépuscule",
+        "ink": "Encre"
+      }
     }
   },
   "board": {}

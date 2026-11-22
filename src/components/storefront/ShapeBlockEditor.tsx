@@ -11,14 +11,17 @@ import {
   SHAPE_ROUNDNESS_MAX,
   blockKey,
   type ShapeBlock,
+  type StorefrontPalette,
 } from "@/types/storefront";
 import { DEFAULT_SHAPE_BORDER_COLOR } from "@/lib/theme/color-target";
 import { cn } from "@/lib/utils";
 import {
   focusRingClass,
+  infoTextClass,
   labelClass,
   transitionClass,
 } from "@/components/ui/control-styles";
+import { GradientSwatches } from "./GradientSwatches";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
 import { BlockActions } from "./BlockActions";
@@ -44,6 +47,7 @@ export type ShapeBlockPatch = Partial<
     | "blurDirection"
     | "roundness"
     | "points"
+    | "gradient"
   >
 >;
 
@@ -53,6 +57,35 @@ export type ShapeBlockPatch = Partial<
 const DEFAULT_BORDER_COLOR = DEFAULT_SHAPE_BORDER_COLOR;
 
 const KIND_BUTTON_CLASS = `inline-flex size-9 items-center justify-center rounded-none border border-border bg-background text-muted-foreground hover:bg-accent hover:text-foreground ${transitionClass} ${focusRingClass}`;
+
+/**
+ * The fill's ready-made gradients, under its colour: a swatch paints the
+ * shape in one, and keeps `color` as its first stop (what a renderer without
+ * gradients falls back to, and what the colour picker above then shows).
+ */
+function ShapeGradientChoice({
+  block,
+  palette,
+  onUpdate,
+}: {
+  block: ShapeBlock;
+  palette: StorefrontPalette;
+  onUpdate: (patch: ShapeBlockPatch) => void;
+}) {
+  const t = useTranslations("EditorFinish.panel.gradient");
+  return (
+    <div className="mt-3 space-y-1.5">
+      <span className={infoTextClass}>{t("shapeLabel")}</span>
+      <GradientSwatches
+        palette={palette}
+        purpose="fill"
+        value={block.gradient}
+        onPick={(gradient) => onUpdate({ gradient, color: gradient.from })}
+        label={t("shapeLabel")}
+      />
+    </div>
+  );
+}
 
 /**
  * Inspector card body for a SHAPE block in the side panel: the kind picker
@@ -67,8 +100,12 @@ export function ShapeBlockEditor({
   onRemove,
   removeLabel,
   summons = null,
+  palette,
 }: {
   block: ShapeBlock;
+  /** The storefront's palette (derivePalette): the fill's ready-made
+   *  gradients are mixed from it. Absent = no gradient choice. */
+  palette?: StorefrontPalette;
   onUpdate: (patch: ShapeBlockPatch) => void;
   /** Insert a copy of this block (the no-keyboard copy/paste path). */
   onDuplicate: () => void;
@@ -171,13 +208,15 @@ export function ShapeBlockEditor({
           id={`${fieldId}-fill`}
           label={isRing ? t("shapeBlock.fill.ring") : t("shapeBlock.fill.shape")}
           value={block.color}
-          onChange={(color) => onUpdate({ color })}
+          // A colour is a solid fill: picking one takes a gradient off.
+          onChange={(color) => onUpdate({ color, gradient: undefined })}
           // Names the block whose colour is SHOWN. Driving a whole selection,
           // a pick still paints all of it: the designer reads that off the
           // live selection (see shapeColorKeys), so this editor does not have
           // to carry the group around with it.
           target={{ kind: "shape-fill", blockKey: blockKey(block) }}
         />
+        {palette && <ShapeGradientChoice block={block} palette={palette} onUpdate={onUpdate} />}
       </SummonedField>
 
       {/* Outline: on a ring this is the ring's own thickness. Width and colour

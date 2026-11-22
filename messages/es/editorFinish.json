@@ -6,6 +6,24 @@
       "subtle": "Sutil",
       "lively": "Animado",
       "hint": "Se reproduce en tu tienda cuando los compradores se desplazan. El editor se queda quieto."
+    },
+    "gradient": {
+      "readyLabel": "Degradados listos",
+      "custom": "Personalizado",
+      "middle": "Centro",
+      "shapeLabel": "O un degradado",
+      "names": {
+        "soft": "Suave",
+        "light": "Claro",
+        "glow": "Brillo",
+        "wash": "Velo",
+        "sunset": "Atardecer",
+        "accent": "Acento",
+        "deep": "Intenso",
+        "bright": "Vivo",
+        "dusk": "Crepúsculo",
+        "ink": "Tinta"
+      }
     }
   },
   "board": {}

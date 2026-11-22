@@ -6,6 +6,24 @@
       "subtle": "Subtil",
       "lively": "Animado",
       "hint": "É reproduzido na sua loja quando os compradores percorrem a página. O editor fica parado."
+    },
+    "gradient": {
+      "readyLabel": "Gradientes prontos",
+      "custom": "Personalizado",
+      "middle": "Meio",
+      "shapeLabel": "Ou um gradiente",
+      "names": {
+        "soft": "Suave",
+        "light": "Claro",
+        "glow": "Brilho",
+        "wash": "Véu",
+        "sunset": "Pôr do sol",
+        "accent": "Destaque",
+        "deep": "Intenso",
+        "bright": "Vivo",
+        "dusk": "Crepúsculo",
+        "ink": "Tinta"
+      }
     }
   },
   "board": {}

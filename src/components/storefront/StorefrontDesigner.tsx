@@ -158,6 +158,7 @@ import { LayersPanel } from "./LayersPanel";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
+import { derivePalette } from "@/lib/storefront/palette";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
 import {
@@ -3295,7 +3296,8 @@ export function StorefrontDesigner({
       // picked with six shapes selected paints six shapes, in one undo step
       // (see updateShapeBlocks and shapeColorKeys).
       case "shape-fill":
-        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex });
+        // A colour is a solid fill: it takes a gradient off (shape-fill.ts).
+        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex, gradient: undefined });
         return;
       case "shape-border":
         updateShapeBlocks(shapeColorKeys(ref.blockKey), { borderColor: hex });
@@ -4716,6 +4718,7 @@ export function StorefrontDesigner({
                     <ShapeBlockEditor
                       block={selectedBlock}
                       summons={blockField}
+                      palette={derivePalette(theme)}
                       onUpdate={(patch) =>
                         updateShapeBlocks([blockKey(selectedBlock)], patch)
                       }

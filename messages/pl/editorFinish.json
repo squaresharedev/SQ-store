@@ -6,6 +6,24 @@
       "subtle": "Subtelny",
       "lively": "Żywy",
       "hint": "Działa w Twoim sklepie, gdy kupujący przewijają stronę. Edytor pozostaje nieruchomy."
+    },
+    "gradient": {
+      "readyLabel": "Gotowe gradienty",
+      "custom": "Własny",
+      "middle": "Środek",
+      "shapeLabel": "Albo gradient",
+      "names": {
+        "soft": "Miękki",
+        "light": "Jasny",
+        "glow": "Poświata",
+        "wash": "Mgiełka",
+        "sunset": "Zachód słońca",
+        "accent": "Akcent",
+        "deep": "Głęboki",
+        "bright": "Wyrazisty",
+        "dusk": "Zmierzch",
+        "ink": "Atrament"
+      }
     }
   },
   "board": {}

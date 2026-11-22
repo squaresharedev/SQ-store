@@ -6,6 +6,24 @@
       "subtle": "Dezent",
       "lively": "Lebhaft",
       "hint": "Spielt in deinem Shop ab, wenn Käufer scrollen. Der Editor bleibt ruhig."
+    },
+    "gradient": {
+      "readyLabel": "Fertige Farbverläufe",
+      "custom": "Eigener",
+      "middle": "Mitte",
+      "shapeLabel": "Oder ein Farbverlauf",
+      "names": {
+        "soft": "Sanft",
+        "light": "Hell",
+        "glow": "Schimmer",
+        "wash": "Hauch",
+        "sunset": "Abendrot",
+        "accent": "Akzent",
+        "deep": "Tief",
+        "bright": "Strahlend",
+        "dusk": "Dämmerung",
+        "ink": "Tinte"
+      }
     }
   },
   "board": {}

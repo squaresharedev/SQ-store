@@ -6,6 +6,24 @@
       "subtle": "Subtle",
       "lively": "Lively",
       "hint": "Plays on your storefront as buyers scroll. The editor stays still."
+    },
+    "gradient": {
+      "readyLabel": "Ready-made gradients",
+      "custom": "Custom",
+      "middle": "Middle",
+      "shapeLabel": "Or a gradient",
+      "names": {
+        "soft": "Soft",
+        "light": "Light",
+        "glow": "Glow",
+        "wash": "Wash",
+        "sunset": "Sunset",
+        "accent": "Accent",
+        "deep": "Deep",
+        "bright": "Bright",
+        "dusk": "Dusk",
+        "ink": "Ink"
+      }
     }
   },
   "board": {}

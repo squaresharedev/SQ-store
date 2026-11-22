@@ -6,6 +6,24 @@
       "subtle": "Discreto",
       "lively": "Vivace",
       "hint": "Si anima nel tuo negozio mentre gli acquirenti scorrono. L’editor resta fermo."
+    },
+    "gradient": {
+      "readyLabel": "Sfumature pronte",
+      "custom": "Personalizzata",
+      "middle": "Centro",
+      "shapeLabel": "Oppure una sfumatura",
+      "names": {
+        "soft": "Morbida",
+        "light": "Chiara",
+        "glow": "Bagliore",
+        "wash": "Velo",
+        "sunset": "Tramonto",
+        "accent": "Accento",
+        "deep": "Intensa",
+        "bright": "Brillante",
+        "dusk": "Crepuscolo",
+        "ink": "Inchiostro"
+      }
     }
   },
   "board": {}

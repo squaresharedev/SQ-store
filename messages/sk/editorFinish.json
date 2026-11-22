@@ -6,6 +6,24 @@
       "subtle": "Jemný",
       "lively": "Živý",
       "hint": "Prehráva sa vo vašom obchode, keď zákazníci posúvajú stránku. Editor zostáva pokojný."
+    },
+    "gradient": {
+      "readyLabel": "Hotové prechody",
+      "custom": "Vlastný",
+      "middle": "Stred",
+      "shapeLabel": "Alebo prechod",
+      "names": {
+        "soft": "Jemný",
+        "light": "Svetlý",
+        "glow": "Žiara",
+        "wash": "Nádych",
+        "sunset": "Západ slnka",
+        "accent": "Zvýraznenie",
+        "deep": "Sýty",
+        "bright": "Jasný",
+        "dusk": "Súmrak",
+        "ink": "Atrament"
+      }
     }
   },
   "board": {}
