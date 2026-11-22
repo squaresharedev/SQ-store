@@ -93,7 +93,7 @@ never resends blocks it was not asked about. The rules are pure data in
 `add_image` through `lib/uploads/store-element.ts`, shared with the upload route.
 `save_storefront` remains for renaming and for replacing a whole config member.
 
-The editor upgrade (`docs/editor-upgrade/BRIEF.md`) is reachable two ways. Every
+The editor upgrade (`docs/editor-upgrade.md`) is reachable two ways. Every
 field the schema accepts is a `theme`, `header` or `style` change, and
 `get_schema` shows it with its description. What a plain change cannot do has an
 operation of its own:
