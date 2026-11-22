@@ -19,6 +19,8 @@ import {
   MARQUEE_SPEEDS,
   MARQUEE_TEXT_MAX,
   PALETTE_SLOTS,
+  PHOTO_SHAPES,
+  SHADOW_PRESETS,
   TEXT_LETTER_SPACING_MAX,
   TEXT_LETTER_SPACING_MIN,
   TEXT_LINE_HEIGHT_DEFAULT,
@@ -146,6 +148,13 @@ const bandBackground = z
     "A palette colour {color}, a gradient {from, via?, to, angle in degrees} or a photo {file, dim?, x and y its focal point in percent, scale its zoom in percent}. Leave out for the palette's muted colour; a change without kind keeps the rest.",
   );
 
+/** The presets a new image or shape can wear at once, so it needs no second call. */
+const shadow = z.enum(SHADOW_PRESETS).optional();
+const gradient = z
+  .strictObject({ from: color, via: color.optional(), to: color, angle: z.number().int() })
+  .optional()
+  .describe("Painted instead of color: palette colours and an angle in degrees.");
+
 const paletteColors = z
   .strictObject({
     background: color.optional(),
@@ -203,6 +212,8 @@ export const designOpSchema = z.discriminatedUnion("op", [
     blurDirection,
     roundness: z.number().int().optional(),
     points: z.number().int().optional(),
+    gradient,
+    shadow,
     ...placement,
   }),
   z.strictObject({
@@ -213,6 +224,8 @@ export const designOpSchema = z.discriminatedUnion("op", [
     opacity: z.number().int().optional(),
     blur,
     blurDirection,
+    shape: z.enum(PHOTO_SHAPES).optional(),
+    shadow,
     ...placement,
   }),
   z.strictObject({

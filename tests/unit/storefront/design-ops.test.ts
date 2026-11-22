@@ -416,6 +416,18 @@ describe("half cells", () => {
   });
 });
 
+describe("presets a new block wears from the start", () => {
+  it("gives a new image its outline and shadow, and a new shape its gradient", () => {
+    const { config, added, valid } = run([
+      { op: "add_image", file: ARTWORK, shape: "arch", shadow: "soft" },
+      { op: "add_shape", kind: "circle", gradient: { from: "#112233", to: "#445566", angle: 90 }, shadow: "lifted" },
+    ]);
+    expect(valid).toBe(true);
+    expect(found(config, added[0])).toMatchObject({ shape: "arch", shadow: "soft" });
+    expect(found(config, added[1])).toMatchObject({ gradient: { from: "#112233", to: "#445566", angle: 90 }, shadow: "lifted" });
+  });
+});
+
 describe("text that starts from a saved style", () => {
   it("is a headline on a few words and body on a sentence, unless named", () => {
     const { config, added } = run([
