@@ -112,7 +112,9 @@ test.describe("the product page's background", () => {
     // ---- A COLOUR OF ITS OWN --------------------------------------------
     const swatches = page.getByRole("group", { name: "Page color swatches" });
     await expect(swatches).toBeVisible();
-    await swatches.getByRole("button", { name: "White (#ffffff)" }).click();
+    // The row offers the storefront's palette: on this dark store its Text
+    // colour is white.
+    await swatches.getByRole("button", { name: "Palette text (#ffffff)" }).click();
     await expect(surface).toHaveAttribute("data-page-background", "#ffffff");
     // THE INK FOLLOWED IT. This is what makes the control safe to offer: the
     // seller picked a backdrop, and the words turned dark on their own.
@@ -167,7 +169,9 @@ test.describe("the product page's background", () => {
     // out, and it drops the stored value rather than writing the store's
     // colour into the page (which would freeze the page if the store changed).
     const swatches = page.getByRole("group", { name: "Page color swatches" });
-    await swatches.getByRole("button", { name: "White (#ffffff)" }).click();
+    // The row offers the storefront's palette: on this dark store its Text
+    // colour is white.
+    await swatches.getByRole("button", { name: "Palette text (#ffffff)" }).click();
     await expect(surface).toHaveAttribute("data-page-background", "#ffffff");
 
     await page.getByRole("button", { name: "Use Storefront background" }).click();

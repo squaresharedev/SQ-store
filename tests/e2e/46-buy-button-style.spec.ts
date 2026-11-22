@@ -124,7 +124,9 @@ test.describe("styling the buy button", () => {
     // A fill of its own: the accent runs through the whole storefront, and the
     // button that closes the sale is allowed not to be it. Scoped to this
     // field's row: the page's own background offers the same preset dots.
-    await swatches.getByRole("button", { name: "Ink (#171717)" }).click();
+    // The row offers the storefront's palette: on this white store its Text
+    // colour is the ink.
+    await swatches.getByRole("button", { name: "Palette text (#171717)" }).click();
     await expect(cta).toHaveAttribute("data-cta-fill", "#171717");
 
     // Roundness and a border, both by keyboard so the value is exact.

@@ -148,6 +148,8 @@ test.describe("tools for a multiple selection", () => {
     // is still pointing at it. A pick has to paint the group the seller can
     // see is selected, so a target that remembered "just this block" from back
     // then would colour one of the two.
+    // The panel opens on the palette; the standard grid is behind All colors.
+    await page.getByRole("button", { name: "All colors" }).click();
     const standard = page.getByRole("group", { name: /standard colors/i });
     await standard.getByRole("button", { name: "Red (#ef4444)" }).click();
     await expect
@@ -184,6 +186,8 @@ test.describe("tools for a multiple selection", () => {
     // is the route a seller has on a phone (where selecting a block opens no
     // panel at all) and after the panel has been sent somewhere else.
     await bar(page).getByRole("button", { name: /change the colour/i }).click();
+    const allColors = page.getByRole("button", { name: "All colors" });
+    if ((await allColors.getAttribute("aria-expanded")) === "false") await allColors.click();
     await standard.getByRole("button", { name: "White (#ffffff)" }).click();
     await expect
       .poll(async () => (await painted(page)).map((s) => s.background))

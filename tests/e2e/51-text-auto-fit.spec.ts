@@ -95,6 +95,9 @@ test.describe("text block auto-fit", () => {
   });
 
   test("an explicit size opts back into overflowing, on purpose", async () => {
+    // The size is one of the block's own overrides, behind More.
+    const more = page.getByRole("button", { name: "More", exact: true }).first();
+    if ((await more.getAttribute("aria-expanded")) === "false") await more.click();
     await page.getByLabel("Size", { exact: true }).fill("60");
     await expect.poll(fontSize).toBe("60px");
 

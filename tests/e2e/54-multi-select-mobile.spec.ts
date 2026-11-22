@@ -169,8 +169,9 @@ test("press and hold builds a selection a finger can then use", async ({
   await hold(page, tiles(page).nth(1));
   await expect(page.locator("[data-block-selected]")).toHaveCount(2);
   await bar.getByRole("button", { name: /change the colour of 2 blocks/i }).tap();
+  // The panel opens on the palette.
   await expect(
-    page.getByRole("group", { name: /standard colors/i }),
+    page.getByRole("group", { name: "Palette colors" }),
   ).toBeVisible();
 });
 

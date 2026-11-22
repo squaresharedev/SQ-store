@@ -208,7 +208,10 @@ test.describe("storefront text, edited in place", () => {
   test("styling from the panel applies to the words being typed", async () => {
     await page.getByRole("button", { name: "Add text", exact: true }).click();
     await page.keyboard.type("Styled");
-    // Reaching for a panel control ends the edit; the words survive it.
+    // Reaching for a panel control ends the edit; the words survive it. The
+    // size is one of the block's own overrides, behind More.
+    const more = page.getByRole("button", { name: "More", exact: true }).first();
+    if ((await more.getAttribute("aria-expanded")) === "false") await more.click();
     await page.getByLabel("Size", { exact: true }).fill("53");
     const styled = page.getByText("Styled", { exact: true }).first();
     await expect

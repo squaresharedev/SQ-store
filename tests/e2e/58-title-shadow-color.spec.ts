@@ -76,7 +76,8 @@ test.describe("shadow title colour", () => {
     await page.screenshot({ path: test.info().outputPath("before.png") });
 
     // A light swatch: the fade takes it and the name flips to dark ink.
-    const white = swatches.locator('[aria-label^="White"]').first();
+    // The row offers the palette, and white is one of its colours.
+    const white = swatches.locator('[aria-label*="(#ffffff)"]').first();
     await white.click();
     await expect
       .poll(async () => (await band(page))?.image ?? "")

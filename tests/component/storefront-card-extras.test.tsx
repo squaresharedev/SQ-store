@@ -453,6 +453,8 @@ describe("text spacing", () => {
   it("offers both sliders, reading Normal at rest, and stores nothing back at Normal", () => {
     const onUpdate = vi.fn();
     const { rerender } = render(<TextBlockEditor block={text} accent="#171717" onUpdate={onUpdate} onDuplicate={() => {}} />);
+    // A text block's spacing is one of its own overrides, behind "More".
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
     const letters = screen.getByRole("slider", { name: "Letter spacing" });
     const lines = screen.getByRole("slider", { name: "Line height" });
     expect(letters).toHaveAttribute("aria-valuetext", "Normal");
