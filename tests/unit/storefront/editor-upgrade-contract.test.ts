@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { carouselBlockSchema, parseStoredStorefrontConfig, storefrontConfigSchema } from "@/lib/validation/storefront";
 import { backdropHex, bandBehind } from "@/lib/storefront/backdrop";
 import {
@@ -372,6 +372,8 @@ describe("words on a band", () => {
 });
 
 describe("a stored storefront with a link to nothing", () => {
+  afterEach(() => vi.restoreAllMocks());
+
   it("is read back without the dead links, never lost whole", () => {
     const stored = structuredClone(upgradedConfig()) as Record<string, any>;
     // The product the button and a menu entry lead to has left the board.
@@ -389,10 +391,22 @@ describe("a stored storefront with a link to nothing", () => {
     expect(read!.theme.palette).toEqual(upgradedConfig().theme.palette);
   });
 
-  it("is still refused when something else is wrong with it too", () => {
+  it("is read with both repaired when the other fault can be dropped too", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
     const stored = structuredClone(upgradedConfig()) as Record<string, any>;
     stored.blocks = stored.blocks.filter((block: Record<string, unknown>) => block.productId !== PRODUCT);
     stored.theme.motion = "spin";
+    const parsed = parseStoredStorefrontConfig(stored);
+    expect(parsed).not.toBeNull();
+    expect(parsed!.theme).not.toHaveProperty("motion");
+    expect(storefrontConfigSchema.safeParse(parsed).success).toBe(true);
+  });
+
+  it("is still refused when something else is wrong beyond repair", () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const stored = structuredClone(upgradedConfig()) as Record<string, any>;
+    stored.blocks = stored.blocks.filter((block: Record<string, unknown>) => block.productId !== PRODUCT);
+    stored.theme.columns = "many";
     expect(parseStoredStorefrontConfig(stored)).toBeNull();
   });
 });
