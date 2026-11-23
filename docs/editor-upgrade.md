@@ -52,6 +52,19 @@ Neither applies to a MINIATURE of a board (`StorefrontPreview`, the storefront
 list's cards): it sets `--tile-label-floor: 0px` and is left out of the
 stacking, so it draws as it always did.
 
+## Shipping it, and rolling it back
+
+- **Order:** the rollback-safe read (`fix/storefront-forward-compatible-read`,
+  `src/lib/validation/storefront-repair.ts`) ships FIRST, on its own; then the
+  migration `20261123_product_photo_edge.sql` is applied by hand; then this.
+  CI's schema gate refuses a deploy that is ahead of the migration.
+- **A rollback is safe** once the read shipped first: older code reads a
+  config saved with a field it does not know by dropping that field (or the
+  block it cannot draw) and keeping the rest, instead of losing the
+  storefront. A seller who saves during a rollback loses only the dropped
+  parts. The `products.photo_edge` column is harmless to older code, which
+  never selects it.
+
 ## What it added
 
 | Area | Fields | Where |
