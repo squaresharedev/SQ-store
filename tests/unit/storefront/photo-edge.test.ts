@@ -184,7 +184,8 @@ describe("measuring a stored photo through the seller's own copy", () => {
   const answer = (status: number, key?: string) =>
     vi.fn(
       async () =>
-        new Response(status === 200 ? new Blob(["pixels"]) : null, {
+        // Bytes, not a jsdom Blob: Node 22 (CI) refuses a foreign Blob as a body.
+        new Response(status === 200 ? new Uint8Array([1, 2, 3]) : null, {
           status,
           headers: key ? { [PHOTO_KEY_HEADER]: key } : {},
         }),
