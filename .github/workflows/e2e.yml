@@ -26,7 +26,7 @@ permissions:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 150
     env:
       GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
     steps:
@@ -60,19 +60,58 @@ jobs:
       - name: Fetch PostgREST
         run: node tests/e2e/stack/fetch-postgrest.mjs
 
+      # CI-ONLY COMMIT (ci/editor-upgrade): the deploy gates and every spec the
+      # editor upgrade touches, each step run even when an earlier one failed.
+      # Never merged: the pull request is feat/editor-upgrade.
+      - name: Typecheck
+        if: ${{ !cancelled() }}
+        run: pnpm typecheck
+
+      - name: Lint
+        if: ${{ !cancelled() }}
+        run: pnpm lint
+
+      - name: Unit and component tests
+        if: ${{ !cancelled() }}
+        run: pnpm test:unit
+
+      - name: Database integration tests
+        if: ${{ !cancelled() }}
+        run: pnpm test:db
+
+      - name: Specs the editor upgrade edited
+        if: ${{ !cancelled() }}
+        run: npx playwright test 20-typography.spec.ts 21-inplace-text.spec.ts 46-buy-button-style.spec.ts 47-product-page-background.spec.ts 51-text-auto-fit.spec.ts 53-multi-select-tools.spec.ts 54-multi-select-mobile.spec.ts 58-title-shadow-color.spec.ts --retries=1 --reporter=line
+
+      - name: Storefront pages and the embed
+        if: ${{ !cancelled() }}
+        run: npx playwright test 03-storefront.spec.ts 08-storefront-mobile.spec.ts 17-storefront-create.spec.ts 65-sample-storefront.spec.ts 88-storefront-page.spec.ts 89-embed-frame.spec.ts 93-storefront-sale-prices.spec.ts 97-embed-builders.spec.ts --retries=1 --reporter=line
+
+      - name: The designer canvas
+        if: ${{ !cancelled() }}
+        run: npx playwright test 09-canvas-shortcuts.spec.ts 10-canvas-resize.spec.ts 27-canvas-panel-anchor.spec.ts 31-canvas-page-layout.spec.ts 40-rotated-grid-alignment.spec.ts 43-mobile-tile-chrome.spec.ts 45-selection-toolbar-mobile.spec.ts 47-mobile-editor-usability.spec.ts 55-sheet-over-canvas.spec.ts 56-tooling-above-canvas.spec.ts 105-phone-layout-editor.spec.ts --retries=1 --reporter=line
+
+      - name: Onboarding and the guided tour
+        if: ${{ !cancelled() }}
+        run: npx playwright test 60-onboarding.spec.ts 61-onboarding-mobile.spec.ts 63-guided-tour.spec.ts 64-guided-tour-mobile.spec.ts --retries=1 --reporter=line
+
       # One retry: a spec that passes on its second run is reported as flaky,
       # not hidden, and a real break still fails twice.
       - name: Checkout and the order lifecycle
+        if: ${{ !cancelled() }}
         run: npx playwright test --config playwright.checkout.config.ts 78-checkout.spec.ts 80-seller-order-flow.spec.ts 86-order-lifecycle.spec.ts --retries=1 --reporter=line
 
       - name: The cart and add-ons
+        if: ${{ !cancelled() }}
         run: npx playwright test --config playwright.checkout.config.ts 102-product-add-ons.spec.ts 106-shopping-cart.spec.ts --retries=1 --reporter=line
 
       - name: Product page and deep links
+        if: ${{ !cancelled() }}
         run: npx playwright test 30-product-page.spec.ts 97-deep-link-sign-in.spec.ts --retries=1 --reporter=line
 
       # The app URL is what passkeys are bound to, and consent is checked with one.
       - name: The MCP server
+        if: ${{ !cancelled() }}
         env:
           NEXT_PUBLIC_APP_URL: http://localhost:3100
         run: npx playwright test 101-mcp.spec.ts --retries=1 --reporter=line
