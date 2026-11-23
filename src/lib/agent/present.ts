@@ -29,6 +29,8 @@ export function presentProduct(product: Product) {
     lowStockThreshold: product.lowStockThreshold,
     maxPerOrder: product.maxPerOrder,
     ...(product.removal ? { takenDown: product.removal } : {}),
+    // What a storefront card's "auto" white blend reads (PHOTO_EDGE_NOTE).
+    ...(product.photoEdge ? { photoEdge: product.photoEdge } : {}),
   };
 }
 

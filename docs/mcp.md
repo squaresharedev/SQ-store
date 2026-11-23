@@ -133,6 +133,15 @@ Files for a storefront come in as upload ids, never keys:
   the prefix its place demands, with that door's own type, size and moderation
   rules. It takes a product id and which photo, never a key or a URL.
 
+`whiteBlend: "auto"` (and the pale fade of a `shadow` title) reads what is at
+a product photo's edges, a fact stored with the product (`photoEdge` in
+`list_products` and `get_product`; see `docs/editor-upgrade.md`). The server
+never decodes a photo, so a photo uploaded through `upload_image` has no
+`photoEdge` until the seller's browser measures it, the next time they open
+Products or the designer, with nothing to save. So an assistant sets "auto"
+and does not force `on` per card: "auto" leaves a photo with a scene behind it
+alone, and the board starts blending once its photos are measured.
+
 `file` is the word everywhere an operation takes one: `add_image`, a band's
 background, `header.logo`, `theme.customFont` and an image `theme.background`.
 Each is checked to have come through the right door (artwork, photo, font) and

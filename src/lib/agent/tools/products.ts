@@ -29,6 +29,10 @@ import { CURRENCIES, PRODUCT_STATUSES } from "@/types/product";
 
 const IMAGE_URL_NOTE = "imageUrl is a signed link that expires within hours: show it, never store it.";
 
+/** What photoEdge on a product says, for the storefront card that reads it. */
+const PHOTO_EDGE_NOTE =
+  "photoEdge is what is at the main photo's edges: white (a studio shot, which a card's whiteBlend auto blends) or other; absent until the seller's browser has measured it, as they upload a photo or next open Products or the designer.";
+
 /** How many products one publish_products call may put on sale. */
 const PUBLISH_BATCH_MAX = 20;
 
@@ -91,7 +95,7 @@ export const productTools = [
   defineTool({
     name: "list_products",
     title: "List products",
-    description: `The store's products, drafts included, newest first by default. Prices are integer cents. ${IMAGE_URL_NOTE}`,
+    description: `The store's products, drafts included, newest first by default. Prices are integer cents. ${IMAGE_URL_NOTE} ${PHOTO_EDGE_NOTE}`,
     scope: "store:read",
     permission: "store.read",
     annotations: READ,
@@ -117,7 +121,7 @@ export const productTools = [
     name: "get_product",
     title: "Get a product",
     description:
-      `One product in full, and which storefronts it sits on. Files appear as ref: handles: send one back unchanged to keep that file. ${IMAGE_URL_NOTE} ` +
+      `One product in full, and which storefronts it sits on. Files appear as ref: handles: send one back unchanged to keep that file. ${IMAGE_URL_NOTE} ${PHOTO_EDGE_NOTE} ` +
       "An option's details are what THAT version changes; absent means it inherits the product's. Options have no price or stock, so never report one.",
     scope: "store:read",
     permission: "store.read",

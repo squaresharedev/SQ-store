@@ -59,7 +59,7 @@ stacking, so it draws as it always did.
 | Palette | `theme.palette` (background, text, accent, surface, muted) | `lib/storefront/palette.ts`, `ThemePanel`, `ColorPanel` |
 | Font pairings | `theme.fontPairing` (editorial, classic, modern, soft, studio) | `lib/theme/font-pairings.ts`, `src/app/fonts/` (with `LICENSES.md`), `TypographySection` |
 | Text styles | `theme.textStyles`, a fourth `variant` (`label`), `TextBlock.valign` | `lib/storefront/text-styles.ts`, `TextTileContent`, `TextBlockEditor` |
-| Card look | `cardColor`, `whiteBlend`, `titleBarColor`, `titleTextColor`, `titleFont`, `photoShape`, `shadow` on the theme and per card; `ProductBlock.photoEdge` | `components/storefront/card-look.ts`, `lib/storefront/photo-edge.ts`, `CardLookControls` |
+| Card look | `cardColor`, `whiteBlend`, `titleBarColor`, `titleTextColor`, `titleFont`, `photoShape`, `shadow` on the theme and per card; a photo's measured edge on the PRODUCT (`products.photo_edge`, `Product.photoEdge`) | `components/storefront/card-look.ts`, `lib/storefront/photo-edge.ts`, `lib/products/photo-edge-actions.ts`, `components/products/usePhotoEdgeBackfill.ts`, `CardLookControls` |
 | Images, shapes | `ImageBlock.shape`, `.shadow`; `ShapeBlock.shadow`, `.gradient` | `ImageTileContent`, `ShapeTileContent`, `shape-fill.ts` |
 | Gradients | a third stop (`via`) on the background; ready-made palette gradients | `lib/storefront/gradients.ts` |
 | Motion, finish | `theme.motion`, `theme.texture` | `lib/storefront/motion.ts`, `BoardMotion`, `FinishControls` |
@@ -90,12 +90,24 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
 - **Fine placement is insets.** A block's rectangle stays whole cells and
   `fine` pulls each named side in by half a cell, so the block never leaves its
   cells and every whole-cell rule holds. Product cards never carry it.
-- **"Auto" white blend needs a measurement only the designer takes.** Product
-  photos are on another origin, so a buyer's page cannot read their pixels.
-  The designer measures each photo's edges through the seller's same-origin
-  photo route and stores `photoEdge` on the card. A board built through the MCP
-  does not blend on "auto" until it is opened in the designer; an assistant
-  sets `whiteBlend: "on"` per card instead.
+- **A photo's edge is a fact about the photo, stored with the product.**
+  `whiteBlend: "auto"` and the `shadow` title read what is at a product photo's
+  edges (white, or other). Product photos are on another origin, so a buyer's
+  page cannot read their pixels, and the server never decodes a photo. The
+  seller's BROWSER measures it: from the file as it is uploaded (the product
+  form), or, for a photo with no answer yet (stored before this, or uploaded
+  through the MCP), through the seller's same-origin photo route the next time
+  they open Products or the designer. `recordPhotoEdge` stores the answer in
+  `products.photo_edge` against the photo that was measured, and the database
+  clears it whenever `image_key` changes (migration
+  `20261123_product_photo_edge`), so a replaced photo never inherits an old
+  answer. One measurement serves every storefront the product is on. Measuring
+  never touches a storefront: nothing is marked unsaved and no config changes.
+  A buyer's board (hosted, embedded, the MCP preview) is handed the edge with
+  each product whose card reads it (`lib/storefront/tile-extras.ts`); a photo
+  not measured yet is left alone. A board built through the MCP blends on
+  "auto" once its photos are measured, with nothing to save, so "auto" is
+  what an assistant should use.
 - **A buyer's page is handed a built payload.** Bands, band photos, the logo
   and every link's address are put into `StorefrontPageData` by `boardLayout`
   (`lib/storefront/storefront-page.ts`), which the MCP preview also calls. A
