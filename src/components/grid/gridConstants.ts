@@ -974,13 +974,19 @@ export function cellPaintStyle(
 ): CSSProperties {
   const drawn = drawnInset(inset, placement.w, placement.h);
   const pitch = (cells: number, span: number) => `calc((100% + var(--grid-gap, 0px)) * ${cells} / ${span})`;
+  // The vertical offset is a length, not a percentage of the area: WebKit (every
+  // Safari) ignores a percentage `top` on a relatively positioned grid item, so a
+  // block with a top inset or a vertical nudge stayed on its whole cells there.
+  // `--ss-cell` is the row height (globals.css, `.ss-grid`), so a cell plus a gap
+  // is one pitch: the same number of pixels the percentage gave, in every engine.
+  const rowPitch = (cells: number) => `calc((var(--ss-cell) + var(--grid-gap, 0px)) * ${cells})`;
   const offsetX = shift.x + (drawn?.left ? 0.5 : 0);
   const offsetY = shift.y + (drawn?.top ? 0.5 : 0);
   const cutX = (drawn?.left ? 1 : 0) + (drawn?.right ? 1 : 0);
   const cutY = (drawn?.top ? 1 : 0) + (drawn?.bottom ? 1 : 0);
   return {
     ...(offsetX ? { left: pitch(offsetX, placement.w) } : {}),
-    ...(offsetY ? { top: pitch(offsetY, placement.h) } : {}),
+    ...(offsetY ? { top: rowPitch(offsetY) } : {}),
     ...(cutX ? { width: `calc(100% - ${pitch(cutX / 2, placement.w)})` } : {}),
     ...(cutY ? { height: `calc(100% - ${pitch(cutY / 2, placement.h)})` } : {}),
   };
