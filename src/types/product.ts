@@ -84,7 +84,20 @@ export interface Product {
    *  the designer's product list, so both draw the same card. Absent: the
    *  card opens the product's page. */
   quickAdd?: { optionIds: string[] };
+  /** What is at the edges of the main photo (products.photo_edge), measured
+   *  in the seller's browser and stored with the product: a fact about THIS
+   *  photo, cleared when the photo changes. Absent = not measured yet (or no
+   *  photo), and then a card's `auto` blend leaves the photo alone. See
+   *  lib/storefront/photo-edge. */
+  photoEdge?: PhotoEdge;
 }
+
+/**
+ * What is at a product photo's edges: near-white all round (a studio shot),
+ * or anything else. The database's CHECK on products.photo_edge mirrors it.
+ */
+export const PHOTO_EDGES = ["white", "other"] as const;
+export type PhotoEdge = (typeof PHOTO_EDGES)[number];
 
 /**
  * A running sale, as a storefront tile shows it. The tile strikes the

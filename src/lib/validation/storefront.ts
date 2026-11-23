@@ -113,7 +113,6 @@ import {
   MARQUEE_SPEEDS,
   MARQUEE_TEXT_MAX,
   MOTION_PRESETS,
-  PHOTO_EDGES,
   PHOTO_SHAPES,
   SHADOW_PRESETS,
   TEXT_VALIGNS,
@@ -348,7 +347,7 @@ const cardLookFields = {
     .enum(WHITE_BLENDS)
     .optional()
     .describe(
-      "Blend a photo's white background into the card colour: auto, on or off. Absent is off. Auto blends only photos the DESIGNER has measured as white at the edges, so it does nothing on a card the seller has not yet opened there: for a card whose photo you can see is a white studio shot, set on for that card (style), and leave photos with a scene behind them alone. A card darker than mid grey never blends.",
+      "Blend a photo's white background into the card colour: auto, on or off. Absent is off. Prefer auto: it blends only a photo measured as white at its edges (the product's photoEdge in list_products and get_product) and leaves a photo with a scene behind it alone. Photos are measured in the seller's browser, as they upload one in the dashboard or the next time they open Products or the designer, with nothing to save: a photo you uploaded starts blending after their next visit. on blends every photo, scenes included. A card darker than mid grey never blends.",
     ),
   titleBarColor: hexColorSchema.optional().describe("The name strip's fill. Absent follows cardColor. Use a theme.palette colour."),
   titleTextColor: hexColorSchema
@@ -1057,8 +1056,6 @@ const productBlockSchema = z.strictObject({
   // drops it again when framing returns to centred — so an unframed tile is
   // indistinguishable from one saved before framing existed.
   imagePlacement: imagePlacementSchema.optional(),
-  // A cached measurement for whiteBlend "auto" (PHOTO_EDGES); safe to drop.
-  photoEdge: z.enum(PHOTO_EDGES).optional(),
 });
 
 /**

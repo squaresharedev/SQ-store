@@ -1,4 +1,4 @@
-import type { Currency, ProductRating } from "@/types/product";
+import type { Currency, PhotoEdge, ProductRating } from "@/types/product";
 import type { TileStockState } from "@/types/stock";
 import type { TileLook } from "@/lib/storefront/tile-look";
 import type { ResolvedLink } from "@/lib/storefront/links";
@@ -43,6 +43,10 @@ export type StorefrontTileProduct = {
   hoverImageUrl?: string;
   rating?: ProductRating;
   stockState?: TileStockState;
+  /** What is at the photo's edges (Product.photoEdge), present only for a
+   *  card whose look depends on it and only once the photo is measured: what
+   *  an `auto` blend and a `shadow` title read (lib/storefront/photo-edge). */
+  photoEdge?: PhotoEdge;
   /** Where the tile leads: the product's hosted page. */
   href: string;
   /** The version the card's button puts straight in the cart (one option per

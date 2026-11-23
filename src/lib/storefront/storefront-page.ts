@@ -393,6 +393,7 @@ export async function tileProduct(
     ...(extras?.hoverImageUrl ? { hoverImageUrl: extras.hoverImageUrl } : {}),
     ...(extras?.rating ? { rating: { average: extras.rating.average, count: extras.rating.count } } : {}),
     ...(extras?.stockState ? { stockState: extras.stockState } : {}),
+    ...(extras?.photoEdge ? { photoEdge: extras.photoEdge } : {}),
     ...(quickAdd ? { quickAdd: { optionIds: [...quickAdd.optionIds] } } : {}),
     href,
   };

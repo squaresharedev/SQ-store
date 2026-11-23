@@ -12,8 +12,9 @@ import { GALLERY_SECTIONS, type GallerySection } from "./sections";
 // that set it all sit at the foot, driving a live board.
 //
 // The photos are the sample storefront's, on this origin, so the gallery
-// measures their edges in the browser exactly as the designer does
-// (lib/storefront/photo-edge) and lays the answer on the boards.
+// measures their edges in the browser exactly as the designer does for the
+// sample (lib/storefront/photo-edge), and hands each board its products with
+// the answer, as a real store's products carry it.
 //
 // `?only=<section>[,<section>]` draws only those sections (see
 // GALLERY_SECTIONS), for a focused picture. No sign-in, no database.

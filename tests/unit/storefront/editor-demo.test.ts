@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { editorDemoConfig } from "@/app/dev/editor-demo/demo-config";
+import { editorDemoConfig, editorDemoPhotoEdges } from "@/app/dev/editor-demo/demo-config";
 import { buildSampleStorefront } from "@/lib/storefront/sample";
 import { derivePalette, isColorKey } from "@/lib/storefront/palette";
 import { storefrontConfigSchema } from "@/lib/validation/storefront";
@@ -48,7 +48,12 @@ describe("the editor upgrade's demo storefront", () => {
     expect(image).toMatchObject({ shape: "circle", shadow: "lifted" });
 
     const cards = blocks.filter((block) => block.type === "product");
-    expect(cards.some((card) => card.photoEdge === "white")).toBe(true);
+    // "auto" has white-edged photos to blend: a fact about each PRODUCT's
+    // photo, handed to the board with the product, never stored on a card.
+    const edges = editorDemoPhotoEdges(buildSampleStorefront((key) => key));
+    expect(cards.some((card) => edges[card.productId] === "white")).toBe(true);
+    expect(cards.some((card) => edges[card.productId] === "other")).toBe(true);
+    expect(cards.every((card) => !("photoEdge" in card))).toBe(true);
     expect(cards.some((card) => card.style?.photoShape && card.style.shadow)).toBe(true);
     expect(cards.some((card) => card.style?.cardColor && card.style.whiteBlend === "on")).toBe(true);
 

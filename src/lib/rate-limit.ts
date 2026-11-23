@@ -82,6 +82,15 @@ export const RATE_LIMITS = {
    */
   productPhoto: { max: 300, windowSeconds: 60 * 60 },
   /**
+   * A product photo's measured edge stored on the product
+   * (lib/products/photo-edge-actions.ts), per signed-in user. A one-row write
+   * the seller's browser makes on its own, never a person's click, so it has a
+   * budget of its own: measuring a big catalogue must never spend the seller's
+   * product edits (productWrite). The same size as productPhoto, which nearly
+   * every measurement has already read through.
+   */
+  productPhotoEdge: { max: 300, windowSeconds: 60 * 60 },
+  /**
    * Content reports from a buyer, per client IP. The only unauthenticated
    * WRITE in the app, so it is the tightest budget here.
    *

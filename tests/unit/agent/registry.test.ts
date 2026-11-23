@@ -119,6 +119,9 @@ const COVERAGE: Record<string, Coverage> = {
     "Grey words for someone typing in the description field; an assistant writes the whole description itself.",
   ),
   "lib/products/picker-actions.ts::searchCatalogProducts": tool("list_products"),
+  "lib/products/photo-edge-actions.ts::recordPhotoEdge": browser(
+    "Stores what a browser measured in a photo's pixels. An assistant has no browser to decode one in, and the server never decodes one.",
+  ),
   "lib/products/preview-actions.ts::getProductPagePreviewData": tool("preview_product_page"),
   "lib/stock/actions.ts::updateStockSettings": tool("update_stock"),
 

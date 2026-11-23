@@ -150,8 +150,7 @@
       "x": 2,
       "y": 4,
       "w": 2,
-      "h": 3,
-      "photoEdge": "white"
+      "h": 3
     },
     {
       "type": "product",
@@ -163,8 +162,7 @@
       "style": {
         "photoShape": "arch",
         "shadow": "lifted"
-      },
-      "photoEdge": "white"
+      }
     },
     {
       "type": "text",

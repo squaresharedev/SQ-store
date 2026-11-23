@@ -97,6 +97,8 @@ function asFaceProduct(tile: StorefrontTileProduct): Product {
     ...(tile.hoverImageUrl ? { hoverImageUrl: tile.hoverImageUrl } : {}),
     ...(tile.rating ? { rating: tile.rating } : {}),
     ...(tile.stockState ? { stockState: tile.stockState } : {}),
+    // What is at the photo's edges, for a card whose look reads it.
+    ...(tile.photoEdge ? { photoEdge: tile.photoEdge } : {}),
     ...(tile.quickAdd ? { quickAdd: tile.quickAdd } : {}),
   };
 }

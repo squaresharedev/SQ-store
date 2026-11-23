@@ -1,10 +1,10 @@
 import type { CSSProperties } from "react";
 import { contrastRatio, legibleInkOn, readableInkOn } from "@/lib/format/color";
 import { isStrictHexColor } from "@/lib/validation/predicates";
+import type { PhotoEdge } from "@/types/product";
 import {
   TITLE_SHADOW_DEFAULT_COLOR,
   type CardStyle,
-  type PhotoEdge,
   type PhotoShape,
 } from "@/types/storefront";
 import { cellLength, maskStyle, titleShadowBackdrop } from "./config-maps";
@@ -91,8 +91,9 @@ export function blendsInto(surface: string): boolean {
 }
 
 /**
- * The card's paint. `photoEdge` is the block's cached measurement (absent =
- * not measured, and then `auto` leaves the photo alone).
+ * The card's paint. `photoEdge` is what is at the product photo's edges
+ * (Product.photoEdge; absent = not measured, and then `auto` leaves the photo
+ * alone).
  */
 export function cardPaint(
   card: Pick<

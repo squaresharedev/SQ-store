@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
-import type { Product } from "@/types/product";
+import type { PhotoEdge, Product } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   blockKey,
   type CardStyleOverrides,
   type ImageBlock,
-  type PhotoEdge,
   type ProductBlock,
   type ShapeBlock,
   type StorefrontBlock,
@@ -16,7 +15,7 @@ import {
 } from "@/types/storefront";
 import type { StorefrontPageData } from "@/types/storefront-page";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
-import { cachedPhotoEdge } from "@/lib/storefront/photo-edge";
+import { settlePhotoEdge } from "@/components/products/usePhotoEdgeBackfill";
 import { FONT_ROLE_VARS } from "@/lib/theme/font-roles";
 import { cn } from "@/lib/utils";
 import { StorefrontBoard, storefrontSurface } from "@/components/storefront-page/StorefrontBoard";
@@ -60,7 +59,6 @@ const PRODUCTS: Product[] = PHOTOS.map((photo) => ({
   lowStockThreshold: 3,
   maxPerOrder: 10,
 }));
-const PRODUCTS_BY_ID = new Map(PRODUCTS.map((product) => [product.id, product]));
 
 /** A coloured board with today's cards: what the workstream exists to fix. */
 const SAGE: StorefrontTheme = {
@@ -110,21 +108,35 @@ const shape = (key: string, x: number, y: number, over: Partial<ShapeBlock> = {}
   ...over,
 });
 
-/** A buyer's page for a theme and its blocks, as buildStorefrontPage hands it. */
-function pageFor(theme: StorefrontTheme, blocks: StorefrontBlock[], imageUrls: Record<string, string> = {}): StorefrontPageData {
+/** What each product's photo edge measured (by product id), as a real store
+ *  holds it on its products; null where none is known (yet). */
+type Edges = Record<string, PhotoEdge | null> | null;
+
+/** A buyer's page for a theme and its blocks, as buildStorefrontPage hands it:
+ *  each product with its photo's measured edge, when `edges` has one. */
+function pageFor(
+  theme: StorefrontTheme,
+  blocks: StorefrontBlock[],
+  imageUrls: Record<string, string> = {},
+  edges: Edges = null,
+): StorefrontPageData {
   return {
     id: "gallery",
     name: "Gallery",
     theme,
     blocks,
-    products: PRODUCTS.map((product) => ({
-      id: product.id,
-      title: product.title,
-      price: product.price,
-      currency: product.currency,
-      imageUrl: product.imageUrl,
-      href: "#",
-    })),
+    products: PRODUCTS.map((product) => {
+      const photoEdge = edges?.[product.id];
+      return {
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        currency: product.currency,
+        imageUrl: product.imageUrl,
+        ...(photoEdge ? { photoEdge } : {}),
+        href: "#",
+      };
+    }),
     tileLook: resolveTileLook({ theme }),
     imageUrls,
     backgroundImageUrl: null,
@@ -171,12 +183,14 @@ const PAIRING_STAND_IN = {
 export function EditorCardsGallery({ only }: { only: readonly GallerySection[] | null }) {
   const show = (section: GallerySection) => only === null || only.includes(section);
 
-  // THE DESIGNER'S MEASUREMENT, run here on the same photos: what each
-  // product's edge is, or null where it cannot be read.
-  const [edges, setEdges] = useState<Record<string, PhotoEdge | null> | null>(null);
+  // THE BROWSER'S MEASUREMENT, run here on the same photos as the designer
+  // runs it on the sample's (settlePhotoEdge): what each product's edge is,
+  // or null where it cannot be read. A real store keeps the answer on the
+  // product, and the boards below are handed it with each product.
+  const [edges, setEdges] = useState<Edges>(null);
   useEffect(() => {
     let cancelled = false;
-    void Promise.all(PRODUCTS.map(async (product) => [product.id, await cachedPhotoEdge(product, true)] as const)).then(
+    void Promise.all(PRODUCTS.map(async (product) => [product.id, await settlePhotoEdge(product, false)] as const)).then(
       (results) => {
         if (!cancelled) setEdges(Object.fromEntries(results));
       },
@@ -185,12 +199,15 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
       cancelled = true;
     };
   }, []);
-  /** The blocks with the measured edge cached on them, as a saved board has. */
-  const measured = (blocks: StorefrontBlock[]): StorefrontBlock[] =>
-    blocks.map((block) => {
-      const edge = block.type === "product" ? edges?.[block.productId] : null;
-      return block.type === "product" && edge ? { ...block, photoEdge: edge } : block;
-    });
+  /** A buyer's page whose products carry their measured edges. */
+  const measuredPage = (theme: StorefrontTheme, blocks: StorefrontBlock[], imageUrls: Record<string, string> = {}) =>
+    pageFor(theme, blocks, imageUrls, edges);
+  const productsById = new Map(
+    PRODUCTS.map((product) => {
+      const photoEdge = edges?.[product.id];
+      return [product.id, photoEdge ? { ...product, photoEdge } : product] as const;
+    }),
+  );
 
   // The panels' own board, driven by the controls under it.
   const [panelTheme, setPanelTheme] = useState<StorefrontTheme>({ ...SAGE_CARDS, columns: 8, rows: 2 });
@@ -205,7 +222,7 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
       blocks.filter((block) => block.type === "image").map((block) => [blockKey(block), "/sample-storefront/succulent.webp"]),
     );
 
-  const blendConfig: StorefrontConfig = { ...DEFAULT_STOREFRONT_CONFIG, theme: SAGE_CARDS, blocks: measured(SIX) };
+  const blendConfig: StorefrontConfig = { ...DEFAULT_STOREFRONT_CONFIG, theme: SAGE_CARDS, blocks: SIX };
 
   return (
     <main className="mx-auto max-w-6xl space-y-12 bg-background px-4 py-8" data-measured={edges ? "" : undefined}>
@@ -219,8 +236,8 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
       {show("measured") && (
         <Section
           id="measured"
-          title="Measured in the browser, as the designer does"
-          note="Each photo shrunk to 48 px and its border read: white when most of the ring is near-white. A photo that cannot be read is never blended."
+          title="Measured in the browser, stored with the product"
+          note="Each photo shrunk to 48 px and its border read: white when most of the ring is near-white. A real store measures a photo as it is uploaded, or on the seller's next visit to Products or the designer, and keeps the answer on the product. A photo not measured yet is never blended."
         >
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-6">
             {PRODUCTS.map((product) => (
@@ -250,9 +267,9 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
         <Section
           id="blend"
           title="Card color + Blend white background: Auto"
-          note="The same board with a card colour and Auto. White-edged photos sit on the card; the camera (grey wall) and the speaker (a room) are left alone."
+          note="The same board with a card colour and Auto. White-edged photos sit on the card; the camera (grey wall), the mouse (grey desk) and the speaker (a room) are left alone."
         >
-          <Board label="blend-auto" page={pageFor(SAGE_CARDS, measured(SIX))} />
+          <Board label="blend-auto" page={measuredPage(SAGE_CARDS, SIX)} />
           <div className="grid gap-4 md:grid-cols-2">
             <Board
               label="blend-on-blush"
@@ -281,16 +298,14 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
           <div style={PAIRING_STAND_IN}>
             <Board
               label="strip"
-              page={pageFor(
+              page={measuredPage(
                 { ...SAGE_CARDS, rows: 2, buyButton: "outline" },
-                measured(
-                  ROW(["succulent", "headphones", "watch"], 0, 2, (_photo, index) =>
-                    index === 0
-                      ? { titleBarColor: "#23402e", titleFont: "heading" }
-                      : index === 1
-                        ? { titleStyle: "overlay", titleBarColor: "#f6f2ea", titleFont: "heading" }
-                        : { titleTextColor: "#9a3412" },
-                  ),
+                ROW(["succulent", "headphones", "watch"], 0, 2, (_photo, index) =>
+                  index === 0
+                    ? { titleBarColor: "#23402e", titleFont: "heading" }
+                    : index === 1
+                      ? { titleStyle: "overlay", titleBarColor: "#f6f2ea", titleFont: "heading" }
+                      : { titleTextColor: "#9a3412" },
                 ),
               )}
             />
@@ -308,8 +323,8 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
             const shapes = ["rectangle", "rounded", "arch", "circle"] as const;
             const cards = ROW(["succulent", "headphones", "mouse", "watch"], 0, 2, (_photo, index) => ({ photoShape: shapes[index] }));
             const images = shapes.map((outline, index) => image(`4${index}`, index * 2, 2, { shape: outline }));
-            const blocks = measured([...cards, ...images]);
-            return <Board label="shapes" page={pageFor({ ...SAGE_CARDS, columns: 8, rows: 4 }, blocks, succulentArt(blocks))} />;
+            const blocks = [...cards, ...images];
+            return <Board label="shapes" page={measuredPage({ ...SAGE_CARDS, columns: 8, rows: 4 }, blocks, succulentArt(blocks))} />;
           })()}
         </Section>
       )}
@@ -327,11 +342,11 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
             const shapes = presets.map((preset, index) =>
               shape(`6${index}`, index * 2, 4, { kind: index === 1 ? "star" : "rounded", shadow: preset === "none" ? undefined : preset }),
             );
-            const blocks = measured([...cards, ...images, ...shapes]);
+            const blocks = [...cards, ...images, ...shapes];
             return (
               <Board
                 label="shadows"
-                page={pageFor({ ...SAGE_CARDS, background: { kind: "solid", color: "#f1efe9" }, rows: 6 }, blocks, succulentArt(blocks))}
+                page={measuredPage({ ...SAGE_CARDS, background: { kind: "solid", color: "#f1efe9" }, rows: 6 }, blocks, succulentArt(blocks))}
               />
             );
           })()}
@@ -351,9 +366,9 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
             />
             <Board
               label="shadow-after"
-              page={pageFor(
+              page={measuredPage(
                 { ...SAGE, titleStyle: "shadow", rows: 4, columns: 4 },
-                measured(ROW(["headphones", "succulent"], 0).concat(ROW(["camera"], 2))),
+                ROW(["headphones", "succulent"], 0).concat(ROW(["camera"], 2)),
               )}
             />
           </div>
@@ -368,12 +383,12 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
         >
           <Board
             label="labels"
-            page={pageFor(
+            page={measuredPage(
               { ...SAGE_CARDS, columns: 10, rows: 2, chipScale: "cell", priceTagPosition: "top-right" },
-              measured([
+              [
                 ...PHOTOS.slice(0, 5).map((photo, index): ProductBlock => ({ type: "product", productId: id(photo), x: index, y: 0, w: 1, h: 1 })),
                 { type: "product", productId: id("succulent"), x: 5, y: 0, w: 2, h: 2 },
-              ]),
+              ],
             )}
           />
         </Section>
@@ -387,13 +402,13 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
         >
           <Board
             label="freeform"
-            page={pageFor(
+            page={measuredPage(
               { ...SAGE_CARDS, rows: 3, shadow: "lifted" },
-              measured([
+              [
                 shape("70", 0, 0, { kind: "rounded", color: "#23402e", w: 3, h: 3 }),
                 { type: "product", productId: id("succulent"), x: 0, y: 0, w: 2, h: 2, rotation: -6, z: 2 } as ProductBlock,
                 { type: "product", productId: id("headphones"), x: 3, y: 0, w: 3, h: 3, style: { photoShape: "arch" } },
-              ]),
+              ],
             )}
           />
         </Section>
@@ -406,7 +421,7 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
           note="The blend board through StorefrontPreview, which draws the designer's own tiles (BlockTile), scaled to fit."
         >
           <div className="h-[28rem] overflow-hidden rounded-md border border-border">
-            <StorefrontPreview config={blendConfig} productsById={PRODUCTS_BY_ID} className="h-full" />
+            <StorefrontPreview config={blendConfig} productsById={productsById} className="h-full" />
           </div>
         </Section>
       )}
@@ -417,7 +432,7 @@ export function EditorCardsGallery({ only }: { only: readonly GallerySection[] |
           title="The panels"
           note="Product cards > Card style (theme scope) shows Card color and Blend white background; the rest is behind More. The image and shape inspectors gain Shape and Shadow. They drive the board."
         >
-          <Board label="panels" page={pageFor(panelTheme, measured(panelBlocks), succulentArt(panelBlocks))} />
+          <Board label="panels" page={measuredPage(panelTheme, panelBlocks, succulentArt(panelBlocks))} />
           <div className="flex flex-wrap items-start gap-6">
             <div className="w-80 rounded-md border border-border bg-background p-4" data-gallery-panel="cards">
               <CardsSection theme={panelTheme} onChange={setPanelTheme} />

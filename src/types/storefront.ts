@@ -1614,8 +1614,9 @@ export type TextValign = (typeof TEXT_VALIGNS)[number];
  * BLEND WHITE BACKGROUND. Product photos are mostly white studio shots, and
  * on any coloured board they read as white boxes. Blending lets the card's
  * colour show through the white, so the product sits ON the card.
- *   - `auto`: blend only a photo whose edges are near-white (measured, see
- *     lib/storefront/photo-edge); every other photo is left alone;
+ *   - `auto`: blend only a photo whose edges are near-white (Product.photoEdge,
+ *     measured once per photo, see lib/storefront/photo-edge); every other
+ *     photo, and one not measured yet, is left alone;
  *   - `on`: always blend; `off`: never.
  * ABSENT = `off`, so a storefront saved before this draws its photos as it
  * always has. New storefronts start on `auto`.
@@ -1623,16 +1624,6 @@ export type TextValign = (typeof TEXT_VALIGNS)[number];
 export const WHITE_BLENDS = ["auto", "on", "off"] as const;
 export type WhiteBlend = (typeof WHITE_BLENDS)[number];
 export const DEFAULT_WHITE_BLEND: WhiteBlend = "off";
-
-/**
- * What was measured at a product photo's edges the last time the designer
- * drew this card: near-white all round, or anything else. A CACHE of a
- * measurement, written by the editor and safe to drop: a renderer that has it
- * can blend on the first paint, one that does not measures for itself (or
- * leaves the photo alone until it can).
- */
-export const PHOTO_EDGES = ["white", "other"] as const;
-export type PhotoEdge = (typeof PHOTO_EDGES)[number];
 
 /**
  * The outline a photo is cut to: as the card's own corners leave it
@@ -2204,9 +2195,6 @@ export type ProductBlock = BlockPlacement & {
    * that, so an unframed tile stays byte-identical to a legacy one.
    */
   imagePlacement?: ImagePlacement;
-  /** What the designer last measured at this photo's edges (PHOTO_EDGES): a
-   *  cache for `whiteBlend: "auto"`, safe to drop. Absent = not measured. */
-  photoEdge?: PhotoEdge;
 };
 
 export type TextBlock = BlockPlacement & {
