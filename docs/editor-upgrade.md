@@ -145,10 +145,14 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
   gap apart, so a 6 by 2 carousel shows three cards on the board's columns. The
   previous and next arrows show on a fine pointer only (`pointer-fine`), step
   a page at a time, jump instead of gliding under reduced motion, and stay
-  focusable but faded (`aria-disabled`) at an end. On a phone the automatic
-  reflow scales the block like any other (a 6 by 2 row on a 2 column phone
-  board is 2 by 1, two cards in view), and `block.mobile` places it like any
-  other.
+  focusable (`aria-disabled`, the arrow faded) at an end.
+- **On a narrower board a carousel keeps its height in cells.** The reflow and
+  a phone layout's automatic placement scale a block's width and height by the
+  column ratio; a carousel keeps its rows instead, never more than its new
+  width (`keepsRowsWhenNarrow`, `GridBlock.keepRows`, `reflowedSpan`). A 6 by
+  2 row on a 4 column phone is 4 by 2, two readable cards in view, where
+  scaling would have made it 4 by 1 with three cards a third the size.
+  `block.mobile` places it like any other block.
 - **The embed's JSON route (`/api/embed/[key]`) leaves carousels out, as it
   leaves out buttons and scrolling text.** That payload has no consumer (the
   embed is the frame, `/e/...`, drawn by `StorefrontBoard`), so its removal
