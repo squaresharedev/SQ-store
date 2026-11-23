@@ -60,22 +60,15 @@ jobs:
       - name: Fetch PostgREST
         run: node tests/e2e/stack/fetch-postgrest.mjs
 
-      # One retry: a spec that passes on its second run is reported as flaky,
-      # not hidden, and a real break still fails twice.
-      - name: Checkout and the order lifecycle
-        run: npx playwright test --config playwright.checkout.config.ts 78-checkout.spec.ts 80-seller-order-flow.spec.ts 86-order-lifecycle.spec.ts --retries=1 --reporter=line
+      # CI-ONLY COMMIT (ci/editor-check): the unit suite and the two specs the
+      # editor upgrade fixed last. Never merged.
+      - name: Unit and component tests
+        if: ${{ !cancelled() }}
+        run: pnpm test:unit
 
-      - name: The cart and add-ons
-        run: npx playwright test --config playwright.checkout.config.ts 102-product-add-ons.spec.ts 106-shopping-cart.spec.ts --retries=1 --reporter=line
-
-      - name: Product page and deep links
-        run: npx playwright test 30-product-page.spec.ts 97-deep-link-sign-in.spec.ts --retries=1 --reporter=line
-
-      # The app URL is what passkeys are bound to, and consent is checked with one.
-      - name: The MCP server
-        env:
-          NEXT_PUBLIC_APP_URL: http://localhost:3100
-        run: npx playwright test 101-mcp.spec.ts --retries=1 --reporter=line
+      - name: The two specs fixed last
+        if: ${{ !cancelled() }}
+        run: npx playwright test 51-text-auto-fit.spec.ts 10-canvas-resize.spec.ts --retries=1 --reporter=line
 
       - name: Keep screenshots and traces of a failure
         if: ${{ failure() }}
