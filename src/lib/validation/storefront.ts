@@ -13,6 +13,7 @@ import { isStrictHexColor } from "@/lib/validation/predicates";
 import { SHIPPING_RATE_MAX_CENTS } from "@/types/shipping-policy";
 import { issueKey } from "@/lib/validation/messages";
 import { isOnBoard } from "@/lib/geometry/rotated-box";
+import { repairUnreadable } from "@/lib/validation/storefront-repair";
 import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
@@ -1146,11 +1147,28 @@ function upgradeBackground(value: unknown): StorefrontBackground {
   return DEFAULT_STOREFRONT_CONFIG.theme.background;
 }
 
+/** Top-level members a stored config may legitimately carry (current or retired). */
+const STORED_TOP_LEVEL_MEMBERS: ReadonlySet<string> = new Set([
+  "theme",
+  "blocks",
+  "header",
+  "embed",
+  "productPage",
+  "checkoutPage",
+  "cartPage",
+  ...RETIRED_TOP_LEVEL_FIELDS,
+]);
+
 /**
  * Parse a stored config, upgrading older saved shapes instead of discarding
  * them: v1 product blocks had no `type`, older themes lack newer fields (the
  * defaults fill them; themeSchema's preprocess migrates renamed ones), and v1
  * backgrounds were a bare string. Returns null when unrecognizable.
+ *
+ * It also reads configs written by NEWER code (see repairUnreadable): keys,
+ * block types and values this version does not know are dropped and
+ * everything else is kept, so a rollback never turns a stored design into
+ * "nothing". A config that parses directly comes out exactly as stored.
  */
 export function parseStoredStorefrontConfig(
   raw: unknown,
@@ -1174,6 +1192,11 @@ export function parseStoredStorefrontConfig(
     typeof candidate.theme === "object" && candidate.theme !== null
       ? (candidate.theme as Record<string, unknown>)
       : {};
+  // Top-level members this version does not know (the retry below never
+  // carries them), named for the log line only.
+  const dropped: string[] = Object.keys(candidate).filter(
+    (key) => !STORED_TOP_LEVEL_MEMBERS.has(key),
+  );
   const upgraded = {
     theme: {
       ...DEFAULT_STOREFRONT_CONFIG.theme,
@@ -1192,22 +1215,65 @@ export function parseStoredStorefrontConfig(
     // lost config.
     ...(headerSchema.safeParse(candidate.header).success
       ? { header: candidate.header }
-      : {}),
+      : carryRepaired("header", headerSchema, candidate.header, dropped)),
     ...(embedSettingsSchema.safeParse(candidate.embed).success
       ? { embed: candidate.embed }
-      : {}),
+      : carryRepaired("embed", embedSettingsSchema, candidate.embed, dropped, {
+          onlyUnrecognisedKeys: true,
+        })),
     ...(productPageSchema.safeParse(candidate.productPage).success
       ? { productPage: candidate.productPage }
-      : {}),
+      : carryRepaired("productPage", productPageSchema, candidate.productPage, dropped)),
     ...(checkoutPageSchema.safeParse(candidate.checkoutPage).success
       ? { checkoutPage: candidate.checkoutPage }
-      : {}),
+      : carryRepaired("checkoutPage", checkoutPageSchema, candidate.checkoutPage, dropped)),
     ...(cartPageSchema.safeParse(candidate.cartPage).success
       ? { cartPage: candidate.cartPage }
-      : {}),
+      : carryRepaired("cartPage", cartPageSchema, candidate.cartPage, dropped)),
     // Nothing to carry for policies or shipping profiles: they are not config
     // members any more, and the preprocess above has already dropped them.
   };
   const retry = storefrontConfigSchema.safeParse(upgraded);
-  return retry.success ? retry.data : null;
+  if (retry.success) {
+    warnDropped(dropped);
+    return retry.data;
+  }
+
+  // Last resort: what is left may carry keys, block types or values from
+  // newer code. Drop those and keep the rest; null only when a required part
+  // is beyond repair.
+  const repaired = repairUnreadable(storefrontConfigSchema, upgraded);
+  if (!repaired) return null;
+  warnDropped([...dropped, ...repaired.dropped]);
+  return repaired.data;
+}
+
+/**
+ * A stored part (header, product page, ...) that does not parse as it is: keep
+ * what the schema CAN read of it, or nothing when there is no such part. The
+ * fragment spreads into the config being rebuilt.
+ */
+function carryRepaired(
+  key: string,
+  schema: z.ZodType,
+  part: unknown,
+  dropped: string[],
+  options?: { onlyUnrecognisedKeys?: boolean },
+): Record<string, unknown> {
+  const repaired = repairUnreadable(schema, part, options);
+  if (!repaired) return {};
+  dropped.push(...repaired.dropped.map((path) => `${key}.${path}`));
+  return { [key]: repaired.data };
+}
+
+/**
+ * One line in the server log when a stored config needed repairing: paths
+ * only (field names and block positions), never a seller's content.
+ */
+function warnDropped(paths: readonly string[]): void {
+  if (paths.length === 0) return;
+  console.warn(
+    "[storefront] stored config written by newer code: dropped",
+    paths.join(", "),
+  );
 }

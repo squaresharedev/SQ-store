@@ -309,12 +309,20 @@ export async function getStorefront(
   if (error) throw new Error(`Failed to load storefront: ${error.message}`);
   if (!data) return null;
 
+  // A stored design nothing can read (even after the forward-compatible
+  // repair) is an error, never a default board: the designer would offer it
+  // for saving and one save would overwrite the seller's real design.
+  const config = parseStoredStorefrontConfig(data.config);
+  if (!config) {
+    console.error("[storefront] stored config is unreadable", { id: data.id });
+    throw new Error("Failed to load storefront: its saved design cannot be read");
+  }
+
   const takedown = takedownFromRow(data, "storefront");
   return {
     id: data.id,
     name: data.name,
-    config:
-      parseStoredStorefrontConfig(data.config) ?? DEFAULT_STOREFRONT_CONFIG,
+    config,
     ...(takedown ? { removal: takedown } : {}),
     version: await storefrontVersion(data.name, data.config),
   };
