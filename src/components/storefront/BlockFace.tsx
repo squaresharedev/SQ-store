@@ -142,7 +142,6 @@ export function BlockFace({
         look={look}
         hover={hover}
         quickAddAction={quickAddAction}
-        photoEdge={block.photoEdge}
       />
     );
   }

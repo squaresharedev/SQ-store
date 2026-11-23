@@ -31,6 +31,7 @@ import { productQuantityCap } from "@/lib/products/quantity";
 import { MODERATION_DETAIL_SELECT, takedownFromRow } from "@/lib/moderation/removal";
 import { appealsByDecision, withAppeal } from "@/lib/moderation/appeals-read";
 import { productIdSchema } from "@/lib/validation/product";
+import { readPhotoEdge } from "@/lib/storefront/photo-edge";
 import { cache } from "react";
 
 // Server-side reads for the ACTIVE account's products (your own store, or one
@@ -64,6 +65,10 @@ type ProductListRow = Pick<
   // The buy-button destination: needed by the storefront designer to warn
   // when a product block has nowhere to send buyers.
   | "purchase_url"
+  // What is at the main photo's edges (lib/storefront/photo-edge): the
+  // designer's cards read it, and the Products list measures a photo that
+  // has none yet.
+  | "photo_edge"
   // Moderation travels with EVERY seller-side read, list included. A takedown
   // a seller only discovers by opening the one product it happened to is not
   // a notification, it is a trap: the list is where they look first.
@@ -77,7 +82,7 @@ type ProductListRow = Pick<
 >;
 
 const PRODUCT_LIST_COLUMNS =
-  `id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, purchase_url, ${MODERATION_DETAIL_SELECT}` as const;
+  `id, title, description, price_cents, currency, status, image_key, digital_file_key, track_stock, stock_quantity, low_stock_threshold, max_per_order, purchase_url, photo_edge, ${MODERATION_DETAIL_SELECT}` as const;
 
 
 /**
@@ -135,6 +140,7 @@ function fileNameFromKey(key: string | null): string | null {
 /** Map a DB row (integer cents, R2 keys) to the UI contract (decimal, names). */
 async function rowToProduct(row: ProductListRow): Promise<Product> {
   const takedown = takedownFromRow(row);
+  const photoEdge = readPhotoEdge(row);
   return {
     id: row.id,
     title: row.title,
@@ -158,6 +164,8 @@ async function rowToProduct(row: ProductListRow): Promise<Product> {
     // object it always has and no surface has to check a flag before deciding
     // whether the removal fields mean anything.
     ...(takedown ? { removal: takedown } : {}),
+    // Spread the same way: a photo not measured yet adds nothing.
+    ...(photoEdge ? { photoEdge } : {}),
   };
 }
 

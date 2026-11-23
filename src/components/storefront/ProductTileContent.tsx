@@ -25,7 +25,6 @@ import {
   type CardStyle,
   type CardStyleOverrides,
   type ImagePlacement,
-  type PhotoEdge,
   type PriceTagFloatPosition,
   type PriceTagPosition,
   type SpotRow,
@@ -182,16 +181,11 @@ export function ProductTileContent({
   look,
   hover = "board",
   quickAddAction,
-  photoEdge,
 }: {
   product: Product;
   theme: StorefrontTheme;
   /** The block's per-tile style overrides (block.style), if any. */
   overrides?: CardStyleOverrides;
-  /** What was measured at this photo's edges (block.photoEdge, written by
-   *  the designer). Absent = not measured: an `auto` blend leaves the photo
-   *  alone, and a `shadow` title keeps its fade. See lib/storefront/photo-edge. */
-  photoEdge?: PhotoEdge;
   /** The seller's own sold-out mark on this block (block.soldOut). */
   soldOut?: boolean;
   /** Where the photo sits in this tile's frame. Absent = centred at cover,
@@ -228,7 +222,10 @@ export function ProductTileContent({
   // THE CARD LOOK: the card's own colours, whether its photo blends, and the
   // shade a `shadow` title fades in (card-look). All absent on a card that
   // sets none of it, which then draws its old classes and nothing inline.
-  const paint = cardPaint(card, photoEdge);
+  // What is at the photo's edges is the product's (Product.photoEdge, stored
+  // with it once measured): absent, an `auto` blend leaves the photo alone and
+  // a `shadow` title keeps its fade. See lib/storefront/photo-edge.
+  const paint = cardPaint(card, product.photoEdge);
   const photoShape = photoShapeStyle(card.photoShape, "card");
 
   // THE CARD EXTRAS. Stock is a state, never a count (tileStockState): "Low

@@ -83,7 +83,7 @@ function upgradedConfig(): StorefrontConfig {
       shadow: "soft",
     },
     blocks: [
-      { type: "product", productId: PRODUCT, x: 0, y: 0, w: 2, h: 2, photoEdge: "white", style: { whiteBlend: "on", cardColor: "#fef3c7", shadow: "lifted", photoShape: "circle" } },
+      { type: "product", productId: PRODUCT, x: 0, y: 0, w: 2, h: 2, style: { whiteBlend: "on", cardColor: "#fef3c7", shadow: "lifted", photoShape: "circle" } },
       { type: "text", id: TEXT, text: "New in", variant: "label", align: "left", x: 2, y: 0, w: 2, h: 1, valign: "bottom", fine: { left: true } },
       { type: "shape", id: SHAPE, kind: "circle", color: "#fbbf24", x: 4, y: 0, w: 1, h: 1, gradient: { from: "#fbbf24", to: "#f97316", angle: 90 }, shadow: "soft", fine: { right: true, bottom: true } },
       { type: "image", id: IMAGE, key: `elements/${PRODUCT}/${IMAGE}-logo.svg`, alt: "Logo", x: 5, y: 0, w: 1, h: 1, shape: "circle", shadow: "soft" },

@@ -184,9 +184,9 @@ import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { useStoredFlag } from "@/lib/hooks/useStoredFlag";
 import { useIsTouch } from "@/lib/hooks/useIsTouch";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
-import type { TeamRole } from "@/lib/team/permissions";
-import { usePhotoEdges } from "./usePhotoEdges";
-import { withPhotoEdges } from "@/lib/storefront/photo-edge";
+import { can, type TeamRole } from "@/lib/team/permissions";
+import { usePhotoEdgeBackfill } from "@/components/products/usePhotoEdgeBackfill";
+import { productsNeedingPhotoEdge, withPhotoEdge } from "@/lib/storefront/photo-edge";
 import { cardLookColorPatch, isCardLookColorKind, themeWithCardLookColor } from "@/lib/storefront/card-look-fields";
 
 /** What the left inspector column shows: the product picker, or the editor
@@ -696,18 +696,18 @@ export function StorefrontDesigner({
     () => new Map(catalog.map((product) => [product.id, product])),
     [catalog],
   );
-  // Photo cards: measure the photos whose look depends on their edges and
-  // cache the answer on the blocks, so the saved storefront carries it to
-  // buyers (lib/storefront/photo-edge). Not an undo step: a measurement.
-  usePhotoEdges({
-    theme,
-    blocks,
-    products: productsById,
-    sample: isSample,
-    onMeasured: (edges) => {
-      setBlocks((current) => withPhotoEdges(current, edges));
-      markDirty();
-    },
+  // Photo cards: a card whose look depends on what is at its photo's edges
+  // gets that photo measured, where no answer is stored yet, and the answer
+  // is stored with the PRODUCT (lib/storefront/photo-edge). It lands on the
+  // catalogue, never on the board: measuring marks nothing unsaved.
+  const photoEdgeProducts = useMemo(
+    () => productsNeedingPhotoEdge(theme, blocks, productsById),
+    [theme, blocks, productsById],
+  );
+  usePhotoEdgeBackfill({
+    products: photoEdgeProducts,
+    record: !isSample && can(role, "products.write"),
+    onMeasured: (productId, edge) => setCatalog((current) => withPhotoEdge(current, productId, edge)),
   });
   // Whether a sale chip shows anywhere on the board: without one, the theme's
   // sale badge controls offer to start a sale instead (SaleBadgeControls).

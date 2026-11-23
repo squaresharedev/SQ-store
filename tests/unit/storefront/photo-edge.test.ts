@@ -1,13 +1,16 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   NEAR_WHITE_SHARE,
-  blocksNeedingPhotoEdge,
-  cachedPhotoEdge,
+  PHOTO_KEY_HEADER,
   cardNeedsPhotoEdge,
   classifyPhotoEdge,
+  isPhotoEdge,
+  localPhotoSource,
+  measureStoredPhoto,
   photoEdgeCacheKey,
-  photoEdgeSource,
-  withPhotoEdges,
+  productsNeedingPhotoEdge,
+  readPhotoEdge,
+  withPhotoEdge,
 } from "@/lib/storefront/photo-edge";
 import { productPhotoPath } from "@/lib/products/paths";
 import {
@@ -20,8 +23,10 @@ import {
 
 /**
  * WHAT IS AT A PHOTO'S EDGES (lib/storefront/photo-edge): the measurement
- * behind `whiteBlend: "auto"` and the pale `shadow` fade, and the rules for
- * which cards are measured and how the answer is cached on the board.
+ * behind `whiteBlend: "auto"` and the pale `shadow` fade, how a stored answer
+ * is read back (a fact about the product's CURRENT photo), which products the
+ * designer has measured, and how a stored photo is measured through the
+ * seller's same-origin copy.
  */
 
 const SIDE = 10;
@@ -95,7 +100,30 @@ const card = (productId: string, over: Partial<ProductBlock> = {}): ProductBlock
   ...over,
 });
 
-describe("which cards are measured", () => {
+describe("reading a stored answer", () => {
+  const KEY = "images/u/a-photo.webp";
+
+  it("hands back the answer for a product with a photo", () => {
+    expect(readPhotoEdge({ image_key: KEY, photo_edge: "white" })).toBe("white");
+    expect(readPhotoEdge({ image_key: KEY, photo_edge: "other" })).toBe("other");
+  });
+
+  it("knows nothing before the photo is measured, or of a product with no photo", () => {
+    expect(readPhotoEdge({ image_key: KEY, photo_edge: null })).toBeUndefined();
+    expect(readPhotoEdge({ image_key: KEY })).toBeUndefined();
+    // An answer left behind by a photo that is gone says nothing.
+    expect(readPhotoEdge({ image_key: null, photo_edge: "white" })).toBeUndefined();
+  });
+
+  it("trusts only a value from the list", () => {
+    expect(readPhotoEdge({ image_key: KEY, photo_edge: "grey" })).toBeUndefined();
+    expect(isPhotoEdge("white")).toBe(true);
+    expect(isPhotoEdge("WHITE")).toBe(false);
+    expect(isPhotoEdge(undefined)).toBe(false);
+  });
+});
+
+describe("which cards read it", () => {
   it("only cards whose look depends on the edge: an auto blend or a shadow title", () => {
     expect(cardNeedsPhotoEdge(resolveCardStyle(theme()))).toBe(false);
     expect(cardNeedsPhotoEdge(resolveCardStyle(theme({ whiteBlend: "on" })))).toBe(false);
@@ -103,28 +131,46 @@ describe("which cards are measured", () => {
     expect(cardNeedsPhotoEdge(resolveCardStyle(theme({ titleStyle: "shadow" })))).toBe(true);
   });
 
-  it("reads each card through its own style, and skips a product with no photo", () => {
+  it("names each such product once, through each card's own style, and skips one with no photo", () => {
     const products = new Map([
       [A, { id: A, imageUrl: "/a.webp" }],
       [B, { id: B, imageUrl: null }],
     ]);
-    const blocks: StorefrontBlock[] = [card(A, { style: { whiteBlend: "auto" } }), card(B, { style: { whiteBlend: "auto" } })];
-    expect(blocksNeedingPhotoEdge(theme(), blocks, products).map(({ block }) => block.productId)).toEqual([A]);
-    // A legacy board measures nothing, so nothing is ever written to it.
-    expect(blocksNeedingPhotoEdge(theme(), [card(A)], products)).toEqual([]);
+    const blocks: StorefrontBlock[] = [
+      card(A, { style: { whiteBlend: "auto" } }),
+      card(A, { x: 1, style: { titleStyle: "shadow" } }),
+      card(B, { x: 2, style: { whiteBlend: "auto" } }),
+    ];
+    expect(productsNeedingPhotoEdge(theme(), blocks, products).map((product) => product.id)).toEqual([A]);
+    // A legacy board measures nothing.
+    expect(productsNeedingPhotoEdge(theme(), [card(A)], products)).toEqual([]);
+  });
+});
+
+describe("laying an answer on the products a page shows", () => {
+  const products = [
+    { id: A, imageUrl: "/a.webp" },
+    { id: B, imageUrl: "/b.webp", photoEdge: "other" as const },
+  ];
+
+  it("sets it on the right product and keeps the rest", () => {
+    const next = withPhotoEdge(products, A, "white");
+    expect(next[0]).toEqual({ ...products[0], photoEdge: "white" });
+    expect(next[1]).toBe(products[1]);
+  });
+
+  it("hands back the same list when it already says so", () => {
+    expect(withPhotoEdge(products, B, "other")).toBe(products);
+    expect(withPhotoEdge(products, "nobody", "white")).toBe(products);
   });
 });
 
 describe("where a photo is read from", () => {
-  it("reads a photo on this origin directly, and the seller's own copy of a signed one", () => {
-    expect(photoEdgeSource({ id: A, imageUrl: "/sample-storefront/camera.webp" }, true)).toBe("/sample-storefront/camera.webp");
-    expect(photoEdgeSource({ id: A, imageUrl: "https://bucket.r2.test/images/a.webp?X-Amz-Signature=1" }, false)).toBe(productPhotoPath(A));
-  });
-
-  it("has nothing to read for the sample's cross-origin photo, nor for no photo", () => {
-    expect(photoEdgeSource({ id: A, imageUrl: "https://elsewhere.test/a.webp" }, true)).toBeNull();
-    expect(photoEdgeSource({ id: A, imageUrl: "//elsewhere.test/a.webp" }, true)).toBeNull();
-    expect(photoEdgeSource({ id: A, imageUrl: null }, false)).toBeNull();
+  it("reads a photo on this origin directly, and nothing else", () => {
+    expect(localPhotoSource("/sample-storefront/camera.webp")).toBe("/sample-storefront/camera.webp");
+    expect(localPhotoSource("https://bucket.r2.test/images/a.webp?X-Amz-Signature=1")).toBeNull();
+    expect(localPhotoSource("//elsewhere.test/a.webp")).toBeNull();
+    expect(localPhotoSource(null)).toBeNull();
   });
 
   it("knows one photo by its object, not by a signature that changes every load", () => {
@@ -132,34 +178,47 @@ describe("where a photo is read from", () => {
     expect(photoEdgeCacheKey(signed("1"))).toBe(photoEdgeCacheKey(signed("2")));
     expect(photoEdgeCacheKey(signed("1"))).not.toBe(photoEdgeCacheKey({ id: A, imageUrl: "https://bucket.r2.test/images/b.webp" }));
   });
-
-  it("measures each photo once a session, however many tiles ask", async () => {
-    const measure = vi.fn(async () => "white" as const);
-    const product = { id: B, imageUrl: "/once.webp" };
-    const [first, second] = await Promise.all([cachedPhotoEdge(product, false, measure), cachedPhotoEdge(product, false, measure)]);
-    expect([first, second]).toEqual(["white", "white"]);
-    expect(measure).toHaveBeenCalledTimes(1);
-    expect(measure).toHaveBeenCalledWith("/once.webp");
-  });
-
-  it("does not try a photo it cannot read", async () => {
-    const measure = vi.fn(async () => "white" as const);
-    expect(await cachedPhotoEdge({ id: A, imageUrl: "https://elsewhere.test/x.webp" }, true, measure)).toBeNull();
-    expect(measure).not.toHaveBeenCalled();
-  });
 });
 
-describe("caching the answer on the board", () => {
-  it("lays the measured edge on the right card, and keeps the rest of it", () => {
-    const blocks: StorefrontBlock[] = [card(A, { mobile: { x: 0, y: 2 } } as Partial<ProductBlock>), card(B, { x: 1 })];
-    const next = withPhotoEdges(blocks, new Map([[`p_${A}`, "white" as const]]));
-    expect(next[0]).toEqual({ ...blocks[0], photoEdge: "white" });
-    expect(next[1]).toBe(blocks[1]);
+describe("measuring a stored photo through the seller's own copy", () => {
+  const answer = (status: number, key?: string) =>
+    vi.fn(
+      async () =>
+        new Response(status === 200 ? new Blob(["pixels"]) : null, {
+          status,
+          headers: key ? { [PHOTO_KEY_HEADER]: key } : {},
+        }),
+    );
+  const asFetch = (load: unknown) => load as typeof fetch;
+
+  it("reads the route, and says which photo it measured", async () => {
+    const load = answer(200, "images/u/a-photo.webp");
+    const measure = vi.fn(async () => "white" as const);
+    expect(await measureStoredPhoto(A, asFetch(load), measure)).toEqual({
+      status: "measured",
+      photoKey: "images/u/a-photo.webp",
+      edge: "white",
+    });
+    expect(load).toHaveBeenCalledWith(productPhotoPath(A), { credentials: "same-origin" });
+    expect(measure).toHaveBeenCalledTimes(1);
   });
 
-  it("hands back the same board when nothing changes", () => {
-    const blocks: StorefrontBlock[] = [card(A, { photoEdge: "white" })];
-    expect(withPhotoEdges(blocks, new Map([[`p_${A}`, "white" as const]]))).toBe(blocks);
-    expect(withPhotoEdges(blocks, new Map())).toBe(blocks);
+  it("measures nothing it cannot pin to a photo, or cannot read", async () => {
+    const measure = vi.fn(async () => "white" as const);
+    expect(await measureStoredPhoto(A, asFetch(answer(200)), measure)).toEqual({ status: "unreadable" });
+    expect(await measureStoredPhoto(A, asFetch(answer(404)), measure)).toEqual({ status: "unreadable" });
+    expect(measure).not.toHaveBeenCalled();
+    const unreadable = vi.fn(async () => null);
+    expect(await measureStoredPhoto(A, asFetch(answer(200, "images/u/k.webp")), unreadable)).toEqual({
+      status: "unreadable",
+    });
+    const offline = vi.fn(async () => {
+      throw new TypeError("Failed to fetch");
+    });
+    expect(await measureStoredPhoto(A, asFetch(offline), measure)).toEqual({ status: "unreadable" });
+  });
+
+  it("says when the route's budget is spent, so the session can stop asking", async () => {
+    expect(await measureStoredPhoto(A, asFetch(answer(429)))).toEqual({ status: "busy" });
   });
 });

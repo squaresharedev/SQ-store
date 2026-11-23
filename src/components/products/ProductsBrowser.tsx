@@ -28,6 +28,7 @@ import {
 } from "@/types/product";
 import type { StorefrontPlacement } from "@/lib/products/queries";
 import { NEW_PRODUCT_PATH, PRODUCTS_IMPORT_PATH } from "@/lib/products/paths";
+import { usePhotoEdgeBackfill } from "./usePhotoEdgeBackfill";
 import type { TraderIdentityField } from "@/lib/settings/trader-identity";
 import type { Paginated } from "@/types/pagination";
 import { PRODUCT_SORTS, type ProductSort } from "@/lib/products/sort";
@@ -140,6 +141,10 @@ export function ProductsBrowser({
   const tSearch = useTranslations("Search.trigger");
   const tPagination = useTranslations("Common.pagination");
   const search = useSearch();
+  // The photos on this page with no measured edge yet are measured here and
+  // stored with their products, for the storefront cards that read it
+  // (lib/storefront/photo-edge). Nothing on this page changes.
+  usePhotoEdgeBackfill({ products: data.rows, record: canWrite });
 
   const sortOptions: FilterOption<ProductSort>[] = SORT_ICONS.map(({ value, icon }) => ({
     value,

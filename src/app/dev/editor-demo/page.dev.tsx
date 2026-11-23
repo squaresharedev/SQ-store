@@ -4,7 +4,7 @@ import { EmbedFrameView } from "@/components/storefront-page/EmbedFrameView";
 import { StorefrontPageView } from "@/components/storefront-page/StorefrontPageView";
 import { buildSampleStorefront } from "@/lib/storefront/sample";
 import { galleryPage } from "../editor-layout/fixtures";
-import { DEMO_PORTRAIT, DEMO_PORTRAIT_KEY, editorDemoConfig } from "./demo-config";
+import { DEMO_PORTRAIT, DEMO_PORTRAIT_KEY, editorDemoConfig, editorDemoPhotoEdges } from "./demo-config";
 
 // THE EDITOR UPGRADE'S DEMO STOREFRONT: one board wearing every feature the
 // upgrade shipped (see demo-config.ts), drawn by the real hosted page and the
@@ -32,8 +32,12 @@ export default async function EditorDemoPage({
   const demo = editorDemoConfig(sample);
   const config = query.motion === "0" ? { ...demo, theme: { ...demo.theme, motion: undefined } } : demo;
   const built = galleryPage(sample, config, { cart: query.cart === "1" });
+  // What each product's photo edge measures, handed with the product as a
+  // real board's tiles are (lib/storefront/tile-extras).
+  const edges = editorDemoPhotoEdges(sample);
+  const products = built.products.map((product) => (edges[product.id] ? { ...product, photoEdge: edges[product.id] } : product));
   // The image block's picture, where a real storefront has a signed URL.
-  const page = { ...built, imageUrls: { ...built.imageUrls, [DEMO_PORTRAIT_KEY]: DEMO_PORTRAIT } };
+  const page = { ...built, products, imageUrls: { ...built.imageUrls, [DEMO_PORTRAIT_KEY]: DEMO_PORTRAIT } };
 
   if (query.view === "embed") {
     // A real frame is exactly as tall as its content; shown as a page of its

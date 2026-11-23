@@ -1910,6 +1910,7 @@ export type Database = {
           moderation_status: string
           option_groups: Json
           owner_id: string
+          photo_edge: string | null
           price_cents: number
           purchase_url: string | null
           shipping_profile_id: string | null
@@ -1944,6 +1945,7 @@ export type Database = {
           moderation_status?: string
           option_groups?: Json
           owner_id: string
+          photo_edge?: string | null
           price_cents: number
           purchase_url?: string | null
           shipping_profile_id?: string | null
@@ -1978,6 +1980,7 @@ export type Database = {
           moderation_status?: string
           option_groups?: Json
           owner_id?: string
+          photo_edge?: string | null
           price_cents?: number
           purchase_url?: string | null
           shipping_profile_id?: string | null

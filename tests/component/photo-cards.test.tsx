@@ -68,10 +68,11 @@ const PRODUCT: Product = {
   maxPerOrder: 10,
 };
 
+/** A card on its own. `photoEdge` is what the PRODUCT's photo measured
+ *  (Product.photoEdge); absent = not measured yet. */
 function tile(over: Partial<StorefrontTheme>, overrides?: CardStyleOverrides, photoEdge?: "white" | "other") {
-  const { container } = render(
-    <ProductTileContent product={PRODUCT} theme={theme(over)} overrides={overrides} photoEdge={photoEdge} />,
-  );
+  const product: Product = photoEdge ? { ...PRODUCT, photoEdge } : PRODUCT;
+  const { container } = render(<ProductTileContent product={product} theme={theme(over)} overrides={overrides} />);
   const photo = container.querySelector<HTMLImageElement>("[data-image-frame] > img")!;
   const frame = container.querySelector<HTMLElement>("[data-image-frame]")!;
   const band = container.querySelector<HTMLElement>("[data-title-band]")!;
@@ -125,15 +126,17 @@ describe("blending a white background", () => {
     expect(tile({ cardColor: "#1c1917", whiteBlend: "on" }).photo).not.toHaveClass("mix-blend-multiply");
   });
 
-  it("reaches the face from the block's cached edge on a buyer's board", () => {
-    const block: ProductBlock = { type: "product", productId: PRODUCT.id, x: 0, y: 0, w: 1, h: 1, photoEdge: "white" };
+  it("reaches the face from the product's stored edge on a buyer's board", () => {
+    const block: ProductBlock = { type: "product", productId: PRODUCT.id, x: 0, y: 0, w: 1, h: 1 };
     const t = theme({ columns: 2, rows: 1, cardColor: "#fef3c7", whiteBlend: "auto", shadow: "soft" });
     const page: StorefrontPageData = {
       id: "sf",
       name: "Shop",
       theme: t,
       blocks: [block],
-      products: [{ id: PRODUCT.id, title: PRODUCT.title, price: 12.5, currency: "EUR", imageUrl: PRODUCT.imageUrl, href: "/p" }],
+      products: [
+        { id: PRODUCT.id, title: PRODUCT.title, price: 12.5, currency: "EUR", imageUrl: PRODUCT.imageUrl, photoEdge: "white", href: "/p" },
+      ],
       tileLook: resolveTileLook({ theme: t, productPage: DEFAULT_PRODUCT_PAGE_CONFIG }),
       imageUrls: {},
       backgroundImageUrl: null,
@@ -147,6 +150,25 @@ describe("blending a white background", () => {
     expect(link.querySelector("[data-image-frame] > img")).toHaveClass("mix-blend-multiply");
     // The card's shadow is drawn by its cell, outside the face's clip.
     expect(link.closest("li")!.style.filter).toBe(shadowFilter("soft"));
+
+    // The same board before its photo is measured: drawn exactly as a board
+    // with no edge at all, photo left alone.
+    cleanup();
+    const unmeasured = {
+      ...page,
+      products: page.products.map((product) => {
+        const copy = { ...product };
+        delete copy.photoEdge;
+        return copy;
+      }),
+    };
+    // React's generated ids differ between two mounts; nothing else may.
+    const html = (container: HTMLElement) => container.innerHTML.replace(/«r[0-9a-z]+»|:r[0-9a-z]+:/g, "");
+    const before = html(render(<StorefrontBoard page={unmeasured} displayName="Shop" />).container);
+    expect(document.querySelector("[data-image-frame] > img")).not.toHaveClass("mix-blend-multiply");
+    cleanup();
+    const other = { ...page, products: page.products.map((product) => ({ ...product, photoEdge: "other" as const })) };
+    expect(html(render(<StorefrontBoard page={other} displayName="Shop" />).container)).toBe(before);
   });
 });
 

@@ -1,4 +1,5 @@
 import type { SampleStorefront } from "@/lib/storefront/sample";
+import type { PhotoEdge } from "@/types/product";
 import {
   DEFAULT_STOREFRONT_CONFIG,
   NEW_STOREFRONT_THEME,
@@ -94,11 +95,12 @@ export function editorDemoConfig(sample: SampleStorefront): StorefrontConfig {
     // A SCROLLING TEXT STRIP, in the Small label style.
     { type: "marquee", id: ID.strip, text: "Free delivery this week · New pieces every Friday", speed: "slow", x: 0, y: 3, w: 6, h: 1 },
     // PHOTO CARDS. The theme blends white studio photos into the card colour
-    // ("auto"): the headphones and the watch were measured white at the edges.
+    // ("auto"): what each photo's edge measures is the PRODUCT's, handed to
+    // the board with it (editorDemoPhotoEdges below).
     { type: "product", productId: camera, x: 0, y: 4, w: 2, h: 3 },
-    { type: "product", productId: headphones, x: 2, y: 4, w: 2, h: 3, photoEdge: "white" },
+    { type: "product", productId: headphones, x: 2, y: 4, w: 2, h: 3 },
     // One card with its own look: an arch, lifted.
-    { type: "product", productId: watch, x: 4, y: 4, w: 2, h: 3, photoEdge: "white", style: { photoShape: "arch", shadow: "lifted" } },
+    { type: "product", productId: watch, x: 4, y: 4, w: 2, h: 3, style: { photoShape: "arch", shadow: "lifted" } },
     // A Small label on the dark band: its ink is picked to read there.
     { type: "text", id: ID.label, text: "Picked by hand · Packed with care", variant: "label", align: "center", x: 1, y: 7, w: 4, h: 1 },
     // On the photo band: words, and an outline button that scrolls to a band.
@@ -159,4 +161,17 @@ export function editorDemoConfig(sample: SampleStorefront): StorefrontConfig {
     blocks,
     bands,
   };
+}
+
+/**
+ * What each sample photo's edge measures, as /dev/editor-cards measures it in
+ * the browser: on a real storefront this is products.photo_edge, stored with
+ * the product once the seller's browser has measured its photo, and handed to
+ * a buyer's board with the product (lib/storefront/tile-extras). The camera,
+ * the mouse and the speaker are not white at the edges, so "auto" leaves them
+ * be (the speaker's card blends because it sets "on" for itself).
+ */
+export function editorDemoPhotoEdges(sample: SampleStorefront): Record<string, PhotoEdge> {
+  const [camera, headphones, watch, mouse, speaker] = sample.products.map((product) => product.id);
+  return { [camera]: "other", [headphones]: "white", [watch]: "white", [mouse]: "other", [speaker]: "other" };
 }
