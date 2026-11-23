@@ -208,7 +208,7 @@ const ARTWORK = `elements/${PRODUCT}/${OTHER}-logo.svg`;
 
 const bandOf = (config: StorefrontConfig, id: string) => config.bands?.find((band) => band.id === id);
 
-describe("buttons and scrolling text", () => {
+describe("buttons, scrolling text and carousels", () => {
   it("adds a button that leads to a product on the board, and drops the default look", () => {
     const { config, added, valid } = run([
       { op: "add_button", label: "Shop the lamp", link: { kind: "product", productId: PRODUCT }, x: 0, y: 2 },
@@ -232,12 +232,18 @@ describe("buttons and scrolling text", () => {
     expect(() => run([{ op: "add_button", label: "Go", link: { kind: "product", productId: OTHER } }])).toThrow(
       /The button "Go".*not on this storefront/,
     );
-    // Putting the product on the board in the same list is the fix.
+    // Putting the product on the board in the same list is the fix: as a
+    // tile, or in a carousel.
     const fixed = run([
       { op: "add_product", productId: OTHER },
       { op: "add_button", label: "Go", link: { kind: "product", productId: OTHER } },
     ]);
     expect(fixed.valid).toBe(true);
+    const inCarousel = run([
+      { op: "add_carousel", productIds: [OTHER] },
+      { op: "add_button", label: "Go", link: { kind: "product", productId: OTHER } },
+    ]);
+    expect(inCarousel.valid).toBe(true);
   });
 
   it("refuses removing the product a button leads to, naming the button", () => {
@@ -251,8 +257,37 @@ describe("buttons and scrolling text", () => {
     expect(found(config, added[0])).toEqual({ type: "marquee", id: added[0], text: "Free delivery this week", x: 0, y: 1, w: 6, h: 1 });
   });
 
-  it("offers no carousel: the block is not built, so there is nothing to add", () => {
-    expect(designOpSchema.safeParse({ op: "add_carousel", productIds: [PRODUCT] }).success).toBe(false);
+  it("lays a carousel across the board's full width, two rows tall, in the order given", () => {
+    const { config, added, valid } = run([{ op: "add_carousel", productIds: [OTHER, PRODUCT] }]);
+    expect(valid).toBe(true);
+    expect(found(config, added[0])).toEqual({ type: "carousel", id: added[0], productIds: [OTHER, PRODUCT], x: 0, y: 1, w: 6, h: 2 });
+    expect(boardSummary(config).blocks.find((block) => block.block === added[0])).toMatchObject({ productIds: [OTHER, PRODUCT] });
+    // A size of its own is kept.
+    const narrow = run([{ op: "add_carousel", productIds: [PRODUCT], x: 1, y: 3, w: 4, h: 1 }]);
+    expect(found(narrow.config, narrow.added[0])).toMatchObject({ x: 1, y: 3, w: 4, h: 1 });
+  });
+
+  it("changes a carousel's products with style, and refuses none, a repeat or too many in words", () => {
+    const first = run([{ op: "add_carousel", productIds: [PRODUCT] }]);
+    const id = first.added[0];
+    const changed = run([{ op: "style", block: id, changes: { productIds: [OTHER, PRODUCT] } }], first.config);
+    expect(changed.valid).toBe(true);
+    expect(found(changed.config, id)).toMatchObject({ productIds: [OTHER, PRODUCT] });
+    expect(() => run([{ op: "style", block: id, changes: { productIds: [] } }], first.config)).toThrow(/needs a list/);
+    expect(() => run([{ op: "style", block: id, changes: { productIds: [PRODUCT, PRODUCT] } }], first.config)).toThrow(/each product once/);
+    expect(() => run([{ op: "add_carousel", productIds: [PRODUCT, PRODUCT] }])).toThrow(/each product once/);
+    const many = Array.from({ length: 13 }, (_, n) => `77777777-7777-4777-8777-${String(n).padStart(12, "0")}`);
+    expect(designOpSchema.safeParse({ op: "add_carousel", productIds: many }).success).toBe(false);
+    expect(() => run([{ op: "style", block: id, changes: { productIds: many } }], first.config)).toThrow(/at most 12/);
+  });
+
+  it("refuses taking a product out of a carousel while a button still leads to it", () => {
+    const linked = run([
+      { op: "add_carousel", productIds: [OTHER, PRODUCT] },
+      { op: "add_button", label: "Buy", link: { kind: "product", productId: OTHER } },
+    ]);
+    const id = linked.added[0];
+    expect(() => run([{ op: "style", block: id, changes: { productIds: [PRODUCT] } }], linked.config)).toThrow(/The button "Buy"/);
   });
 
   it("restyles the new kinds through style, like any block", () => {
