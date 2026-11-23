@@ -957,6 +957,40 @@ export function resizeHalfBox(
 }
 
 /**
+ * The corner handle's resize, in half cells: the far corner goes to `to`, and
+ * past the near corner the span lands on the OTHER side of the anchor cell.
+ *
+ * It is the whole-cell corner gesture (resizeLocalBox, "corner") carried into
+ * half steps, so a small block stretches up and left from the one handle
+ * exactly as every block always has. The anchor is the block's own top-left
+ * cell: it stays inside the result however far the hand travels. `to` is the
+ * line the far corner is dragged to; the cell the hand is over is the one whose
+ * centre sits a half cell before it, which is the cell the far corner sat in.
+ * Drag that cell off the anchor's side and the span flips; until then it is
+ * resizeHalfBox's, never narrower than half a cell.
+ */
+export function resizeHalfCorner(
+  box: HalfBox,
+  to: { x: number; y: number },
+  columns: number,
+  rows: number,
+): HalfBox {
+  const anchorX = Math.floor(box.l / 2);
+  const anchorY = Math.floor(box.t / 2);
+  const handX = Math.floor((to.x - 1) / 2);
+  const handY = Math.floor((to.y - 1) / 2);
+  const flippedX = handX < anchorX;
+  const flippedY = handY < anchorY;
+  const straight = resizeHalfBox(box, { n: false, e: true, s: true, w: false }, to, columns, rows);
+  return {
+    l: flippedX ? Math.max(0, 2 * handX) : box.l,
+    r: flippedX ? 2 * (anchorX + 1) : straight.r,
+    t: flippedY ? Math.max(0, 2 * handY) : box.t,
+    b: flippedY ? 2 * (anchorY + 1) : straight.b,
+  };
+}
+
+/**
  * Where a block's cell is PAINTED, as offsets and a size in its own grid
  * area: the half-cell nudge a turned block needs (`shift`, in cells), plus its
  * insets. Stated against the grid area rather than measured, the way

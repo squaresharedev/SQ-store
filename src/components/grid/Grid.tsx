@@ -49,6 +49,7 @@ import {
   reflowBlocks,
   reflowHasRoom,
   resizeHalfBox,
+  resizeHalfCorner,
   resizeLocalBox,
   roundToStep,
   toHalves,
@@ -1552,8 +1553,9 @@ export function Grid<TData>(props: GridProps<TData>) {
    * `edge`: the grabbed border goes where the hand is, as an edge drag always
    * has. `corner`: the handle hangs outside the tile, so the hand starts off
    * the far corner; what counts is how far it has travelled from there, in
-   * steps, and the far corner moves by that much. It never flips past the
-   * near corner: half a cell is as small as it gets.
+   * steps, and the far corner moves by that much. Dragged past the block's own
+   * top-left cell the span lands on that cell's other side (resizeHalfCorner),
+   * the way the whole-cell handle always has; an edge drag stops at half a cell.
    */
   function startHalfResize(
     event: React.PointerEvent<HTMLElement>,
@@ -1600,7 +1602,11 @@ export function Grid<TData>(props: GridProps<TData>) {
               x: (edges.w ? origin.l : origin.r) + roundToStep(2 * pointer.x - (edges.w ? origin.l : origin.r), steps.x),
               y: (edges.n ? origin.t : origin.b) + roundToStep(2 * pointer.y - (edges.n ? origin.t : origin.b), steps.y),
             };
-      latest = resizeHalfBox(origin, edges, to, columns, rows);
+      // The corner handle also flips past the anchor cell, as it always has.
+      latest =
+        mode === "corner"
+          ? resizeHalfCorner(origin, to, columns, rows)
+          : resizeHalfBox(origin, edges, to, columns, rows);
       const landed = fromHalves(latest);
       latestValid = dropIsLegal(block, landed.placement, blocks);
       gestureRef.current = {
