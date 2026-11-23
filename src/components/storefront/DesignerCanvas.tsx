@@ -13,6 +13,7 @@ import {
   CANVAS_ROWS_MAX,
   blockFine,
   blockKey,
+  boardProductIds,
   layerOrder,
   tileCovers,
   type HeaderLine,
@@ -72,6 +73,8 @@ import {
 } from "@/lib/storefront/text-selection";
 import { EditorSlotsContext } from "./editor-slots";
 import { BlockTile } from "./BlockTile";
+import type { CarouselCards } from "./CarouselTileContent";
+import { keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
@@ -399,6 +402,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       block.type === "product"
         ? (productsById.get(block.productId) ?? null)
         : null,
+    [productsById],
+  );
+  // A carousel's cards, from the seller's own catalogue (drafts included, as
+  // a product block's are). One object for the board, so tiles stay memoised.
+  const carouselCards = useMemo<CarouselCards>(
+    () => ({ product: (productId) => productsById.get(productId) ?? null }),
     [productsById],
   );
 
@@ -734,6 +743,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         // half steps (product cards stay on the main grid).
         ...(blockFine(block) ? { inset: blockFine(block) } : {}),
         ...(takesFine(block) ? { halfSteps: true } : {}),
+        // A carousel keeps its height on a phone (keepsRowsWhenNarrow).
+        ...(keepsRowsWhenNarrow(block) ? { keepRows: true } : {}),
         data: block,
       };
     });
@@ -825,13 +836,11 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     [productPage, openPages, productsById],
   );
 
-  // What a page's sample cart is made of: the board's products, each once, in
-  // board order. Keyed by that list rather than by the blocks, so moving a
-  // tile does not hand the open cart a new sample (and forget its steps).
-  const boardProductKey = blocks
-    .flatMap((block) => (block.type === "product" ? [block.productId] : []))
-    .filter((id, index, ids) => ids.indexOf(id) === index)
-    .join(",");
+  // What a page's sample cart is made of: the board's products (its tiles and
+  // its carousels' members), each once, in reading order. Keyed by that list
+  // rather than by the blocks, so moving a tile does not hand the open cart a
+  // new sample (and forget its steps).
+  const boardProductKey = boardProductIds(blocks).join(",");
   const boardProducts = useMemo(
     () =>
       boardProductKey
@@ -1180,6 +1189,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 onSpotChange={changeSpot}
                 onOpenSpotSetting={openSpotSetting}
                 backdrop={blockBackdrop(theme, bands, gridBlock.data, state.underlayKey)}
+                carouselCards={carouselCards}
               />
             )}
           />

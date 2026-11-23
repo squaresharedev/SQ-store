@@ -186,11 +186,15 @@ export function shadowFilter(preset: ShadowPreset): string | undefined {
 }
 
 /** The shadow a block wears: a card's from its card style (theme and tile),
- *  an image's or a shape's its own. Every other kind wears none. */
+ *  a carousel's cards the theme's, an image's or a shape's its own. Every
+ *  other kind wears none. A carousel's is drawn on its whole cell, and as a
+ *  drop shadow it falls under each card, not under the row. */
 export function blockShadow(theme: StorefrontTheme, block: StorefrontBlock): ShadowPreset {
   switch (block.type) {
     case "product":
       return resolveCardStyle(theme, block.style).shadow;
+    case "carousel":
+      return resolveCardStyle(theme, undefined).shadow;
     case "image":
     case "shape":
       return block.shadow ?? "none";

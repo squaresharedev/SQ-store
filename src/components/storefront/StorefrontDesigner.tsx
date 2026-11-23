@@ -23,6 +23,7 @@ import {
   HEADER_BASE_PX,
   blockFootprint,
   blockKey,
+  boardProductIds,
   headerStyleValue,
   mergeCardStyleOverrides,
   readingOrder,
@@ -163,6 +164,7 @@ import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import { derivePalette } from "@/lib/storefront/palette";
 import { newMarqueeBlock } from "@/lib/storefront/marquee";
+import { keepProducts } from "@/lib/storefront/carousel";
 import { MarqueeBlockEditor, type MarqueeBlockPatch } from "./MarqueeBlockEditor";
 import { MarqueeLibraryEntry } from "./MarqueeLibraryEntry";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
@@ -712,10 +714,7 @@ export function StorefrontDesigner({
   // Whether a sale chip shows anywhere on the board: without one, the theme's
   // sale badge controls offer to start a sale instead (SaleBadgeControls).
   const saleOnBoard = useMemo(
-    () =>
-      blocks.some(
-        (block) => block.type === "product" && productsById.get(block.productId)?.sale !== undefined,
-      ),
+    () => boardProductIds(blocks).some((productId) => productsById.get(productId)?.sale !== undefined),
     [blocks, productsById],
   );
 
@@ -770,6 +769,7 @@ export function StorefrontDesigner({
     insertBlock: (build, w, h) => insertBlock(build, w, h, takeInsertHint()),
     selectInserted: (block) => selectBlock(blockKey(block), false, block),
     onNoRoomForBand: () => toast.info(tKey("EditorLayout.panel.insert.noRoom")),
+    onNoProductsForCarousel: () => toast.info(tKey("EditorLayout.panel.insert.noProducts")),
     newButtonLabel: tKey("EditorLayout.panel.button.defaultLabel"),
   });
 
@@ -779,21 +779,14 @@ export function StorefrontDesigner({
   const defaultPageProductId = useMemo<string | null>(() => {
     const selected = selectedBlocks.find((block) => block.type === "product");
     if (selected?.type === "product") return selected.productId;
-    const first = readingOrder(blocks).find(
-      (block) => block.type === "product" && productsById.has(block.productId),
-    );
-    return first?.type === "product" ? first.productId : null;
+    // A tile or a carousel's member: each has a page here.
+    return boardProductIds(blocks).find((productId) => productsById.has(productId)) ?? null;
   }, [selectedBlocks, blocks, productsById]);
 
   // How many of the board's products a card puts straight in the cart: the
   // Cart settings' guess about which button should lead (lib/predictions.ts).
   const cartAddable = useMemo(
-    () =>
-      new Set(
-        blocks.flatMap((block) =>
-          block.type === "product" && productsById.get(block.productId)?.quickAdd ? [block.productId] : [],
-        ),
-      ).size,
+    () => boardProductIds(blocks).filter((productId) => productsById.get(productId)?.quickAdd).length,
     [blocks, productsById],
   );
 
@@ -3937,12 +3930,11 @@ export function StorefrontDesigner({
     // Draft products are hidden from buyers, so a grid tile that points at one
     // would lead buyers to a dead link. The save still succeeds (the seller
     // may be about to publish the product), but they hear about it.
-    const draftBlockTitles = blocks
-      .flatMap((b) => {
-        if (b.type !== "product") return [];
-        const p = productsById.get(b.productId);
-        return p?.status === "draft" ? [p.title] : [];
-      });
+    // A carousel's members count: a draft in one is left out for buyers.
+    const draftBlockTitles = boardProductIds(blocks).flatMap((productId) => {
+      const p = productsById.get(productId);
+      return p?.status === "draft" ? [p.title] : [];
+    });
 
     const result = await saveStorefront(
       storefrontId,
@@ -3962,12 +3954,9 @@ export function StorefrontDesigner({
     if (result.version) savedVersion.current = result.version;
     setSavedElsewhere(false);
     if (result.droppedBlocks > 0) {
-      // Server dropped refs to deleted products; mirror that locally.
-      setBlocks((current) =>
-        current.filter(
-          (b) => b.type !== "product" || productsById.has(b.productId),
-        ),
-      );
+      // Server dropped refs to deleted products; mirror that locally, a
+      // carousel's members included (keepProducts).
+      setBlocks((current) => keepProducts(current, (productId) => productsById.has(productId)));
     }
     // Only clear the flag when no edit arrived while the save was in flight.
     // If the counter moved, the seller made a change after we started; keeping
@@ -4063,6 +4052,7 @@ export function StorefrontDesigner({
   const layoutInspector = (
     <LayoutInspector
       layout={layout} button={selectedBlock?.type === "button" ? selectedBlock : null}
+      carousel={selectedBlock?.type === "carousel" ? selectedBlock : null}
       theme={theme} blocks={blocks} header={header} onDuplicate={duplicateBlocks} onRemove={removeBlock}
     />
   );
@@ -4451,6 +4441,7 @@ export function StorefrontDesigner({
                   onAddShape={addShapeBlock}
                   onAddBand={layout.addBand}
                   onAddButton={layout.addButton}
+                  onAddCarousel={layout.addCarousel}
                   onClose={() => setLeftPanel(null)}
                   moreBlocks={<MarqueeLibraryEntry onAdd={addMarqueeBlock} disabled={blocks.length >= MAX_BLOCKS} />}
                 />
@@ -4886,7 +4877,7 @@ export function StorefrontDesigner({
                       onDuplicate={() => duplicateBlocks([blockKey(selectedBlock)])}
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
-                  ) : selectedBlock?.type === "button" ? layoutInspector : null}
+                  ) : selectedBlock?.type === "button" || selectedBlock?.type === "carousel" ? layoutInspector : null}
             </>
           }
         />

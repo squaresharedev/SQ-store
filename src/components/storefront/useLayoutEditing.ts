@@ -11,11 +11,18 @@ import {
   replaceBand,
 } from "@/lib/storefront/bands";
 import { defaultButtonLink, newButtonBlock, withButtonPatch, withFine, withoutDeadLinks } from "@/lib/storefront/layout-blocks";
+import {
+  carouselInsertSize,
+  newCarouselBlock,
+  startingCarouselProducts,
+  withCarouselProducts,
+} from "@/lib/storefront/carousel";
 import type { Product } from "@/types/product";
 import { linkChoicesFor, type LayoutEditorValue } from "./layout-editor-context";
 import type { LinkableStorefront } from "./LinkDestinationField";
 import {
   blockKey,
+  boardProductIds,
   type BandBackground,
   type BlockPlacement,
   type ButtonBlock,
@@ -28,7 +35,8 @@ import {
 /**
  * THE DESIGNER'S LAYOUT AND NAVIGATION EDITS, out of StorefrontDesigner: the
  * bands (add, select, move by rows, repaint, remove), half-cell placement of
- * a block (the grid's onPlace), and adding a button.
+ * a block (the grid's onPlace), adding a button, and adding a product
+ * carousel and choosing its products.
  *
  * The designer owns the undoable state (its snapshot holds `bands` beside
  * `blocks`) and hands it in each render with the few of its own functions
@@ -59,6 +67,8 @@ export type LayoutEditingDeps = {
   selectInserted: (block: StorefrontBlock) => void;
   /** Says there is no row left for a new band. */
   onNoRoomForBand: () => void;
+  /** Says there is no product yet to put in a carousel. */
+  onNoProductsForCarousel: () => void;
   /** The words a new button starts with, in the seller's language. */
   newButtonLabel: string;
   /** This storefront, which a new button leads to when the board has nothing
@@ -154,6 +164,37 @@ export function useLayoutEditing(deps: LayoutEditingDeps) {
     if (block) selectInserted(block);
   }, []);
 
+  /** A new carousel across the board, two rows tall, holding a few of the
+   *  store's live products (the ones the board does not show yet first). With
+   *  no product at all there is nothing to show, and the seller is told. */
+  const addCarousel = useCallback(() => {
+    const { insertBlock, selectInserted, blocks, theme, productsById, onNoProductsForCarousel } = live.current;
+    const productIds = startingCarouselProducts([...productsById.values()], new Set(boardProductIds(blocks)));
+    if (productIds.length === 0) {
+      onNoProductsForCarousel();
+      return;
+    }
+    const { w, h } = carouselInsertSize(theme.columns);
+    const block = insertBlock((placement) => newCarouselBlock(crypto.randomUUID(), placement, productIds), w, h);
+    if (block) selectInserted(block);
+  }, []);
+
+  /** A carousel's products, in their new order, as ONE undo step. A product
+   *  taken out that the board shows nowhere else takes with it any button
+   *  that led to it (withoutDeadLinks): the schema refuses a link to a
+   *  product the board does not show, so the board is kept saveable. */
+  const updateCarousel = useCallback((key: string, productIds: readonly string[]) => {
+    const { setBlocks, recordChange, bands } = live.current;
+    if (productIds.length === 0) return;
+    recordChange();
+    setBlocks((current) =>
+      withoutDeadLinks(
+        current.map((block) => (block.type === "carousel" && blockKey(block) === key ? withCarouselProducts(block, productIds) : block)),
+        bands,
+      ),
+    );
+  }, []);
+
   /** A button's words, destination or look; typing its words is one undo step. */
   const updateButton = useCallback((key: string, patch: Partial<Pick<ButtonBlock, "label" | "link" | "look">>) => {
     const { setBlocks, recordChange } = live.current;
@@ -163,17 +204,21 @@ export function useLayoutEditing(deps: LayoutEditingDeps) {
     );
   }, []);
 
-  /** The inspector's title and close label for a band or a button, or null
-   *  for anything else (the designer's own titles answer). */
+  /** The inspector's title and close label for a band, a button or a
+   *  carousel, or null for anything else (the designer's own titles answer). */
   const inspectorTitle = (selected: StorefrontBlock | null): { title: string; close: string } | null =>
     selectedBand
       ? { title: t("band.title"), close: t("band.close") }
       : selected?.type === "button"
         ? { title: t("button.title"), close: t("button.close") }
-        : null;
+        : selected?.type === "carousel"
+          ? { title: t("carousel.title"), close: t("carousel.close") }
+          : null;
 
   // What the layout panels read through LayoutEditorProvider.
   const { blocks, bands, productsById, photoUrls, storefrontId, storefrontName } = deps;
+  // The catalogue in its own order (newest first), for a carousel's panel.
+  const catalog = useMemo(() => [...productsById.values()], [productsById]);
   const storefronts = useMemo(
     () => deps.storefronts ?? [{ id: storefrontId, name: storefrontName }],
     [deps.storefronts, storefrontId, storefrontName],
@@ -196,6 +241,9 @@ export function useLayoutEditing(deps: LayoutEditingDeps) {
     removeBand,
     placeBlock,
     addButton,
+    addCarousel,
+    updateCarousel,
+    catalog,
     /** The board with every link to something gone dropped (StorefrontDesigner's
      *  removal hook). */
     withoutDeadLinks,

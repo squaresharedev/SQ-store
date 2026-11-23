@@ -100,10 +100,13 @@ function LayerThumb({
     );
   }
 
+  // A carousel shows its first product's photo.
   const src =
     block.type === "product"
       ? (productsById.get(block.productId)?.imageUrl ?? null)
-      : (elementUrls[blockKey(block)] ?? null);
+      : block.type === "carousel"
+        ? (productsById.get(block.productIds[0] ?? "")?.imageUrl ?? null)
+        : (elementUrls[blockKey(block)] ?? null);
 
   return (
     <span className={box}>

@@ -27,6 +27,7 @@ export function ShapesPanel({
   canAddBlocks,
   onAddBand,
   onAddButton,
+  onAddCarousel,
 }: {
   onAddShape: (kind: ShapeKind) => void;
   /** False at the block cap; the buttons disable rather than fail silently. */
@@ -34,12 +35,14 @@ export function ShapesPanel({
   /** A band and a button, as the Layout group above the shapes. */
   onAddBand?: () => void;
   onAddButton?: () => void;
+  /** A product carousel, in the same group. */
+  onAddCarousel?: () => void;
 }) {
   const t = useTranslations("Storefront.shapes");
   return (
     <div>
       {onAddBand && onAddButton && (
-        <LayoutInserts onAddBand={onAddBand} onAddButton={onAddButton} canAddBlocks={canAddBlocks} />
+        <LayoutInserts onAddBand={onAddBand} onAddButton={onAddButton} onAddCarousel={onAddCarousel} canAddBlocks={canAddBlocks} />
       )}
       {SHAPE_GROUPS.map((group) => (
         <CollapsibleSection key={group.id} title={t(`group.${group.id}`)}>

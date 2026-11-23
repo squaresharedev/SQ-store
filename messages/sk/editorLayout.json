@@ -5,13 +5,16 @@
       "groupLabel": "Pridať prvok rozloženia",
       "name": {
         "band": "Pás",
-        "button": "Tlačidlo"
+        "button": "Tlačidlo",
+        "carousel": "Karusel"
       },
       "add": {
         "band": "Pridať pás cez celú šírku",
-        "button": "Pridať tlačidlo"
+        "button": "Pridať tlačidlo",
+        "carousel": "Pridať rad produktov na listovanie"
       },
-      "noRoom": "Za každým riadkom už je nejaký pás."
+      "noRoom": "Za každým riadkom už je nejaký pás.",
+      "noProducts": "Najprv pridajte do obchodu produkt, potom ho dajte do karuselu."
     },
     "bandChrome": {
       "rail": "Pás za riadkami {from} až {to}. Potiahnutím ho presuniete, stlačením upravíte.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Nakupovať",
       "tileLabel": "Tlačidlo: {label}"
     },
+    "carousel": {
+      "title": "Karusel",
+      "close": "Zavrieť karusel",
+      "products": "Produkty v karuseli",
+      "count": "{count} z {max} produktov",
+      "moveEarlier": "Posunúť {title} dopredu",
+      "moveLater": "Posunúť {title} dozadu",
+      "remove": "Vybrať {title} z karuselu",
+      "keepOne": "Karusel má vždy aspoň jeden produkt.",
+      "addProducts": "Pridať produkty",
+      "add": "Pridať {title} do karuselu",
+      "search": "Nájsť produkt",
+      "noMatch": "Žiadny produkt nezodpovedá.",
+      "full": "Karusel pojme najviac {max} produktov."
+    },
     "header": {
       "logoAndMenu": "Logo a menu",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Menu výkladu",
     "openMenu": "Otvoriť menu",
     "closeMenu": "Zavrieť menu",
-    "logoFallback": "Logo {store}"
+    "logoFallback": "Logo {store}",
+    "carousel": {
+      "roleDescription": "karusel",
+      "label": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktov}}",
+      "previous": "Predchádzajúce produkty",
+      "next": "Ďalšie produkty"
+    }
   }
 }

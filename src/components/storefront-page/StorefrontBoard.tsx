@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useCallback, useMemo, type CSSProperties, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { resolveInk } from "@/components/product-page/product-page-maps";
 import { BlockFace } from "@/components/storefront/BlockFace";
+import { CarouselCardAnchor, type CarouselCards } from "@/components/storefront/CarouselTileContent";
+import { keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import { BlockBlurCopies } from "@/components/storefront/BlockBlurCopies";
 import { phoneGridLayout } from "@/components/storefront/phone-grid";
 import { StorefrontMasthead } from "@/components/storefront/StorefrontMasthead";
@@ -33,6 +35,7 @@ import {
   readingOrder,
   resolveCardStyle,
   tileCovers,
+  type CardBuyButton,
   type StorefrontBlock,
 } from "@/types/storefront";
 import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefront-page";
@@ -177,6 +180,49 @@ export function StorefrontBoard({
   const blocks = useMemo(() => readingOrder(page.blocks), [page.blocks]);
   const { bands } = page;
 
+  /** Whether a card of this product, wearing this buy button, puts its
+   *  product straight in the cart: the cart is here, the seller's cards add
+   *  to it, the product allows it, and the card shows a buy button. The same
+   *  question for a product block and a carousel's card. */
+  const addsToCart = useCallback(
+    (tile: { product: Product } | undefined, buyButton: CardBuyButton | undefined) =>
+      Boolean(tile?.product.quickAdd && cart && page.tileLook.quickAdd && buyButton !== "none"),
+    [cart, page.tileLook.quickAdd],
+  );
+
+  // A carousel's cards: only the products this payload carries (the server
+  // has already left out every one a buyer may not see), each opening its
+  // page exactly as a product block's card does: the link, or the card whose
+  // button adds to the cart.
+  const carouselCards = useMemo<CarouselCards>(() => {
+    const buyButton = resolveCardStyle(theme, undefined).buyButton;
+    return {
+      product: (productId) => tiles.get(productId)?.product ?? null,
+      link: (productId, frameClassName, renderFace) => {
+        const tile = tiles.get(productId);
+        if (!tile) return null;
+        if (tile.product.quickAdd && addsToCart(tile, buyButton)) {
+          return (
+            <QuickAddTile
+              href={tile.href}
+              newTab={tilesOpenNewTab}
+              frameClassName={frameClassName}
+              productId={productId}
+              optionIds={tile.product.quickAdd.optionIds}
+              title={tile.product.title}
+              renderFace={renderFace}
+            />
+          );
+        }
+        return (
+          <CarouselCardAnchor href={tile.href} newTab={tilesOpenNewTab} productId={productId} frameClassName={frameClassName}>
+            {renderFace()}
+          </CarouselCardAnchor>
+        );
+      },
+    };
+  }, [tiles, theme, addsToCart, tilesOpenNewTab]);
+
   // Depth over the blocks this page DRAWS, like the preview: a tile that was
   // dropped on the server leaves no hole in the stack.
   const gridBlocks = useMemo<GridBlock<StorefrontBlock>[]>(() => {
@@ -193,6 +239,8 @@ export function StorefrontBoard({
         z: depths.get(key),
         // Half-cell insets, drawn by the grid (absent on every other block).
         ...(blockFine(block) ? { inset: blockFine(block) } : {}),
+        // A carousel keeps its height on a phone (keepsRowsWhenNarrow).
+        ...(keepsRowsWhenNarrow(block) ? { keepRows: true } : {}),
         data: block,
       };
     });
@@ -265,6 +313,7 @@ export function StorefrontBoard({
                     look={page.tileLook}
                     quickAddAction={quickAddAction}
                     backdrop={backdrop}
+                    carouselCards={carouselCards}
                   />
                 </div>
                 <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} backdrop={backdrop} />
@@ -281,13 +330,7 @@ export function StorefrontBoard({
             // seller's cards add to it, the product allows it, and the card
             // shows a buy button): its link goes under the face, and its
             // button is a button (QuickAddTile).
-            if (
-              tile?.product.quickAdd &&
-              block.type === "product" &&
-              cart &&
-              page.tileLook.quickAdd &&
-              card?.buyButton !== "none"
-            ) {
+            if (tile?.product.quickAdd && block.type === "product" && addsToCart(tile, card?.buyButton)) {
               return (
                 <QuickAddTile
                   href={tile.href}

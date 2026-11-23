@@ -33,6 +33,16 @@ export function carouselInsertSize(columns: number): { w: number; h: number } {
   return { w: Math.max(CANVAS_COLUMNS_MIN, columns), h: CAROUSEL_NEW_ROWS };
 }
 
+/**
+ * Whether a block keeps its height in cells on a narrower board (the reflow, a
+ * phone layout's automatic placement; GridBlock keepRows): a carousel does. A
+ * 6 by 2 row scaled to a 4 column phone would be 4 by 1, three cards a third
+ * the size; kept at 2 rows it shows two cards a thumb can read.
+ */
+export function keepsRowsWhenNarrow(block: Pick<StorefrontBlock, "type">): boolean {
+  return block.type === "carousel";
+}
+
 /** A list of products as a carousel holds it: each once, in the order given,
  *  at most CAROUSEL_PRODUCTS_MAX. */
 export function carouselProductList(ids: readonly string[]): string[] {

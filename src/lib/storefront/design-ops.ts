@@ -4,7 +4,7 @@ import { isFreelyArrangedAsDrawn } from "@/lib/storefront/layout-blocks";
 import { LAYER_OPS, normalizeLayers, type LayerOp } from "@/lib/storefront/layers";
 import { PHONE_BOARD_WIDTH_PX, phoneLayout, phoneRect, unpinnedOnPhone } from "@/lib/storefront/mobile-layout";
 import { derivePalette, recolourPalettes } from "@/lib/storefront/palette";
-import { CAROUSEL_NEW_ROWS } from "@/lib/storefront/carousel";
+import { CAROUSEL_NEW_ROWS, keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 import { objectKeyPrefix } from "@/lib/validation/product";
 import {
@@ -995,10 +995,11 @@ export function applyDesignOps(
   return { config: edited, added };
 }
 
-/** findFreeCell reads a block's placement and nothing else. */
+/** findFreeCell and the reflow read a block's placement, and whether it keeps
+ *  its rows on a narrower board (a carousel), and nothing else. */
 function asGridBlock(block: StorefrontBlock): GridBlock<StorefrontBlock> {
   const { x, y, w, h, rotation } = block;
-  return { key: blockKey(block), data: block, x, y, w, h, rotation };
+  return { key: blockKey(block), data: block, x, y, w, h, rotation, ...(keepsRowsWhenNarrow(block) ? { keepRows: true } : {}) };
 }
 
 /** What a block is, in a few words, beside where it is. Never a file key. */

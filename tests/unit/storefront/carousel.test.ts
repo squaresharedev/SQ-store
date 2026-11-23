@@ -11,6 +11,9 @@ import {
   withCarouselProducts,
 } from "@/lib/storefront/carousel";
 import { withoutDeadLinks } from "@/lib/storefront/layout-blocks";
+import { reflowBlocks } from "@/components/grid/gridConstants";
+import { phoneLayout } from "@/lib/storefront/mobile-layout";
+import { keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import { placedProductIds } from "@/lib/storefront/placed-products";
 import { tileExtrasWanted } from "@/lib/storefront/tile-extras";
 import { storefrontStructuredData } from "@/lib/seo/structured-data";
@@ -82,6 +85,24 @@ describe("a new carousel", () => {
     expect(startingCarouselProducts([], new Set())).toEqual([]);
     const big = Array.from({ length: 10 }, (_, n) => ({ id: `p${n}`, status: "active" }));
     expect(startingCarouselProducts(big, new Set())).toHaveLength(CAROUSEL_STARTING_PRODUCTS);
+  });
+});
+
+describe("a carousel on a phone", () => {
+  it("keeps its height in cells when the board reflows, never taller than it is wide", () => {
+    const grid = (block: StorefrontBlock) => ({ key: block.type, data: block, x: block.x, y: block.y, w: block.w, h: block.h, ...(keepsRowsWhenNarrow(block) ? { keepRows: true } : {}) });
+    const reflowed = reflowBlocks([grid(carousel([A, B, C])), grid({ ...text, x: 0, y: 4, w: 6, h: 2 })], 6, 4);
+    // 6 by 2 on 6 columns, onto 4: the carousel keeps 2 rows (two cards), the
+    // text block scales like everything else did before.
+    expect(reflowed.blocks.map((block) => [block.w, block.h])).toEqual([[4, 2], [4, 1]]);
+    const narrow = reflowBlocks([grid(carousel([A], { w: 6, h: 3 }))], 6, 2);
+    expect([narrow.blocks[0].w, narrow.blocks[0].h]).toEqual([2, 2]);
+  });
+
+  it("keeps its height in a phone layout's automatic placement too", () => {
+    const theme = { ...DEFAULT_STOREFRONT_CONFIG.theme, columns: 6, mobileColumns: 4 };
+    const layout = phoneLayout(theme, [carousel([A, B, C])]);
+    expect(layout?.placed.map((spot) => [spot.w, spot.h])).toEqual([[4, 2]]);
   });
 });
 

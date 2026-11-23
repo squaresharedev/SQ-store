@@ -5,13 +5,16 @@
       "groupLabel": "Dodaj element układu",
       "name": {
         "band": "Pas",
-        "button": "Przycisk"
+        "button": "Przycisk",
+        "carousel": "Karuzela"
       },
       "add": {
         "band": "Dodaj pas na całą szerokość",
-        "button": "Dodaj przycisk"
+        "button": "Dodaj przycisk",
+        "carousel": "Dodaj rząd produktów do przewijania"
       },
-      "noRoom": "Za każdym wierszem jest już jakiś pas."
+      "noRoom": "Za każdym wierszem jest już jakiś pas.",
+      "noProducts": "Najpierw dodaj produkt do sklepu, potem wstaw go do karuzeli."
     },
     "bandChrome": {
       "rail": "Pas za wierszami od {from} do {to}. Przeciągnij, aby przesunąć, naciśnij, aby edytować.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Kup teraz",
       "tileLabel": "Przycisk: {label}"
     },
+    "carousel": {
+      "title": "Karuzela",
+      "close": "Zamknij karuzelę",
+      "products": "Produkty w karuzeli",
+      "count": "{count} z {max} produktów",
+      "moveEarlier": "Przesuń {title} wcześniej",
+      "moveLater": "Przesuń {title} dalej",
+      "remove": "Wyjmij {title} z karuzeli",
+      "keepOne": "Karuzela zawsze ma co najmniej jeden produkt.",
+      "addProducts": "Dodaj produkty",
+      "add": "Dodaj {title} do karuzeli",
+      "search": "Znajdź produkt",
+      "noMatch": "Żaden produkt nie pasuje.",
+      "full": "Karuzela mieści najwyżej {max} produktów."
+    },
     "header": {
       "logoAndMenu": "Logo i menu",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Menu witryny",
     "openMenu": "Otwórz menu",
     "closeMenu": "Zamknij menu",
-    "logoFallback": "Logo {store}"
+    "logoFallback": "Logo {store}",
+    "carousel": {
+      "roleDescription": "karuzela",
+      "label": "{count, plural, one {# produkt} few {# produkty} many {# produktów} other {# produktu}}",
+      "previous": "Poprzednie produkty",
+      "next": "Następne produkty"
+    }
   }
 }
