@@ -22,8 +22,9 @@ import { GALLERY_BAND_PHOTO, GALLERY_LOGO } from "./fixtures";
 /**
  * The designer's canvas with the layout workstream's pieces live on it: the
  * band rails (press one to edit the band, drag it to move it), half-step
- * dragging of the small blocks, a button's panel when one is selected, and
- * the library's band and button. State is local; nothing is saved.
+ * dragging of the small blocks, a button's or a carousel's panel when one is
+ * selected, and the library's band, button and carousel. State is local;
+ * nothing is saved.
  */
 export function DesignerLab({
   config,
@@ -75,6 +76,7 @@ export function DesignerLab({
     },
     selectInserted: (block) => setSelectedKeys([blockKey(block)]),
     onNoRoomForBand: () => {},
+    onNoProductsForCarousel: () => {},
     newButtonLabel: "Shop now",
   });
 
@@ -136,10 +138,14 @@ export function DesignerLab({
           <button type="button" className="border border-border px-2 py-1 text-xs" onClick={layout.addButton} data-lab-add-button="">
             + button
           </button>
+          <button type="button" className="border border-border px-2 py-1 text-xs" onClick={layout.addCarousel} data-lab-add-carousel="">
+            + carousel
+          </button>
         </div>
         <LayoutInspector
           layout={layout}
           button={selectedBlock?.type === "button" ? selectedBlock : null}
+          carousel={selectedBlock?.type === "carousel" ? selectedBlock : null}
           theme={theme}
           blocks={blocks}
           header={header}

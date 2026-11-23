@@ -14,7 +14,8 @@ import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefro
 
 // THE LAYOUT GALLERY'S BOARDS (/dev/editor-layout): a storefront with three
 // full-width bands (a colour, a gradient, a photo), words and buttons on them,
-// small half-cell pieces, and the sample's own products; and the sample board
+// small half-cell pieces, the sample's own products, and a product carousel
+// of all five across the foot of the board; and the sample board
 // untouched, as the legacy board the before/after render compares. Raw hex is
 // allowed here: these are a gallery's fixtures.
 
@@ -32,6 +33,7 @@ const ID = {
   more: "0b1e7a10-0000-4000-8000-000000000017",
   star: "0b1e7a10-0000-4000-8000-000000000018",
   outline: "0b1e7a10-0000-4000-8000-000000000019",
+  carousel: "0b1e7a10-0000-4000-8000-00000000001a",
 } as const;
 
 /** The gallery's band photo: a picture the app already serves. */
@@ -77,12 +79,15 @@ export function layoutBoardConfig(sample: SampleStorefront, options: LayoutBoard
     { type: "product", productId: mouse, x: 0, y: 9, w: 3, h: 2 },
     { type: "product", productId: speaker, x: 3, y: 9, w: 3, h: 2 },
     { type: "button", id: ID.more, label: "Read our story", link: { kind: "url", url: "https://example.com/story" }, look: "link", x: 2, y: 11, w: 2, h: 1, fine: { bottom: true } },
+    // A PRODUCT CAROUSEL across the board, two rows tall: three cards show,
+    // the other two are a swipe (or an arrow) away. In its own order.
+    { type: "carousel", id: ID.carousel, productIds: [speaker, mouse, watch, headphones, camera], x: 0, y: 12, w: 6, h: 2 },
   ];
   return {
     ...sample.config,
     theme: {
       ...sample.config.theme,
-      rows: 12,
+      rows: 14,
       cornerRadius: options.radius,
       titleDisplay: "always",
       priceDisplay: "always",
