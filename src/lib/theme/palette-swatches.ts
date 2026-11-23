@@ -1,5 +1,5 @@
 import type { MessageKey } from "@/i18n/types";
-import { derivePalette } from "@/lib/storefront/palette";
+import { backgroundIsPhoto, derivePalette } from "@/lib/storefront/palette";
 import type { PaletteSlot, StorefrontPalette, StorefrontTheme } from "@/types/storefront";
 import type { ColorPreset } from "./color-presets";
 
@@ -43,12 +43,14 @@ export const PALETTE_SLOT_ORDER = Object.keys(PALETTE_SLOT_LABELS) as PaletteSlo
  * The palette as picker swatches, in slot order. Two slots wearing one colour
  * (a new storefront's text and accent are one ink) show once, under the first
  * slot's name: a row of two identical dots says nothing, and the hex is a
- * swatch's identity.
+ * swatch's identity. `omit` leaves a slot out: the Background of a board that
+ * is a photo, which no flat colour stands for.
  */
-export function paletteSwatches(palette: StorefrontPalette): ColorPreset[] {
+export function paletteSwatches(palette: StorefrontPalette, omit: readonly PaletteSlot[] = []): ColorPreset[] {
   const seen = new Set<string>();
   const swatches: ColorPreset[] = [];
   for (const slot of PALETTE_SLOT_ORDER) {
+    if (omit.includes(slot)) continue;
     const value = palette[slot].toLowerCase();
     if (seen.has(value)) continue;
     seen.add(value);
@@ -58,11 +60,14 @@ export function paletteSwatches(palette: StorefrontPalette): ColorPreset[] {
 }
 
 /** What the designer hands its colour provider (lib/theme/color-context):
- *  the storefront's palette, own or derived, and the same as swatches. */
+ *  the storefront's palette, own or derived, the same as swatches, and whether
+ *  the board's background is a photo (then it is no swatch of the five). */
 export function paletteContext(theme: StorefrontTheme): {
   palette: StorefrontPalette;
   paletteSwatches: ColorPreset[];
+  photoBackdrop: boolean;
 } {
   const palette = derivePalette(theme);
-  return { palette, paletteSwatches: paletteSwatches(palette) };
+  const photoBackdrop = backgroundIsPhoto(theme);
+  return { palette, paletteSwatches: paletteSwatches(palette, photoBackdrop ? ["background"] : []), photoBackdrop };
 }

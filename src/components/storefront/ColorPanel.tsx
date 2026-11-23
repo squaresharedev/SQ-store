@@ -283,7 +283,12 @@ export function ColorPanel({
 
       {designPalette && (
         <CollapsibleSection title={tKey("EditorType.panel.palette.title")}>
-          <PaletteSwatches palette={designPalette} isActive={isActive} onPick={pick} />
+          <PaletteSwatches
+            palette={designPalette}
+            omitBackground={colorTarget?.photoBackdrop ?? false}
+            isActive={isActive}
+            onPick={pick}
+          />
           <button
             type="button"
             onClick={() => setShowAll((open) => !open)}
@@ -468,14 +473,17 @@ function InheritSection({
  * The palette's five colours, each under its name: the first thing the panel
  * offers once the designer has handed it a palette. All five are shown even
  * when two share a colour (a new storefront's text and accent are one ink),
- * because here the NAME is what is being chosen.
+ * because here the NAME is what is being chosen. Except the Background of a
+ * board that is a photo: it has no colour to offer.
  */
 function PaletteSwatches({
   palette,
+  omitBackground,
   isActive,
   onPick,
 }: {
   palette: StorefrontPalette;
+  omitBackground: boolean;
   isActive: (hex: string) => boolean;
   onPick: (hex: string) => void;
 }) {
@@ -486,7 +494,7 @@ function PaletteSwatches({
       aria-label={tKey("EditorType.panel.palette.group")}
       className={PALETTE_CHIPS_CLASS}
     >
-      {PALETTE_SLOT_ORDER.map((slot) => {
+      {PALETTE_SLOT_ORDER.filter((slot) => !(omitBackground && slot === "background")).map((slot) => {
         const hex = palette[slot].toLowerCase();
         const labels = PALETTE_SLOT_LABELS[slot];
         return (

@@ -46,6 +46,9 @@ export type ColorTargetContextValue = {
    *  paletteContext). Handed down ready-made so the shared ColorPicker never
    *  carries the editor's words into the pages that use it elsewhere. */
   paletteSwatches?: readonly ColorPreset[];
+  /** The board's background is a photo: the palette's Background is then no
+   *  colour on the board, and the panel does not offer it as one. */
+  photoBackdrop?: boolean;
 };
 
 const ColorTargetContext = createContext<ColorTargetContextValue | null>(null);
