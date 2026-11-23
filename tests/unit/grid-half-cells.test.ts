@@ -10,6 +10,7 @@ import {
   hasInset,
   moveHalfBox,
   resizeHalfBox,
+  resizeHalfCorner,
   roundToStep,
   toHalves,
   underlayBehind,
@@ -78,6 +79,21 @@ describe("half steps", () => {
     expect(resizeHalfBox(box, { n: false, e: true, s: true, w: false }, { x: 0, y: 0 }, 6, 6)).toEqual({ ...box, r: box.l + 1, b: box.t + 1 });
     expect(resizeHalfBox(box, { n: true, e: false, s: false, w: true }, { x: -4, y: -4 }, 6, 6)).toEqual({ ...box, l: 0, t: 0 });
     expect(resizeHalfBox(box, { n: false, e: true, s: false, w: false }, { x: 99, y: 0 }, 6, 6).r).toBe(12);
+  });
+
+  it("flip the corner handle past the anchor cell, the way the whole-cell handle does", () => {
+    const box = toHalves(at(1, 1, 1, 1));
+    // Out: the far corner follows the hand.
+    expect(resizeHalfCorner(box, { x: 6, y: 5 }, 6, 6)).toEqual({ l: 2, t: 2, r: 6, b: 5 });
+    // Not yet past the anchor cell: as small as half a cell, no flip.
+    expect(resizeHalfCorner(box, { x: 3, y: 3 }, 6, 6)).toEqual({ l: 2, t: 2, r: 3, b: 3 });
+    // One whole cell back, left and up: the span lands on the other side of the
+    // anchor cell, which stays inside it.
+    expect(resizeHalfCorner(box, { x: 2, y: 2 }, 6, 6)).toEqual({ l: 0, t: 0, r: 4, b: 4 });
+    // Each axis on its own.
+    expect(resizeHalfCorner(box, { x: 2, y: 5 }, 6, 6)).toEqual({ l: 0, t: 2, r: 4, b: 5 });
+    // Held to the board.
+    expect(resizeHalfCorner(box, { x: -9, y: -9 }, 6, 6)).toEqual({ l: 0, t: 0, r: 4, b: 4 });
   });
 });
 
