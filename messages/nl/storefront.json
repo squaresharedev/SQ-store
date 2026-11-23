@@ -448,7 +448,6 @@
     "sectionPalettes": "Paletten"
   },
   "themePanel": {
-    "accent": "Accent",
     "accentHint": "Gebruikt voor knoppen, actielabels, koppen en je winkelnaam."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Afbeelding uploaden",
     "uploadingProgress": "Achtergrondafbeelding uploaden",
     "uploadHint": "Tot 10 MB. JPEG, PNG, WebP, GIF of AVIF.",
-    "colorLabel": "Kleur",
+    "colorFromPalette": "De kleur is het staaltje Achtergrond in het palet hierboven.",
     "from": "Van",
     "to": "Naar",
     "angle": "Hoek",

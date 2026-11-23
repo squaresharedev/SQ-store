@@ -5,6 +5,8 @@
       "hint": "Ändern Sie hier eine Farbe, und alles in dieser Farbe ändert sich mit.",
       "group": "Palettenfarben",
       "allColors": "Alle Farben",
+      "photoName": "Hintergrund (Ihr Foto)",
+      "photoHint": "Der Hintergrund ist Ihr Foto. Eine hier gewählte Farbe ersetzt es. Mit Rückgängig ist es wieder da.",
       "slots": {
         "background": {
           "name": "Hintergrund",

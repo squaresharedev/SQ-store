@@ -448,7 +448,6 @@
     "sectionPalettes": "Paletas"
   },
   "themePanel": {
-    "accent": "Destaque",
     "accentHint": "Utilizada nos botões, etiquetas de promoção, títulos e no nome da sua loja."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Carregar imagem",
     "uploadingProgress": "A carregar imagem de fundo",
     "uploadHint": "Até 10 MB. JPEG, PNG, WebP, GIF ou AVIF.",
-    "colorLabel": "Cor",
+    "colorFromPalette": "A cor é a amostra Fundo da paleta acima.",
     "from": "De",
     "to": "Para",
     "angle": "Ângulo",

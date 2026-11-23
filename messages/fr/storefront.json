@@ -448,7 +448,6 @@
     "sectionPalettes": "Palettes"
   },
   "themePanel": {
-    "accent": "Accent",
     "accentHint": "S’applique aux boutons, aux étiquettes promo, aux titres et au nom de votre boutique."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Importer une image",
     "uploadingProgress": "Import de l’image d’arrière-plan",
     "uploadHint": "Jusqu’à 10 Mo. JPEG, PNG, WebP, GIF ou AVIF.",
-    "colorLabel": "Couleur",
+    "colorFromPalette": "La couleur est celle de la pastille Arrière-plan de la palette ci-dessus.",
     "from": "De",
     "to": "À",
     "angle": "Angle",

@@ -448,7 +448,6 @@
     "sectionPalettes": "Palettes"
   },
   "themePanel": {
-    "accent": "Accent",
     "accentHint": "Used for buttons, sale badges, headings and your store name."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Upload image",
     "uploadingProgress": "Uploading background image",
     "uploadHint": "Up to 10 MB. JPEG, PNG, WebP, GIF, or AVIF.",
-    "colorLabel": "Color",
+    "colorFromPalette": "The color is the Background swatch in the palette above.",
     "from": "From",
     "to": "To",
     "angle": "Angle",

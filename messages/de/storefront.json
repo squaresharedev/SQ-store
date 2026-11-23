@@ -448,7 +448,6 @@
     "sectionPalettes": "Paletten"
   },
   "themePanel": {
-    "accent": "Akzentfarbe",
     "accentHint": "Wird für Buttons, Aktions-Badges, Überschriften und deinen Shop-Namen verwendet."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Bild hochladen",
     "uploadingProgress": "Hintergrundbild wird hochgeladen",
     "uploadHint": "Bis zu 10 MB. JPEG, PNG, WebP, GIF oder AVIF.",
-    "colorLabel": "Farbe",
+    "colorFromPalette": "Die Farbe stellst du über das Feld Hintergrund in der Palette oben ein.",
     "from": "Von",
     "to": "Bis",
     "angle": "Winkel",

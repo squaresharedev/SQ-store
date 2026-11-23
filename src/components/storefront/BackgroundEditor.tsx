@@ -26,7 +26,6 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
 import { infoTextClass, labelClass, secondaryButtonClass } from "@/components/ui/control-styles";
-import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
 import { resolveBackgroundStyle } from "./background-presets";
 
 type Kind = StorefrontBackground["kind"];
@@ -64,12 +63,13 @@ function switchKind(
 }
 
 /**
- * Background control: choose a solid color, a gradient (a ready-made one
- * mixed from the palette, or its colours one by one behind "Custom"), or
- * upload an image (10 MB cap; drag the preview to position it, zoom to
- * resize). Emits only the structured, schema-safe StorefrontBackground
- * shapes; the image variant stores the R2 object KEY, and display URLs come
- * from the caller.
+ * Background control: choose WHAT KIND of background the board has: a solid
+ * color (whose colour is the palette's Background swatch, set in the palette
+ * row above, not here), a gradient (a ready-made one mixed from the palette,
+ * or its colours one by one behind "Custom"), or an image (10 MB cap; drag the
+ * preview to position it, zoom to resize). Emits only the structured,
+ * schema-safe StorefrontBackground shapes; the image variant stores the R2
+ * object KEY, and display URLs come from the caller.
  */
 export function BackgroundEditor({
   value,
@@ -85,8 +85,7 @@ export function BackgroundEditor({
   imageUrl: string | null;
   /** Reports a new local preview URL after an upload (null on remove). */
   onImageChange: (url: string | null) => void;
-  /** The theme's own accent, for the solid color field's quick picks — four
-   *  tints and shades of THIS storefront's brand color, not generic neutrals. */
+  /** The theme's own accent: what a palette is read off when none is given. */
   accent: string;
   /** The storefront's palette (derivePalette), which the ready-made gradients
    *  are mixed from. Absent = one read off this background and accent. */
@@ -314,16 +313,8 @@ export function BackgroundEditor({
         </div>
       )}
 
-      {value.kind === "solid" && (
-        <ColorPicker
-          id={`${fieldId}-solid`}
-          label={t("colorLabel")}
-          value={value.color}
-          onChange={(color) => onChange({ kind: "solid", color })}
-          target={{ kind: "theme-background-solid" }}
-          presets={themeAccentPresets(accent)}
-        />
-      )}
+      {/* The colour itself is the palette's Background swatch, above. */}
+      {value.kind === "solid" && <p className={infoTextClass}>{t("colorFromPalette")}</p>}
 
       {value.kind === "gradient" && (
         <div className="space-y-3">

@@ -1,18 +1,15 @@
 "use client";
 
-import { useId } from "react";
-import { useTranslations } from "next-intl";
 import type { StorefrontBackground, StorefrontTheme } from "@/types/storefront";
-import { ColorPicker } from "@/components/ui/ColorPicker";
-import { infoTextClass } from "@/components/ui/control-styles";
 import { BackgroundEditor } from "./BackgroundEditor";
-import { derivePalette } from "@/lib/storefront/palette";
+import { derivePalette, withBackground } from "@/lib/storefront/palette";
 import { LooksSection } from "./LooksSection";
 import { PaletteRow } from "./PaletteRow";
 
 /**
- * Theme essentials: background (color / gradient / uploaded image) and accent.
- * Corner roundness lives with the other card controls in CardsSection, and the
+ * Theme essentials: the palette (the one place the accent and a plain
+ * background colour are chosen) and the background's kind (color / gradient /
+ * uploaded image). Corner roundness lives with the other card controls in CardsSection, and the
  * designer's grid guides live in the sibling "Canvas" section of this same
  * Theme group (see ControlsPanel) — they are an editor view preference, never
  * a saved theme value, and sitting here implied otherwise. Every control is
@@ -33,18 +30,16 @@ export function ThemePanel({
   backgroundImageUrl: string | null;
   onBackgroundImageChange: (url: string | null) => void;
 }) {
-  const t = useTranslations("Storefront.themePanel");
-  const fieldId = useId();
-
   function updateBackground(background: StorefrontBackground) {
-    onChange({ ...theme, background });
+    onChange(withBackground(theme, background));
   }
 
   return (
     <div className="space-y-4">
       <LooksSection theme={theme} onChange={onChange} />
-      {/* Palette first: the five colours every picker below opens on. */}
-      <PaletteRow theme={theme} onChange={onChange} />
+      {/* Palette first: the five colours every picker below opens on, and
+          where the accent and a plain background colour are set. */}
+      <PaletteRow theme={theme} onChange={onChange} backgroundImageUrl={backgroundImageUrl} />
       <BackgroundEditor
         value={theme.background}
         onChange={updateBackground}
@@ -53,18 +48,6 @@ export function ThemePanel({
         accent={theme.accent}
         palette={derivePalette(theme)}
       />
-      {/* "Accent" is a role, not a thing on the page, so the line under it
-          names what it colours. */}
-      <div className="space-y-1">
-        <ColorPicker
-          id={`${fieldId}-accent`}
-          label={t("accent")}
-          value={theme.accent}
-          onChange={(accent) => onChange({ ...theme, accent })}
-          target={{ kind: "theme-accent" }}
-        />
-        <p className={infoTextClass}>{t("accentHint")}</p>
-      </div>
     </div>
   );
 }

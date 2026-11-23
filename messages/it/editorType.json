@@ -5,6 +5,8 @@
       "hint": "Cambia un colore qui e tutto ciò che lo usa cambia con lui.",
       "group": "Colori della tavolozza",
       "allColors": "Tutti i colori",
+      "photoName": "Sfondo (la tua foto)",
+      "photoHint": "Lo sfondo è la tua foto. Scegliere qui un colore la sostituisce. Annulla la ripristina.",
       "slots": {
         "background": {
           "name": "Sfondo",

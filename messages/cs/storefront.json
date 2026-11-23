@@ -448,7 +448,6 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Zvýraznění",
     "accentHint": "Používá se pro tlačítka, štítky akcí, nadpisy a název obchodu."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Nahrát obrázek",
     "uploadingProgress": "Nahrávání obrázku pozadí",
     "uploadHint": "Do 10 MB. JPEG, PNG, WebP, GIF nebo AVIF.",
-    "colorLabel": "Barva",
+    "colorFromPalette": "Barvu určuje vzorek Pozadí v paletě výše.",
     "from": "Od",
     "to": "Do",
     "angle": "Úhel",

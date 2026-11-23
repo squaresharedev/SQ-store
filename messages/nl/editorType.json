@@ -5,6 +5,8 @@
       "hint": "Verander hier een kleur en alles in die kleur verandert mee.",
       "group": "Paletkleuren",
       "allColors": "Alle kleuren",
+      "photoName": "Achtergrond (je foto)",
+      "photoHint": "De achtergrond is je foto. Kies je hier een kleur, dan vervangt die de foto. Ongedaan maken haalt de foto terug.",
       "slots": {
         "background": {
           "name": "Achtergrond",

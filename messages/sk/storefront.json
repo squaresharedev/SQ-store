@@ -448,7 +448,6 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Zvýraznenie",
     "accentHint": "Používa sa pre tlačidlá, štítky akcií, nadpisy a názov obchodu."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Nahrať obrázok",
     "uploadingProgress": "Nahráva sa obrázok pozadia",
     "uploadHint": "Najviac 10 MB. JPEG, PNG, WebP, GIF alebo AVIF.",
-    "colorLabel": "Farba",
+    "colorFromPalette": "Farbu určuje vzorka Pozadie v palete vyššie.",
     "from": "Od",
     "to": "Do",
     "angle": "Uhol",

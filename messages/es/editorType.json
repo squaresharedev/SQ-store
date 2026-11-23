@@ -5,6 +5,8 @@
       "hint": "Cambia un color aquí y todo lo que lo usa cambia con él.",
       "group": "Colores de la paleta",
       "allColors": "Todos los colores",
+      "photoName": "Fondo (tu foto)",
+      "photoHint": "El fondo es tu foto. Si eliges un color aquí, la sustituye. Deshacer la recupera.",
       "slots": {
         "background": {
           "name": "Fondo",

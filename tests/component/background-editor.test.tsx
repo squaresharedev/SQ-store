@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from "vitest";
+import userEvent from "@testing-library/user-event";
 import { render, screen, cleanup, within } from "../setup/render";
-import { english } from "../setup/translate";
 import { BackgroundEditor } from "@/components/storefront/BackgroundEditor";
 import { ToastProvider } from "@/components/ui/Toast";
-import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
-import { COLOR_PRESETS } from "@/lib/theme/color-presets";
 import type { StorefrontBackground } from "@/types/storefront";
 
 afterEach(cleanup);
@@ -29,85 +27,49 @@ beforeAll(() => {
 
 const ACCENT = "#a855f7";
 const SOLID: StorefrontBackground = { kind: "solid", color: "#ffffff" };
+const GRADIENT: StorefrontBackground = { kind: "gradient", from: "#111111", to: "#222222", angle: 160 };
 
-function mount(accent = ACCENT) {
-  return render(
+function mount(value: StorefrontBackground = SOLID, onChange = vi.fn()) {
+  render(
     <ToastProvider>
-      <BackgroundEditor
-        value={SOLID}
-        onChange={vi.fn()}
-        imageUrl={null}
-        onImageChange={vi.fn()}
-        accent={accent}
-      />
+      <BackgroundEditor value={value} onChange={onChange} imageUrl={null} onImageChange={vi.fn()} accent={ACCENT} />
     </ToastProvider>,
   );
+  return onChange;
 }
 
-/** The solid color field's swatch row specifically — the tab strip above it
- *  ("Color" / "Gradient" / "Image") also has a button named "Color". */
-function colorSwatchRow() {
-  return screen.getByRole("group", { name: /color swatches/i });
-}
-
-describe("BackgroundEditor solid color quick picks", () => {
-  it("offers the theme's own accent presets, not the generic neutrals", () => {
+describe("BackgroundEditor chooses the KIND of background", () => {
+  it("offers color, gradient and image, with the current one pressed", () => {
     mount();
-    const row = colorSwatchRow();
-    for (const preset of themeAccentPresets(ACCENT)) {
-      expect(
-        within(row).getByRole("button", { name: english(preset.label, { value: preset.value }) }),
-      ).toBeInTheDocument();
-    }
-    // The three neutrals every other field shares are NOT here — this field
-    // shows the seller's own brand color instead.
-    for (const preset of COLOR_PRESETS) {
-      expect(
-        within(row).queryByRole("button", { name: english(preset.label, { value: preset.value }) }),
-      ).toBeNull();
-    }
+    const kinds = screen.getByRole("group", { name: "Background type" });
+    expect(within(kinds).getByRole("button", { name: "Color" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(kinds).getByRole("button", { name: "Gradient" })).toHaveAttribute("aria-pressed", "false");
+    expect(within(kinds).getByRole("button", { name: "Image" })).toHaveAttribute("aria-pressed", "false");
   });
 
-  it("changing the theme's accent changes the quick picks", () => {
-    const { rerender } = render(
-      <ToastProvider>
-        <BackgroundEditor
-          value={SOLID}
-          onChange={vi.fn()}
-          imageUrl={null}
-          onImageChange={vi.fn()}
-          accent="#16a34a"
-        />
-      </ToastProvider>,
-    );
-    const greenPreset = themeAccentPresets("#16a34a")[2];
-    expect(
-      within(colorSwatchRow()).getByRole("button", {
-        name: english(greenPreset.label, { value: greenPreset.value }),
-      }),
-    ).toBeInTheDocument();
+  it("has no colour picker for a plain colour: that colour is the palette's Background swatch", () => {
+    mount();
+    expect(screen.queryAllByRole("group", { name: /color swatches/i })).toHaveLength(0);
+    expect(screen.getByText(/Background swatch in the palette above/i)).toBeInTheDocument();
+  });
 
-    rerender(
-      <ToastProvider>
-        <BackgroundEditor
-          value={SOLID}
-          onChange={vi.fn()}
-          imageUrl={null}
-          onImageChange={vi.fn()}
-          accent={ACCENT}
-        />
-      </ToastProvider>,
-    );
-    const purplePreset = themeAccentPresets(ACCENT)[2];
-    expect(
-      within(colorSwatchRow()).getByRole("button", {
-        name: english(purplePreset.label, { value: purplePreset.value }),
-      }),
-    ).toBeInTheDocument();
-    expect(
-      within(colorSwatchRow()).queryByRole("button", {
-        name: english(greenPreset.label, { value: greenPreset.value }),
-      }),
-    ).toBeNull();
+  it("switches to a gradient, starting from the colour it had", async () => {
+    const onChange = mount();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Gradient" }));
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0]).toMatchObject({ kind: "gradient" });
+  });
+
+  it("switches a gradient back to a colour", async () => {
+    const onChange = mount(GRADIENT);
+    await userEvent.setup().click(within(screen.getByRole("group", { name: "Background type" })).getByRole("button", { name: "Color" }));
+    expect(onChange.mock.calls[0][0]).toEqual({ kind: "solid", color: "#111111" });
+  });
+
+  it("keeps a gradient's own stops reachable (the palette has no gradient stops)", () => {
+    mount(GRADIENT);
+    expect(screen.getByText("From")).toBeInTheDocument();
+    expect(screen.getByText("To")).toBeInTheDocument();
+    expect(screen.queryByText(/Background swatch in the palette above/i)).toBeNull();
   });
 });

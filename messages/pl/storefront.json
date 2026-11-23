@@ -448,7 +448,6 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Akcent",
     "accentHint": "Używany w przyciskach, etykietach obniżek, nagłówkach i nazwie sklepu."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Prześlij obraz",
     "uploadingProgress": "Przesyłanie obrazu tła",
     "uploadHint": "Do 10 MB. JPEG, PNG, WebP, GIF lub AVIF.",
-    "colorLabel": "Kolor",
+    "colorFromPalette": "Kolor to próbka Tło w palecie powyżej.",
     "from": "Od",
     "to": "Do",
     "angle": "Kąt",
