@@ -178,9 +178,17 @@ export async function buyerStorefrontFor(accountId: string, productId: string): 
     .eq("owner_id", accountId)
     .order("created_at", { ascending: false })
     .limit(50);
-  const storefronts = (data ?? []) as { id: string; config: { blocks?: { type?: string; productId?: string }[] } | null }[];
+  const storefronts = (data ?? []) as {
+    id: string;
+    config: { blocks?: { type?: string; productId?: string; productIds?: string[] }[] } | null;
+  }[];
+  // Placed as a tile, or in a carousel: either gives it a page there.
   const placing = storefronts.find((storefront) =>
-    storefront.config?.blocks?.some((block) => block.type === "product" && block.productId === productId),
+    storefront.config?.blocks?.some(
+      (block) =>
+        (block.type === "product" && block.productId === productId) ||
+        (block.type === "carousel" && Array.isArray(block.productIds) && block.productIds.includes(productId)),
+    ),
   );
   return (placing ?? storefronts[0])?.id ?? null;
 }

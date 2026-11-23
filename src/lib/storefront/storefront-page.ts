@@ -21,7 +21,8 @@
 //   - a product tile is drawn only for a product that is live (active, this
 //     seller's, not taken down). Anything else is dropped whole, like the
 //     embed drops a removed product: a hole labelled "something was here" is
-//     neither the buyer's business nor something they can act on;
+//     neither the buyer's business nor something they can act on. A carousel
+//     keeps only its live members, and one left with none is dropped whole;
 //   - of each product, only what a tile prints: title, price, photo. No stock
 //     count, no per-order limit, no description, no object key.
 //
@@ -66,8 +67,10 @@ import {
 import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { uuidField } from "@/lib/validation/inputs";
+import { keepProducts } from "@/lib/storefront/carousel";
 import {
   blockKey,
+  boardProductIds,
   buyerVisibleBlocks,
   type StorefrontBlock,
   type StorefrontConfig,
@@ -219,9 +222,9 @@ export async function buildStorefrontPage(
 
   const admin = createAdminClient();
   const visible = buyerVisibleBlocks(config);
-  const productIds = [
-    ...new Set(visible.flatMap((block) => (block.type === "product" ? [block.productId] : []))),
-  ];
+  // Every product the board shows: its tiles and its carousels' members, each
+  // once (boardProductIds), all read and gated alike below.
+  const productIds = boardProductIds(visible);
 
   // Compute which extras each tile wants BEFORE reading tile products, so the
   // gallery column (up to 24 JSON objects per product) is included in the
@@ -278,12 +281,12 @@ export async function buildStorefrontPage(
   if (storeSales === null) return PAGE_BUSY;
 
   // THE REMOVAL GATE, product half: a product staff have taken down has no
-  // tile, the same as one that is a draft or was deleted.
+  // tile, the same as one that is a draft or was deleted. A carousel loses
+  // such a member the same way, and a carousel left with none draws nothing
+  // (keepProducts).
   const live = products.data.filter((row) => isContentVisible(row.moderation_status));
   const liveIds = new Set(live.map((row) => row.id));
-  const liveBlocks: StorefrontBlock[] = visible.filter(
-    (block) => block.type !== "product" || liveIds.has(block.productId),
-  );
+  const liveBlocks: StorefrontBlock[] = keepProducts(visible, (productId) => liveIds.has(productId));
   // Bands, and where each link leads (a button whose link leads nowhere a
   // buyer may go is dropped, like a tile whose product is not live).
   const layout = await boardLayout(admin, storefront.owner_id, config, liveBlocks, (productId) =>

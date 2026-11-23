@@ -8,9 +8,11 @@
 //     or menu entry that names any other is dropped, the way a product block
 //     naming someone else's product is;
 //   - a link to a PRODUCT the save has just dropped (not this store's, or
-//     deleted while the editor was open) is dropped with it. The schema refuses
-//     a link to a product the board does not show, so storing one would leave a
-//     config that could not be read back;
+//     deleted while the editor was open), as a product block or from a
+//     carousel, is dropped with it unless the board still shows that product
+//     somewhere else. The schema refuses a link to a product the board does
+//     not show, so storing one would leave a config that could not be read
+//     back;
 //   - band photos are uploads like the background (an `images/` key): a key
 //     new to this storefront is verified (ownership, real size and type), and
 //     one the save lets go of is evicted once the row is written;

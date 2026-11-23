@@ -53,7 +53,19 @@ export function tileExtrasWanted(config: Pick<StorefrontConfig, "theme" | "block
   const hoverPhoto = new Set<string>();
   const rating = new Set<string>();
   const stock = new Set<string>();
+  // A carousel's cards wear the theme's card look, and play no hover (a card
+  // in a row of them is not the cell the hover answers to), so its members
+  // ask for the stars and the stock state the theme's cards show, never a
+  // second photo.
+  const themeCard = resolveCardStyle(config.theme, undefined);
   for (const block of config.blocks) {
+    if (block.type === "carousel") {
+      for (const productId of block.productIds) {
+        if (themeCard.showRating) rating.add(productId);
+        if (themeCard.showLowStock || themeCard.buyButton !== "none") stock.add(productId);
+      }
+      continue;
+    }
     if (block.type !== "product") continue;
     const card = resolveCardStyle(config.theme, block.style);
     if (card.hoverPhoto) hoverPhoto.add(block.productId);

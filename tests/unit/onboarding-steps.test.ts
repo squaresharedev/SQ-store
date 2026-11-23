@@ -210,6 +210,13 @@ describe("buildSetupSteps", () => {
     expect(step(data, "publish").done).toBe(false);
   });
 
+  it("counts a product only a carousel shows as placed: it has a page there", () => {
+    const carousel = { type: "carousel", id: "c-1", productIds: ["p-1"] } as Block;
+    const data = buildSetupSteps(placedSeller({ storefronts: [storefront("sf-1", [carousel], true)] }));
+    expect(step(data, "storefront").done).toBe(true);
+    expect(data.livePage).not.toBeNull();
+  });
+
   it("ignores blocks that are not products", () => {
     const data = buildSetupSteps(
       placedSeller({

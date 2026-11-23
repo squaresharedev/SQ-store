@@ -263,6 +263,21 @@ describe("listIndexablePages", () => {
     expect(urls.some((u) => u.includes(`/s/${SF_ID_1}/p/${PRODUCT_ID_1}`))).toBe(true);
   });
 
+  it("lists a product only a carousel shows, like a tile's", async () => {
+    const admin = createAdminClient();
+    const config = makeConfig({ productIds: [] });
+    config.blocks = [
+      { type: "carousel", id: "c0000000-0000-4000-8000-000000000001", productIds: [PRODUCT_ID_2, PRODUCT_ID_1], x: 0, y: 0, w: 6, h: 2 },
+    ];
+    st.storefrontPages = [{ data: [makeSf(SF_ID_1, config)], error: null }];
+    st.profilesResult = { data: [COMPLETE_PROFILE], error: null };
+    st.productsResult = { data: [makeProduct(PRODUCT_ID_1), makeProduct(PRODUCT_ID_2)], error: null };
+    const pages = await listIndexablePages(admin);
+    const urls = (pages ?? []).map((p) => p.url);
+    expect(urls.some((u) => u.includes(`/s/${SF_ID_1}/p/${PRODUCT_ID_1}`))).toBe(true);
+    expect(urls.some((u) => u.includes(`/s/${SF_ID_1}/p/${PRODUCT_ID_2}`))).toBe(true);
+  });
+
   it("excludes a product that has been taken down", async () => {
     const admin = createAdminClient();
     st.storefrontPages = [{ data: [makeSf()], error: null }];

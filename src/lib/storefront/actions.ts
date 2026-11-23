@@ -19,8 +19,10 @@ import {
   DEFAULT_STOREFRONT_HEADER,
   DEFAULT_STOREFRONT_NAME,
   HEADER_NAME_MAX,
+  boardProductIds,
   type StorefrontConfig,
 } from "@/types/storefront";
+import { keepProducts } from "@/lib/storefront/carousel";
 import {
   failure,
   invalidInput,
@@ -252,12 +254,13 @@ export async function saveStorefront(
 
   const supabase = await createClient();
 
-  // Ownership check: keep only product blocks whose product exists AND belongs
-  // to the caller. Text blocks carry no references and pass through as-parsed.
+  // Ownership check: keep only the products that exist AND belong to the
+  // active account (a team member saves the OWNER's store), wherever the board
+  // shows them: a product block naming any other goes whole, a carousel loses
+  // that member, and a carousel left with none goes too (keepProducts). Text
+  // and the other kinds carry no product and pass through as parsed.
   let blocks = parsed.data.blocks;
-  const productIds = blocks
-    .filter((block) => block.type === "product")
-    .map((block) => block.productId);
+  const productIds = boardProductIds(blocks);
   if (productIds.length > 0) {
     const { data: ownedRows, error } = await supabase
       .from("products")
@@ -269,9 +272,7 @@ export async function saveStorefront(
       return failure(serverError("saveStorefront"));
     }
     const ownedIds = new Set(ownedRows.map((row) => row.id));
-    blocks = blocks.filter(
-      (block) => block.type !== "product" || ownedIds.has(block.productId),
-    );
+    blocks = keepProducts(blocks, (productId) => ownedIds.has(productId));
   }
 
   const config: StorefrontConfig = {

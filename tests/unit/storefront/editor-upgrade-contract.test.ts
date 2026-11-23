@@ -29,7 +29,7 @@ const MARQUEE = "22222222-3333-4444-8555-666666666666";
 const CAROUSEL = "33333333-4444-4555-8666-777777777777";
 const ELSEWHERE = "44444444-5555-4666-8777-888888888888";
 
-/** A carousel block, as the contract shapes it (not saveable yet, see below). */
+/** A carousel block: two products, one of them on no tile. */
 function carousel(): Extract<StorefrontBlock, { type: "carousel" }> {
   return { type: "carousel", id: CAROUSEL, productIds: [ELSEWHERE, PRODUCT], x: 0, y: 6, w: 6, h: 2 };
 }
@@ -252,17 +252,37 @@ describe("editor upgrade contract: the new members", () => {
     expect(refuses((c) => c.bands.push({ ...c.bands[0] }))).toBe(true);
   });
 
-  // THE CAROUSEL IS IN THE CONTRACT BUT NOT BUILT. Its products are not yet
-  // owner-checked on save nor gated for buyers, so until it is built no
-  // storefront may hold one; its shape is pinned for the round that builds it.
-  it("refuses a carousel block: the kind is not saveable until it is built", () => {
-    expect(refuses((c) => c.blocks.push(carousel()))).toBe(true);
+  // THE CAROUSEL: saveable, its shape judged here (whose products they are is
+  // the save's question, see storefront-carousel.test.ts).
+  it("accepts a carousel block, and reads it back exactly as stored", () => {
+    const config = structuredClone(upgradedConfig());
+    config.blocks.push({ ...carousel(), y: 5 });
+    const parsed = storefrontConfigSchema.safeParse(structuredClone(config));
+    expect(parsed.error?.issues).toBeUndefined();
+    expect(parsed.data).toEqual(config);
+    expect(parseStoredStorefrontConfig(structuredClone(config))).toEqual(config);
   });
 
-  it("pins the carousel's shape: its own products, each once, at least one", () => {
+  it("refuses a carousel naming a product twice, none, more than it holds, or anything but a product id", () => {
+    const withCarousel = (productIds: unknown) => refuses((c) => c.blocks.push({ ...carousel(), y: 5, productIds }));
+    expect(withCarousel([PRODUCT, PRODUCT])).toBe(true);
+    expect(withCarousel([])).toBe(true);
+    expect(withCarousel(Array.from({ length: 13 }, (_, n) => `33333333-4444-4555-8666-${String(n).padStart(12, "0")}`))).toBe(true);
+    expect(withCarousel(["not-a-product"])).toBe(true);
+    expect(refuses((c) => c.blocks.push({ ...carousel(), y: 5, style: { shadow: "soft" } }))).toBe(true);
     expect(carouselBlockSchema.safeParse(carousel()).success).toBe(true);
-    expect(carouselBlockSchema.safeParse({ ...carousel(), productIds: [PRODUCT, PRODUCT] }).success).toBe(false);
-    expect(carouselBlockSchema.safeParse({ ...carousel(), productIds: [] }).success).toBe(false);
+  });
+
+  it("takes a link to a product only a carousel shows, and drops it when the carousel goes", () => {
+    const config = structuredClone(upgradedConfig()) as Record<string, any>;
+    config.blocks.push({ ...carousel(), y: 5 });
+    config.blocks[4].link = { kind: "product", productId: ELSEWHERE };
+    expect(storefrontConfigSchema.safeParse(config).success).toBe(true);
+    // Stored with the carousel gone, the dead link is repaired, not fatal.
+    config.blocks = config.blocks.filter((block: { type: string }) => block.type !== "carousel");
+    const read = parseStoredStorefrontConfig(config);
+    expect(read).not.toBeNull();
+    expect(read!.blocks.some((block) => block.type === "button" && block.id === BUTTON)).toBe(false);
   });
 
   it("keeps the band's photo to an uploaded image, never an element or a product photo", () => {
