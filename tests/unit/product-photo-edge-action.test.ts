@@ -29,7 +29,7 @@ vi.mock("@/lib/supabase/server", () => ({
       const calls: Call[] = [];
       queries.push(calls);
       const chain: Record<string, unknown> = {};
-      for (const method of ["select", "update", "eq", "or"]) {
+      for (const method of ["select", "update", "eq", "is"]) {
         chain[method] = (...args: unknown[]) => {
           calls.push({ method, args });
           return chain;
@@ -73,8 +73,8 @@ describe("storing a photo's edge", () => {
       ["owner_id", OWNER],
       ["image_key", PHOTO],
     ]);
-    // Only a change is written.
-    expect(argsOf(write, "or")).toEqual([["photo_edge.is.null,photo_edge.neq.white"]]);
+    // Only a photo with no answer yet is written.
+    expect(argsOf(write, "is")).toEqual([["photo_edge", null]]);
     expect(rateLimitMock).toHaveBeenCalledWith("product_photo_edge", { max: 300, windowSeconds: 3600 });
   });
 

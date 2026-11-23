@@ -81,15 +81,16 @@ export async function recordPhotoEdge(input: RecordPhotoEdgeInput): Promise<Reco
   const { productId, photoKey, edge } = parsed.data;
 
   const supabase = await createClient();
-  // Only a change is written: an answer already stored for this photo stays.
-  // `edge` is one of PHOTO_EDGES here, so it is safe inside the filter text.
+  // Only a photo with no answer yet is written: measuring is deterministic, so
+  // an answer already stored for this photo stays, and a repeated write never
+  // touches the row (no filter is built from text: search-input-hardening).
   const { data: written, error } = await supabase
     .from("products")
     .update({ photo_edge: edge })
     .eq("id", productId)
     .eq("owner_id", account.accountId)
     .eq("image_key", photoKey)
-    .or(`photo_edge.is.null,photo_edge.neq.${edge}`)
+    .is("photo_edge", null)
     .select("id")
     .maybeSingle();
   if (error) {

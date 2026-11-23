@@ -146,7 +146,7 @@ describe("half-cell insets", () => {
   it("paint the cell on its half cells", () => {
     const { container } = render(<StorefrontPageView page={page()} />);
     const cell = container.querySelector('[data-grid-key="t_t1"]') as HTMLElement;
-    expect(cell.style.top).toContain("0.5 / 1");
+    expect(cell.style.top).toBe("calc((var(--ss-cell) + var(--grid-gap, 0px)) * 0.5)");
     expect(cell.style.height).toContain("calc(100% -");
   });
 });
