@@ -3336,13 +3336,6 @@ export function StorefrontDesigner({
   function applyColorTarget(ref: ColorTargetRef, hex: string) {
     if (isCardLookColorKind(ref.kind)) return setCardLookColor(ref, hex);
     switch (ref.kind) {
-      case "theme-accent":
-        updateTheme({ ...theme, accent: hex });
-        return;
-      case "theme-background-solid":
-        if (theme.background.kind !== "solid") return;
-        updateTheme({ ...theme, background: { kind: "solid", color: hex } });
-        return;
       case "theme-background-from":
         if (theme.background.kind !== "gradient") return;
         updateTheme({ ...theme, background: { ...theme.background, from: hex } });

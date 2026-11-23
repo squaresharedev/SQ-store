@@ -177,7 +177,7 @@ describe("palette first: the picker row", () => {
   it("offers the palette's five colours instead of the fixed neutrals", () => {
     render(
       <ColorTargetProvider value={provider()}>
-        <ColorPicker label="Fill" value="#123456" onChange={vi.fn()} target={{ kind: "theme-accent" }} />
+        <ColorPicker label="Fill" value="#123456" onChange={vi.fn()} target={{ kind: "shape-fill", blockKey: "b" }} />
       </ColorTargetProvider>,
     );
     for (const hex of Object.values(PALETTE)) {
@@ -190,7 +190,7 @@ describe("palette first: the picker row", () => {
     const onChange = vi.fn();
     render(
       <ColorTargetProvider value={provider()}>
-        <ColorPicker label="Fill" value="#123456" onChange={onChange} target={{ kind: "theme-accent" }} />
+        <ColorPicker label="Fill" value="#123456" onChange={onChange} target={{ kind: "shape-fill", blockKey: "b" }} />
       </ColorTargetProvider>,
     );
     await userEvent.setup().click(screen.getByRole("button", { name: `Palette accent (${PALETTE.accent})` }));

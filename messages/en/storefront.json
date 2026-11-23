@@ -1302,10 +1302,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accent",
       "storeName": "Store name",
       "bio": "Bio",
-      "background": "Background",
       "gradientFrom": "Gradient from",
       "gradientTo": "Gradient to",
       "fill": "Fill",
@@ -1354,22 +1352,6 @@
       "ink": {
         "name": "Ink",
         "label": "Ink ({value})"
-      },
-      "paleAccent": {
-        "name": "Pale accent",
-        "label": "Pale accent ({value})"
-      },
-      "softAccent": {
-        "name": "Soft accent",
-        "label": "Soft accent ({value})"
-      },
-      "accent": {
-        "name": "Accent",
-        "label": "Accent ({value})"
-      },
-      "deepAccent": {
-        "name": "Deep accent",
-        "label": "Deep accent ({value})"
       }
     },
     "standard": {

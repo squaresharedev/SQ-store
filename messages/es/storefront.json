@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Acento",
       "storeName": "Nombre de la tienda",
       "bio": "Biografía",
-      "background": "Fondo",
       "gradientFrom": "Degradado desde",
       "gradientTo": "Degradado hasta",
       "fill": "Relleno",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Tinta",
         "label": "Tinta ({value})"
-      },
-      "paleAccent": {
-        "name": "Acento pálido",
-        "label": "Acento pálido ({value})"
-      },
-      "softAccent": {
-        "name": "Acento suave",
-        "label": "Acento suave ({value})"
-      },
-      "accent": {
-        "name": "Acento",
-        "label": "Acento ({value})"
-      },
-      "deepAccent": {
-        "name": "Acento intenso",
-        "label": "Acento intenso ({value})"
       }
     },
     "standard": {

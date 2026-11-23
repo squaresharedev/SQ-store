@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Zvýraznění",
       "storeName": "Název obchodu",
       "bio": "Bio",
-      "background": "Pozadí",
       "gradientFrom": "Přechod od",
       "gradientTo": "Přechod do",
       "fill": "Výplň",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Inkoustová",
         "label": "Inkoustová ({value})"
-      },
-      "paleAccent": {
-        "name": "Světlé zvýraznění",
-        "label": "Světlé zvýraznění ({value})"
-      },
-      "softAccent": {
-        "name": "Jemné zvýraznění",
-        "label": "Jemné zvýraznění ({value})"
-      },
-      "accent": {
-        "name": "Zvýraznění",
-        "label": "Zvýraznění ({value})"
-      },
-      "deepAccent": {
-        "name": "Tmavé zvýraznění",
-        "label": "Tmavé zvýraznění ({value})"
       }
     },
     "standard": {

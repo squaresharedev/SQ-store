@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Akcent",
       "storeName": "Názov obchodu",
       "bio": "Medailón",
-      "background": "Pozadie",
       "gradientFrom": "Prechod od",
       "gradientTo": "Prechod do",
       "fill": "Výplň",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Atramentová",
         "label": "Atramentová ({value})"
-      },
-      "paleAccent": {
-        "name": "Bledý akcent",
-        "label": "Bledý akcent ({value})"
-      },
-      "softAccent": {
-        "name": "Jemný akcent",
-        "label": "Jemný akcent ({value})"
-      },
-      "accent": {
-        "name": "Akcent",
-        "label": "Akcent ({value})"
-      },
-      "deepAccent": {
-        "name": "Sýty akcent",
-        "label": "Sýty akcent ({value})"
       }
     },
     "standard": {

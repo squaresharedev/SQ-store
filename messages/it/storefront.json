@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accento",
       "storeName": "Nome del negozio",
       "bio": "Bio",
-      "background": "Sfondo",
       "gradientFrom": "Sfumatura da",
       "gradientTo": "Sfumatura a",
       "fill": "Riempimento",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Inchiostro",
         "label": "Inchiostro ({value})"
-      },
-      "paleAccent": {
-        "name": "Accento tenue",
-        "label": "Accento tenue ({value})"
-      },
-      "softAccent": {
-        "name": "Accento morbido",
-        "label": "Accento morbido ({value})"
-      },
-      "accent": {
-        "name": "Accento",
-        "label": "Accento ({value})"
-      },
-      "deepAccent": {
-        "name": "Accento intenso",
-        "label": "Accento intenso ({value})"
       }
     },
     "standard": {

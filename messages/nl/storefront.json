@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accent",
       "storeName": "Etalagenaam",
       "bio": "Bio",
-      "background": "Achtergrond",
       "gradientFrom": "Verloop van",
       "gradientTo": "Verloop naar",
       "fill": "Vulling",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Inkt",
         "label": "Inkt ({value})"
-      },
-      "paleAccent": {
-        "name": "Lichtaccent",
-        "label": "Lichtaccent ({value})"
-      },
-      "softAccent": {
-        "name": "Zacht accent",
-        "label": "Zacht accent ({value})"
-      },
-      "accent": {
-        "name": "Accent",
-        "label": "Accent ({value})"
-      },
-      "deepAccent": {
-        "name": "Diep accent",
-        "label": "Diep accent ({value})"
       }
     },
     "standard": {

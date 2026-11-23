@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Akcent",
       "storeName": "Nazwa sklepu",
       "bio": "Opis",
-      "background": "Tło",
       "gradientFrom": "Gradient od",
       "gradientTo": "Gradient do",
       "fill": "Wypełnienie",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Atramentowy",
         "label": "Atramentowy ({value})"
-      },
-      "paleAccent": {
-        "name": "Jasny akcent",
-        "label": "Jasny akcent ({value})"
-      },
-      "softAccent": {
-        "name": "Delikatny akcent",
-        "label": "Delikatny akcent ({value})"
-      },
-      "accent": {
-        "name": "Akcent",
-        "label": "Akcent ({value})"
-      },
-      "deepAccent": {
-        "name": "Głęboki akcent",
-        "label": "Głęboki akcent ({value})"
       }
     },
     "standard": {

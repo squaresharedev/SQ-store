@@ -1265,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Akzentfarbe",
       "storeName": "Schaufenstername",
       "bio": "Bio",
-      "background": "Hintergrund",
       "gradientFrom": "Verlauf von",
       "gradientTo": "Verlauf bis",
       "fill": "Füllung",
@@ -1317,22 +1315,6 @@
       "ink": {
         "name": "Tintenschwarz",
         "label": "Tintenschwarz ({value})"
-      },
-      "paleAccent": {
-        "name": "Sehr helle Akzentfarbe",
-        "label": "Sehr helle Akzentfarbe ({value})"
-      },
-      "softAccent": {
-        "name": "Helle Akzentfarbe",
-        "label": "Helle Akzentfarbe ({value})"
-      },
-      "accent": {
-        "name": "Akzentfarbe",
-        "label": "Akzentfarbe ({value})"
-      },
-      "deepAccent": {
-        "name": "Dunkle Akzentfarbe",
-        "label": "Dunkle Akzentfarbe ({value})"
       }
     },
     "standard": {

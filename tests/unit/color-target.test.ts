@@ -112,18 +112,10 @@ const product: ProductBlock = {
 // ---------------------------------------------------------------------------
 
 describe("resolveColorTarget: theme colors", () => {
-  it("resolves the accent", () => {
-    const out = resolve(
-      { kind: "theme-accent" },
-      themeWith({ accent: "#ff0000" }),
-      [],
-    );
-    expect(out).toEqual({ label: "Accent", value: "#ff0000" });
-  });
-
-  it("resolves a solid background", () => {
-    const theme = themeWith({ background: { kind: "solid", color: "#abcdef" } });
-    expect(resolve({ kind: "theme-background-solid" }, theme, [])).toEqual({
+  it("resolves the accent and a solid background through the palette's slots", () => {
+    const theme = themeWith({ accent: "#ff0000", background: { kind: "solid", color: "#abcdef" } });
+    expect(resolve({ kind: "palette", slot: "accent" }, theme, [])).toEqual({ label: "Accent", value: "#ff0000" });
+    expect(resolve({ kind: "palette", slot: "background" }, theme, [])).toEqual({
       label: "Background",
       value: "#abcdef",
     });
@@ -202,13 +194,6 @@ describe("resolveColorTarget: theme colors", () => {
     );
   });
 
-  it("a solid target does NOT resolve against a gradient background", () => {
-    const theme = themeWith({
-      background: { kind: "gradient", from: "#111111", to: "#222222", angle: 160 },
-    });
-    expect(resolve({ kind: "theme-background-solid" }, theme, [])).toBeNull();
-  });
-
   it("gradient targets do NOT resolve against an image background", () => {
     // The panel must close rather than edit a color the background has no slot
     // for — this is the case that would otherwise strand it.
@@ -217,7 +202,6 @@ describe("resolveColorTarget: theme colors", () => {
     });
     expect(resolve({ kind: "theme-background-from" }, theme, [])).toBeNull();
     expect(resolve({ kind: "theme-background-to" }, theme, [])).toBeNull();
-    expect(resolve({ kind: "theme-background-solid" }, theme, [])).toBeNull();
   });
 
   it("the accent still resolves under an image background", () => {
@@ -225,7 +209,7 @@ describe("resolveColorTarget: theme colors", () => {
       accent: "#00ff00",
       background: { kind: "image", key: "storefronts/a.jpg", x: 50, y: 50, scale: 100 },
     });
-    expect(resolve({ kind: "theme-accent" }, theme, [])?.value).toBe(
+    expect(resolve({ kind: "palette", slot: "accent" }, theme, [])?.value).toBe(
       "#00ff00",
     );
   });
@@ -440,14 +424,14 @@ describe("resolveColorTarget: hex gating", () => {
     );
     expect(out!.value).toMatch(STRICT_HEX);
     expect(
-      resolve({ kind: "theme-accent" }, themeWith({ accent: "#fff" }), [])!
+      resolve({ kind: "palette", slot: "accent" }, themeWith({ accent: "#fff" }), [])!
         .value,
     ).toMatch(STRICT_HEX);
   });
 
   it("lowercases an uppercase stored color", () => {
     expect(
-      resolve({ kind: "theme-accent" }, themeWith({ accent: "#ABCDEF" }), [])
+      resolve({ kind: "palette", slot: "accent" }, themeWith({ accent: "#ABCDEF" }), [])
         ?.value,
     ).toBe("#abcdef");
   });
@@ -482,14 +466,14 @@ describe("color target helpers", () => {
     // Theme scope and tile scope are different fields too.
     expect(colorTargetKey({ kind: "price-tag", part: "fill" })).not.toBe(keys[0]);
     // And the pre-existing kinds keep a stable identity of their own.
-    expect(colorTargetKey({ kind: "theme-accent" })).not.toBe(
-      colorTargetKey({ kind: "theme-background-solid" }),
+    expect(colorTargetKey({ kind: "palette", slot: "accent" })).not.toBe(
+      colorTargetKey({ kind: "palette", slot: "background" }),
     );
   });
 
   it("colorTargetBlockKey names the block, or null for theme colors", () => {
     expect(colorTargetBlockKey({ kind: "shape-fill", blockKey: "s_1" })).toBe("s_1");
-    expect(colorTargetBlockKey({ kind: "theme-accent" })).toBeNull();
+    expect(colorTargetBlockKey({ kind: "palette", slot: "accent" })).toBeNull();
   });
 
   /**
