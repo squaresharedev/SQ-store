@@ -86,10 +86,12 @@ describe("a cell's paint", () => {
     expect(cellPaintStyle(at(0, 0, 2, 2), { x: 0, y: 0 }, undefined)).toEqual({});
   });
 
-  it("keeps the turned block's nudge exactly as it was written before insets", () => {
+  it("keeps the turned block's nudge where it was before insets, the vertical one as a length", () => {
+    // `top` is in row pitches, not a percentage of the area: WebKit ignores a
+    // percentage `top` on a grid item. A pitch is the same either way.
     expect(cellPaintStyle(at(0, 0, 2, 3), { x: 0.5, y: -1 }, undefined)).toEqual({
       left: "calc((100% + var(--grid-gap, 0px)) * 0.5 / 2)",
-      top: "calc((100% + var(--grid-gap, 0px)) * -1 / 3)",
+      top: "calc((var(--ss-cell) + var(--grid-gap, 0px)) * -1)",
     });
   });
 
