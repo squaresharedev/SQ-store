@@ -270,10 +270,12 @@ export function TextBlockEditor({
         onChange={(align) => onUpdate({ align })}
       />
 
-      <VerticalAlignToggles
-        valign={block.valign}
-        onChange={(valign) => onUpdate({ valign })}
-      />
+      <SummonedField field="valign" summons={summons}>
+        <VerticalAlignToggles
+          valign={block.valign}
+          onChange={(valign) => onUpdate({ valign })}
+        />
+      </SummonedField>
 
       {/* The block's own overrides of its style: a font, a size, spacing
           and a blur. Most blocks need none of them, so they fold away. */}
