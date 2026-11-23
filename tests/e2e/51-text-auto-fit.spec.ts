@@ -27,12 +27,16 @@ const tileText = () => page.locator("[data-block-tile] p").first();
 
 /**
  * The size control is one of the block's own overrides, so it sits behind the
- * panel's "More" fold (shut until a block carries an override). Open it, if it
- * is not already: a shut fold keeps its contents mounted but hidden.
+ * panel's "More" fold (shut until a block carries an override). Open the fold
+ * that holds the Size field, if it is shut: a shut fold keeps its contents
+ * mounted but `hidden`, and its button names it through aria-controls. Found
+ * from the field, not by the word "More", which other panels use too.
  */
 async function openMore() {
-  const more = page.getByRole("button", { name: "More", exact: true }).first();
-  if ((await more.getAttribute("aria-expanded")) === "false") await more.click();
+  const size = page.getByLabel("Size", { exact: true }).first();
+  const foldId = await size.evaluate((node) => node.closest("[hidden][id]")?.id ?? "");
+  if (foldId) await page.locator(`button[aria-controls="${foldId}"]`).click();
+  await expect(size).toBeVisible();
 }
 
 async function fontSize() {
@@ -65,6 +69,7 @@ test.afterAll(async () => {
 test.describe("text block auto-fit", () => {
   test("short words render at the heading's own base size", async () => {
     await expect.poll(fontSize).toBe("24px");
+    await openMore();
     await expect(page.getByText(/^Auto \(24 px\)$/)).toBeVisible();
   });
 
