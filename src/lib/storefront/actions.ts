@@ -14,7 +14,6 @@ import {
 } from "@/lib/validation/storefront";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
-  DEFAULT_STOREFRONT_CONFIG,
   newStorefrontConfig,
   DEFAULT_STOREFRONT_HEADER,
   DEFAULT_STOREFRONT_NAME,
