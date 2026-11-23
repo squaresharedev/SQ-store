@@ -448,7 +448,6 @@
     "sectionPalettes": "Paletten"
   },
   "themePanel": {
-    "accent": "Accent",
     "accentHint": "Gebruikt voor knoppen, actielabels, koppen en je winkelnaam."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Afbeelding uploaden",
     "uploadingProgress": "Achtergrondafbeelding uploaden",
     "uploadHint": "Tot 10 MB. JPEG, PNG, WebP, GIF of AVIF.",
-    "colorLabel": "Kleur",
+    "colorFromPalette": "De kleur is het staaltje Achtergrond in het palet hierboven.",
     "from": "Van",
     "to": "Naar",
     "angle": "Hoek",
@@ -1266,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accent",
       "storeName": "Etalagenaam",
       "bio": "Bio",
-      "background": "Achtergrond",
       "gradientFrom": "Verloop van",
       "gradientTo": "Verloop naar",
       "fill": "Vulling",
@@ -1318,22 +1315,6 @@
       "ink": {
         "name": "Inkt",
         "label": "Inkt ({value})"
-      },
-      "paleAccent": {
-        "name": "Lichtaccent",
-        "label": "Lichtaccent ({value})"
-      },
-      "softAccent": {
-        "name": "Zacht accent",
-        "label": "Zacht accent ({value})"
-      },
-      "accent": {
-        "name": "Accent",
-        "label": "Accent ({value})"
-      },
-      "deepAccent": {
-        "name": "Diep accent",
-        "label": "Diep accent ({value})"
       }
     },
     "standard": {

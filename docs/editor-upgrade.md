@@ -83,7 +83,12 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
   value it does not understand. Colors are found by field NAME: `color`,
   `accent`, `from`, `via`, `to`, or ending in `Color`. A new color field that
   follows the rule is recolored with no further wiring. When two palette
-  slots share a color, only the slot itself moves.
+  slots share a color (a white board with white cards), a value cannot say
+  which slot it is, so only the fields whose ROLE is the slot move
+  (`FIELD_ROLES` and `paletteRoleOf` in `palette.ts`, the one place roles
+  are decided); a field with no role stays. The palette row is the one place
+  the accent and a plain background colour are set. A photo background has no
+  colour: its swatch is the photo, and choosing a colour there replaces it.
 - **A band is not a block.** It lives in `config.bands`, so reading order, the
   phone reflow, the block cap, overlap and layering have no new case. On a
   phone a band follows the blocks that sit on it.
@@ -123,7 +128,6 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
 - **One-click background removal.** The existing in-browser cut-out
   (`lib/share-card/cutout`) loads its runtime and model from third parties at
   run time, which a storefront may not do. Self-host them first.
-- **Editor search entries** for the new controls (`lib/storefront/setting-ref.ts`).
 
 ## Looking at it
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { Check, Copy, Pipette, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -164,6 +164,7 @@ export function ColorPicker({
   target,
   presets = COLOR_PRESETS,
   compact = false,
+  swatchStyle,
   labelClassName = labelClass,
 }: {
   id?: string;
@@ -202,6 +203,13 @@ export function ColorPicker({
    * Nothing is unreachable; the presets and the inherit option move inside.
    */
   compact?: boolean;
+  /**
+   * What a COMPACT swatch is painted with, in place of the colour: for a field
+   * whose value is not a flat colour on the page (a background that is a
+   * photo, which the swatch then shows). `value` still seeds the picker the
+   * swatch opens.
+   */
+  swatchStyle?: CSSProperties;
 }) {
   // The swatch scroller, which keeps the chosen swatch in view.
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -576,7 +584,7 @@ export function ColorPicker({
                 ? "border border-dashed border-muted-foreground/60 bg-transparent"
                 : "ring-1 ring-inset ring-black/15",
             )}
-            style={inheriting ? undefined : { backgroundColor: current }}
+            style={inheriting ? undefined : (swatchStyle ?? { backgroundColor: current })}
           />
         }
       >

@@ -448,7 +448,6 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Akcent",
     "accentHint": "Używany w przyciskach, etykietach obniżek, nagłówkach i nazwie sklepu."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Prześlij obraz",
     "uploadingProgress": "Przesyłanie obrazu tła",
     "uploadHint": "Do 10 MB. JPEG, PNG, WebP, GIF lub AVIF.",
-    "colorLabel": "Kolor",
+    "colorFromPalette": "Kolor to próbka Tło w palecie powyżej.",
     "from": "Od",
     "to": "Do",
     "angle": "Kąt",
@@ -1266,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Akcent",
       "storeName": "Nazwa sklepu",
       "bio": "Opis",
-      "background": "Tło",
       "gradientFrom": "Gradient od",
       "gradientTo": "Gradient do",
       "fill": "Wypełnienie",
@@ -1318,22 +1315,6 @@
       "ink": {
         "name": "Atramentowy",
         "label": "Atramentowy ({value})"
-      },
-      "paleAccent": {
-        "name": "Jasny akcent",
-        "label": "Jasny akcent ({value})"
-      },
-      "softAccent": {
-        "name": "Delikatny akcent",
-        "label": "Delikatny akcent ({value})"
-      },
-      "accent": {
-        "name": "Akcent",
-        "label": "Akcent ({value})"
-      },
-      "deepAccent": {
-        "name": "Głęboki akcent",
-        "label": "Głęboki akcent ({value})"
       }
     },
     "standard": {

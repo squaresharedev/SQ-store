@@ -5,6 +5,8 @@
       "hint": "Changez une couleur ici et tout ce qui la porte change avec elle.",
       "group": "Couleurs de la palette",
       "allColors": "Toutes les couleurs",
+      "photoName": "Arrière-plan (votre photo)",
+      "photoHint": "L’arrière-plan est votre photo. Choisir une couleur ici la remplace. Annuler la rétablit.",
       "slots": {
         "background": {
           "name": "Arrière-plan",

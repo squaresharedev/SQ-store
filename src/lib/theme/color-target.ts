@@ -50,8 +50,6 @@ export { DEFAULT_TEXT_COLOR, headerThemeColors, priceTagAutoTextColor } from "./
  * (so undo history and the dirty flag behave identically).
  */
 export type ColorTargetRef =
-  | { kind: "theme-accent" }
-  | { kind: "theme-background-solid" }
   | { kind: "theme-background-from" }
   | { kind: "theme-background-to" }
   | { kind: "header-name" }
@@ -299,12 +297,6 @@ export function resolveColorTarget(
   editingLine?: HeaderLine | null,
 ): ResolvedColorTarget | null {
   switch (ref.kind) {
-    case "theme-accent":
-      return {
-        label: "Storefront.colors.fields.accent",
-        value: gate(theme.accent, "#171717"),
-      };
-
     // The two masthead lines resolve only while they are actually on screen:
     // hiding the header (or emptying the line) leaves nothing to style, so the
     // panel closes rather than editing something invisible — the same rule the
@@ -336,14 +328,6 @@ export function resolveColorTarget(
         },
       };
     }
-
-    case "theme-background-solid":
-      return theme.background.kind === "solid"
-        ? {
-            label: "Storefront.colors.fields.background",
-            value: gate(theme.background.color, "#ffffff"),
-          }
-        : null;
 
     case "theme-background-from":
       return theme.background.kind === "gradient"

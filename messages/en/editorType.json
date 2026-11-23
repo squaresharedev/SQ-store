@@ -5,6 +5,8 @@
       "hint": "Change a color here and everything painted in it changes with it.",
       "group": "Palette colors",
       "allColors": "All colors",
+      "photoName": "Background (your photo)",
+      "photoHint": "The background is your photo. Choosing a color here replaces it. Undo brings it back.",
       "slots": {
         "background": {
           "name": "Background",

@@ -5,7 +5,6 @@ import {
 } from "@/lib/theme/standard-colors";
 import { COLOR_PALETTES } from "@/lib/theme/color-palettes";
 import { COLOR_PRESETS } from "@/lib/theme/color-presets";
-import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
 import { english } from "../setup/translate";
 
 const STRICT_HEX = /^#[0-9a-f]{6}$/;
@@ -117,40 +116,6 @@ describe("color palettes", () => {
   it("names each palette's group after the palette", () => {
     for (const palette of COLOR_PALETTES) {
       expect(english(palette.group)).toBe(`${english(palette.name)} palette`);
-    }
-  });
-});
-
-describe("theme accent presets", () => {
-  it("is four swatches, light to dark, ending on pure black at the extreme", () => {
-    const presets = themeAccentPresets("#a855f7");
-    expect(presets).toHaveLength(4);
-    const lums = presets.map((s) => luminance(s.value));
-    for (let i = 1; i < lums.length; i++) {
-      expect(lums[i]).toBeLessThan(lums[i - 1]);
-    }
-  });
-
-  it("the third swatch is the accent itself, unmixed", () => {
-    const accent = "#a855f7";
-    const preset = themeAccentPresets(accent)[2];
-    expect(preset.value).toBe(accent);
-    expect(english(preset.name)).toBe("Accent");
-    expect(english(preset.label, { value: accent })).toBe(`Accent (${accent})`);
-  });
-
-  it("follows a different accent to a different row", () => {
-    const purple = themeAccentPresets("#a855f7").map((s) => s.value);
-    const green = themeAccentPresets("#16a34a").map((s) => s.value);
-    expect(purple).not.toEqual(green);
-  });
-
-  it("every swatch is strict lowercase hex and named", () => {
-    for (const swatch of themeAccentPresets("#2563eb")) {
-      expect(swatch.value).toMatch(STRICT_HEX);
-      expect(english(swatch.label, { value: swatch.value })).toBe(
-        `${english(swatch.name)} (${swatch.value})`,
-      );
     }
   });
 });

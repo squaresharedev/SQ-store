@@ -81,6 +81,21 @@ export function resolveBackgroundStyle(
 }
 
 /**
+ * What a small swatch shows for a PHOTO background: the photo itself, cropped
+ * to fill it (the palette row's Background swatch). Without a display URL, the
+ * neutral base the photo degrades to everywhere else.
+ */
+export function photoSwatchStyle(imageUrl?: string | null): CSSProperties {
+  if (!imageUrl) return { backgroundColor: IMAGE_BACKGROUND_BASE };
+  return {
+    backgroundColor: IMAGE_BACKGROUND_BASE,
+    backgroundImage: cssUrl(imageUrl),
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
+}
+
+/**
  * The BOARD's backdrop: its background, with the paper grain laid on top when
  * it has one (lib/storefront/texture). For the buyer's board and the
  * designer's canvas; the product page and the checkout borrow the background

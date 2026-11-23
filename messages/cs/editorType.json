@@ -5,6 +5,8 @@
       "hint": "Změňte tu barvu a změní se s ní všechno, co je v ní obarvené.",
       "group": "Barvy palety",
       "allColors": "Všechny barvy",
+      "photoName": "Pozadí (vaše fotka)",
+      "photoHint": "Pozadím je vaše fotka. Výběr barvy ji nahradí. Krok zpět ji vrátí.",
       "slots": {
         "background": {
           "name": "Pozadí",

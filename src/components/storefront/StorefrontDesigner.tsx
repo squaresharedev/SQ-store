@@ -3336,13 +3336,6 @@ export function StorefrontDesigner({
   function applyColorTarget(ref: ColorTargetRef, hex: string) {
     if (isCardLookColorKind(ref.kind)) return setCardLookColor(ref, hex);
     switch (ref.kind) {
-      case "theme-accent":
-        updateTheme({ ...theme, accent: hex });
-        return;
-      case "theme-background-solid":
-        if (theme.background.kind !== "solid") return;
-        updateTheme({ ...theme, background: { kind: "solid", color: hex } });
-        return;
       case "theme-background-from":
         if (theme.background.kind !== "gradient") return;
         updateTheme({ ...theme, background: { ...theme.background, from: hex } });
@@ -3558,10 +3551,11 @@ export function StorefrontDesigner({
     // opened in an effect, so the panel is already on the right group when the
     // editor first paints.
     // (A block's own setting has no panel to seed: it is answered below, once
-    // there is a board to pick its block from.)
+    // there is a board to pick its block from. Nor has the drawer that adds a
+    // block: that opens the same way.)
     () => {
       const ref = settingById(initialSetting ?? "")?.ref;
-      return ref && ref.kind !== "block" ? ref : null;
+      return ref && ref.kind !== "block" && ref.kind !== "library" ? ref : null;
     },
   );
   useEffect(() => {
@@ -3600,8 +3594,8 @@ export function StorefrontDesigner({
   // first render has.
   useEffect(() => {
     const ref = settingById(initialSetting ?? "")?.ref;
-    if (ref?.kind !== "block") return;
-    const timer = setTimeout(() => openBlockSetting(ref), 0);
+    if (ref?.kind !== "block" && ref?.kind !== "library") return;
+    const timer = setTimeout(() => openSetting(ref), 0);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- answered once, for the arrival only
   }, []);
@@ -3609,6 +3603,13 @@ export function StorefrontDesigner({
   function openSetting(ref: SettingRef) {
     if (ref.kind === "block") {
       openBlockSetting(ref);
+      return;
+    }
+    // The drawer that ADDS a band, a button or scrolling text: the same call
+    // the toolbar's "all shapes" makes.
+    if (ref.kind === "library") {
+      setLeftPanel({ kind: "library", tab: ref.tab });
+      setSettingsOpen(false);
       return;
     }
     // THE CART is designed while looking at it, full: a product page out with

@@ -448,7 +448,6 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Zvýraznění",
     "accentHint": "Používá se pro tlačítka, štítky akcí, nadpisy a název obchodu."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Nahrát obrázek",
     "uploadingProgress": "Nahrávání obrázku pozadí",
     "uploadHint": "Do 10 MB. JPEG, PNG, WebP, GIF nebo AVIF.",
-    "colorLabel": "Barva",
+    "colorFromPalette": "Barvu určuje vzorek Pozadí v paletě výše.",
     "from": "Od",
     "to": "Do",
     "angle": "Úhel",
@@ -1266,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Zvýraznění",
       "storeName": "Název obchodu",
       "bio": "Bio",
-      "background": "Pozadí",
       "gradientFrom": "Přechod od",
       "gradientTo": "Přechod do",
       "fill": "Výplň",
@@ -1318,22 +1315,6 @@
       "ink": {
         "name": "Inkoustová",
         "label": "Inkoustová ({value})"
-      },
-      "paleAccent": {
-        "name": "Světlé zvýraznění",
-        "label": "Světlé zvýraznění ({value})"
-      },
-      "softAccent": {
-        "name": "Jemné zvýraznění",
-        "label": "Jemné zvýraznění ({value})"
-      },
-      "accent": {
-        "name": "Zvýraznění",
-        "label": "Zvýraznění ({value})"
-      },
-      "deepAccent": {
-        "name": "Tmavé zvýraznění",
-        "label": "Tmavé zvýraznění ({value})"
       }
     },
     "standard": {

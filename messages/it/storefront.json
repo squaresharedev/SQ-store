@@ -448,7 +448,6 @@
     "sectionPalettes": "Palette"
   },
   "themePanel": {
-    "accent": "Accento",
     "accentHint": "Usato per pulsanti, etichette promo, titoli e il nome del tuo negozio."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Carica immagine",
     "uploadingProgress": "Caricamento dell’immagine di sfondo",
     "uploadHint": "Fino a 10 MB. JPEG, PNG, WebP, GIF o AVIF.",
-    "colorLabel": "Colore",
+    "colorFromPalette": "Il colore è il campione Sfondo della tavolozza qui sopra.",
     "from": "Da",
     "to": "A",
     "angle": "Angolo",
@@ -1266,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accento",
       "storeName": "Nome del negozio",
       "bio": "Bio",
-      "background": "Sfondo",
       "gradientFrom": "Sfumatura da",
       "gradientTo": "Sfumatura a",
       "fill": "Riempimento",
@@ -1318,22 +1315,6 @@
       "ink": {
         "name": "Inchiostro",
         "label": "Inchiostro ({value})"
-      },
-      "paleAccent": {
-        "name": "Accento tenue",
-        "label": "Accento tenue ({value})"
-      },
-      "softAccent": {
-        "name": "Accento morbido",
-        "label": "Accento morbido ({value})"
-      },
-      "accent": {
-        "name": "Accento",
-        "label": "Accento ({value})"
-      },
-      "deepAccent": {
-        "name": "Accento intenso",
-        "label": "Accento intenso ({value})"
       }
     },
     "standard": {

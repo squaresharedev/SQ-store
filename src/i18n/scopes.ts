@@ -80,6 +80,23 @@ const APP_CHROME = [
   "Storefront.settings",
   // ...whose cart entries are named by the Cart panel's own labels
   "Storefront.cartPage",
+  // ...and whose entries for the editor upgrade's controls are named by those
+  // controls' own labels (one string each, not the catalogues they sit in)
+  "EditorType.panel.palette.title",
+  "EditorType.panel.pairings.title",
+  "EditorType.panel.textStyles.title",
+  "EditorType.panel.valign.label",
+  "EditorCards.panel.cardColor",
+  "EditorCards.panel.blend.label",
+  "EditorCards.panel.nameStrip",
+  "EditorCards.panel.photoShape.label",
+  "EditorCards.panel.shadow.label",
+  "EditorFinish.panel.motion.label",
+  "EditorFinish.panel.texture.label",
+  "EditorFinish.panel.marquee.inspectorTitle",
+  "EditorLayout.panel.band.title",
+  "EditorLayout.panel.button.title",
+  "EditorLayout.panel.header.logoAndMenu",
   // lib/auth/actions.ts + lib/auth/signup.ts in shell closure
   "Auth.success",
   // lib/security/events.ts in shell closure

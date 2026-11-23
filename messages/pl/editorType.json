@@ -5,6 +5,8 @@
       "hint": "Zmień tu kolor, a wszystko w tym kolorze zmieni się razem z nim.",
       "group": "Kolory palety",
       "allColors": "Wszystkie kolory",
+      "photoName": "Tło (twoje zdjęcie)",
+      "photoHint": "Tłem jest twoje zdjęcie. Wybranie tu koloru je zastąpi. Cofnięcie przywróci zdjęcie.",
       "slots": {
         "background": {
           "name": "Tło",

@@ -448,7 +448,6 @@
     "sectionPalettes": "Palety"
   },
   "themePanel": {
-    "accent": "Zvýraznenie",
     "accentHint": "Používa sa pre tlačidlá, štítky akcií, nadpisy a názov obchodu."
   },
   "panelSearch": {
@@ -487,7 +486,7 @@
     "uploadImage": "Nahrať obrázok",
     "uploadingProgress": "Nahráva sa obrázok pozadia",
     "uploadHint": "Najviac 10 MB. JPEG, PNG, WebP, GIF alebo AVIF.",
-    "colorLabel": "Farba",
+    "colorFromPalette": "Farbu určuje vzorka Pozadie v palete vyššie.",
     "from": "Od",
     "to": "Do",
     "angle": "Uhol",
@@ -1266,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Akcent",
       "storeName": "Názov obchodu",
       "bio": "Medailón",
-      "background": "Pozadie",
       "gradientFrom": "Prechod od",
       "gradientTo": "Prechod do",
       "fill": "Výplň",
@@ -1318,22 +1315,6 @@
       "ink": {
         "name": "Atramentová",
         "label": "Atramentová ({value})"
-      },
-      "paleAccent": {
-        "name": "Bledý akcent",
-        "label": "Bledý akcent ({value})"
-      },
-      "softAccent": {
-        "name": "Jemný akcent",
-        "label": "Jemný akcent ({value})"
-      },
-      "accent": {
-        "name": "Akcent",
-        "label": "Akcent ({value})"
-      },
-      "deepAccent": {
-        "name": "Sýty akcent",
-        "label": "Sýty akcent ({value})"
       }
     },
     "standard": {
