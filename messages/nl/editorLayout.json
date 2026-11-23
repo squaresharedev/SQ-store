@@ -5,13 +5,16 @@
       "groupLabel": "Een indelingselement toevoegen",
       "name": {
         "band": "Band",
-        "button": "Knop"
+        "button": "Knop",
+        "carousel": "Carrousel"
       },
       "add": {
         "band": "Een band over de volle breedte toevoegen",
-        "button": "Een knop toevoegen"
+        "button": "Een knop toevoegen",
+        "carousel": "Een rij producten om doorheen te vegen toevoegen"
       },
-      "noRoom": "Achter elke rij ligt al een band."
+      "noRoom": "Achter elke rij ligt al een band.",
+      "noProducts": "Voeg eerst een product toe aan je winkel en zet het dan in een carrousel."
     },
     "bandChrome": {
       "rail": "Band achter de rijen {from} tot {to}. Sleep om te verplaatsen, druk om te bewerken.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Nu shoppen",
       "tileLabel": "Knop: {label}"
     },
+    "carousel": {
+      "title": "Carrousel",
+      "close": "Carrousel sluiten",
+      "products": "Producten in de carrousel",
+      "count": "{count} van {max} producten",
+      "moveEarlier": "{title} naar voren",
+      "moveLater": "{title} naar achteren",
+      "remove": "{title} uit de carrousel halen",
+      "keepOne": "Een carrousel houdt altijd minstens één product.",
+      "addProducts": "Producten toevoegen",
+      "add": "{title} aan de carrousel toevoegen",
+      "search": "Een product zoeken",
+      "noMatch": "Geen product komt overeen.",
+      "full": "Een carrousel bevat hooguit {max} producten."
+    },
     "header": {
       "logoAndMenu": "Logo en menu",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Etalagemenu",
     "openMenu": "Menu openen",
     "closeMenu": "Menu sluiten",
-    "logoFallback": "Logo van {store}"
+    "logoFallback": "Logo van {store}",
+    "carousel": {
+      "roleDescription": "carrousel",
+      "label": "{count, plural, one {# product} other {# producten}}",
+      "previous": "Vorige producten",
+      "next": "Volgende producten"
+    }
   }
 }

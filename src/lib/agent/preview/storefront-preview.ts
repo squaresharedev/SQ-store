@@ -28,6 +28,7 @@ import { isTraderIdentityComplete } from "@/lib/settings/trader-identity";
 import { resolveProductPage } from "@/lib/storefront/product-page";
 import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { getStorefront } from "@/lib/storefront/queries";
+import { keepProducts } from "@/lib/storefront/carousel";
 import { loadTileExtras, tileExtrasWanted } from "@/lib/storefront/tile-extras";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
 import {
@@ -91,8 +92,9 @@ export async function storefrontPreview(
   // was taken down, is left out (a hole the buyer would not see either).
   const drawable = products.filter((row) => isContentVisible(row.moderation_status));
   const drawableIds = new Set(drawable.map((row) => row.id));
-  const drawnBlocks: StorefrontBlock[] = buyerVisibleBlocks(config).filter(
-    (block) => block.type !== "product" || drawableIds.has(block.productId),
+  // A carousel loses such a member too, and one left with none is not drawn.
+  const drawnBlocks: StorefrontBlock[] = keepProducts(buyerVisibleBlocks(config), (productId) =>
+    drawableIds.has(productId),
   );
 
   const admin = createAdminClient();

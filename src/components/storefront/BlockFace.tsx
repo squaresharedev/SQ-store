@@ -16,7 +16,7 @@ import type {
   TextRange,
 } from "./InlineTextEditor";
 import { ButtonTileContent } from "./ButtonTileContent";
-import { CarouselTileContent } from "./CarouselTileContent";
+import { CarouselTileContent, type CarouselCards } from "./CarouselTileContent";
 import { ImageTileContent } from "./ImageTileContent";
 import { MarqueeTileContent } from "./MarqueeTileContent";
 import { ProductTileContent, type TileQuickAddAction } from "./ProductTileContent";
@@ -52,6 +52,7 @@ export function BlockFace({
   hover,
   quickAddAction,
   backdrop,
+  carouselCards,
   onTextChange,
   onToggleBlockFormat,
   onTextRangeChange,
@@ -85,6 +86,9 @@ export function BlockFace({
    *  pick an ink that reads when they carry no colour of their own. Absent =
    *  not known here, and the face keeps the ink it has always had. */
   backdrop?: string;
+  /** Carousel blocks only: where its cards' products come from, and on a
+   *  buyer's board how each card opens its product (CarouselCards). */
+  carouselCards?: CarouselCards;
   /** Text and the spans that format parts of it, always together. */
   onTextChange?: (text: string, spans: TextSpan[], source: TextEditSource) => void;
   /** Ctrl+B / I / U with nothing selected: the whole block. */
@@ -127,7 +131,7 @@ export function BlockFace({
     return <MarqueeTileContent block={block} theme={theme} backdrop={backdrop} />;
   }
   if (block.type === "carousel") {
-    return <CarouselTileContent block={block} theme={theme} />;
+    return <CarouselTileContent block={block} theme={theme} look={look} cards={carouselCards} />;
   }
   if (product) {
     return (

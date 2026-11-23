@@ -5,13 +5,16 @@
       "groupLabel": "Aggiungi un elemento di layout",
       "name": {
         "band": "Fascia",
-        "button": "Pulsante"
+        "button": "Pulsante",
+        "carousel": "Carosello"
       },
       "add": {
         "band": "Aggiungi una fascia a tutta larghezza",
-        "button": "Aggiungi un pulsante"
+        "button": "Aggiungi un pulsante",
+        "carousel": "Aggiungi una fila di prodotti da scorrere"
       },
-      "noRoom": "Dietro ogni riga c'è già una fascia."
+      "noRoom": "Dietro ogni riga c'è già una fascia.",
+      "noProducts": "Prima aggiungi un prodotto al tuo negozio, poi mettilo in un carosello."
     },
     "bandChrome": {
       "rail": "Fascia dietro le righe da {from} a {to}. Trascinala per spostarla, premi per modificarla.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Acquista ora",
       "tileLabel": "Pulsante: {label}"
     },
+    "carousel": {
+      "title": "Carosello",
+      "close": "Chiudi il carosello",
+      "products": "Prodotti nel carosello",
+      "count": "{count} prodotti su {max}",
+      "moveEarlier": "Sposta {title} prima",
+      "moveLater": "Sposta {title} dopo",
+      "remove": "Togli {title} dal carosello",
+      "keepOne": "Un carosello tiene sempre almeno un prodotto.",
+      "addProducts": "Aggiungi prodotti",
+      "add": "Aggiungi {title} al carosello",
+      "search": "Trova un prodotto",
+      "noMatch": "Nessun prodotto corrisponde.",
+      "full": "Un carosello contiene al massimo {max} prodotti."
+    },
     "header": {
       "logoAndMenu": "Logo e menu",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Menu della vetrina",
     "openMenu": "Apri il menu",
     "closeMenu": "Chiudi il menu",
-    "logoFallback": "Logo di {store}"
+    "logoFallback": "Logo di {store}",
+    "carousel": {
+      "roleDescription": "carosello",
+      "label": "{count, plural, one {# prodotto} other {# prodotti}}",
+      "previous": "Prodotti precedenti",
+      "next": "Prodotti successivi"
+    }
   }
 }

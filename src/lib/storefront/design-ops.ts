@@ -4,6 +4,7 @@ import { isFreelyArrangedAsDrawn } from "@/lib/storefront/layout-blocks";
 import { LAYER_OPS, normalizeLayers, type LayerOp } from "@/lib/storefront/layers";
 import { PHONE_BOARD_WIDTH_PX, phoneLayout, phoneRect, unpinnedOnPhone } from "@/lib/storefront/mobile-layout";
 import { derivePalette, recolourPalettes } from "@/lib/storefront/palette";
+import { CAROUSEL_NEW_ROWS, keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 import { objectKeyPrefix } from "@/lib/validation/product";
 import {
@@ -12,6 +13,7 @@ import {
   BLUR_MAX,
   BUTTON_LABEL_MAX,
   BUTTON_LOOKS,
+  CAROUSEL_PRODUCTS_MAX,
   DEFAULT_IMAGE_PLACEMENT,
   IMAGE_ALT_MAX,
   LINK_TARGET_KINDS,
@@ -242,6 +244,19 @@ export const designOpSchema = z.discriminatedUnion("op", [
     color: color.optional().describe("Leave out for an ink that reads on what is behind it."),
     ...placement,
   }),
+  z
+    .strictObject({
+      op: z.literal("add_carousel"),
+      productIds: z
+        .array(someId)
+        .min(1)
+        .max(CAROUSEL_PRODUCTS_MAX)
+        .describe(`This store's products, in the order the row shows them, each once: 1 to ${CAROUSEL_PRODUCTS_MAX}. Change them later with style {productIds}.`),
+      ...placement,
+    })
+    .describe(
+      "A row of products in one block, swiped on a phone and stepped with arrows on a desktop. Its cards wear the board's card look. Lands across the board's full width, 2 rows tall (a card is as wide as the row is tall), unless given x, y, w and h; give it at least 3 columns.",
+    ),
   z.strictObject({ op: z.literal("move"), block: blockRef, x: cells, y: cells, viewport }),
   z.strictObject({
     op: z.literal("resize"),
@@ -319,7 +334,7 @@ const NEW_BLOCK_SIZE: Record<StorefrontBlock["type"], { w: number; h: number }> 
   image: { w: 1, h: 1 },
   button: { w: 2, h: 1 },
   marquee: { w: Number.POSITIVE_INFINITY, h: 1 },
-  carousel: { w: Number.POSITIVE_INFINITY, h: 2 },
+  carousel: { w: Number.POSITIVE_INFINITY, h: CAROUSEL_NEW_ROWS },
 };
 
 /** Past this many characters (or across lines) a new text block reads as a
@@ -485,6 +500,10 @@ function restyled(block: StorefrontBlock, patch: Fields): StorefrontBlock {
       void _old;
       return patched({ ...rest, ...(style ? { style } : {}) }, imagePlacement === undefined ? {} : { imagePlacement });
     }
+    case "carousel": {
+      if (patch.productIds !== undefined) assertCarouselProducts(patch.productIds);
+      return patched(block, patch);
+    }
     case "image": {
       // `file` is what an assistant knows a picture by; the block stores its key.
       const { file, ...rest } = patch;
@@ -493,6 +512,24 @@ function restyled(block: StorefrontBlock, patch: Fields): StorefrontBlock {
     }
     default:
       return patched(block, patch);
+  }
+}
+
+/**
+ * A carousel's products as an assistant gives them: a list of ids, at least
+ * one, at most CAROUSEL_PRODUCTS_MAX, none twice. The schema refuses the same
+ * in one generic sentence; this says which rule. Whose they are is asked by
+ * the tool (edit_storefront), and again by the save.
+ */
+function assertCarouselProducts(ids: unknown): void {
+  if (!Array.isArray(ids) || ids.length === 0 || ids.some((id) => typeof id !== "string")) {
+    throw new DesignOpRefused("A carousel needs a list of product ids.", "Give productIds: at least one of this store's product ids. To have none, remove the carousel.");
+  }
+  if (ids.length > CAROUSEL_PRODUCTS_MAX) {
+    throw new DesignOpRefused(`A carousel holds at most ${CAROUSEL_PRODUCTS_MAX} products.`, "Pick the ones to show, or add a second carousel.");
+  }
+  if (new Set(ids).size !== ids.length) {
+    throw new DesignOpRefused("A carousel shows each product once.", "Leave out the repeated ids.");
   }
 }
 
@@ -605,7 +642,7 @@ function assertLinksLand(config: StorefrontConfig): void {
     if (kind === "product" && typeof productId === "string" && !shown.has(productId)) {
       throw new DesignOpRefused(
         `${who} leads to product ${productId}, which is not on this storefront.`,
-        "A product link opens that product's page here, so the product has to be on the board: add it with add_product, or link somewhere else.",
+        "A product link opens that product's page here, so the product has to be on the board: add it with add_product or put it in a carousel, or link somewhere else.",
       );
     }
     if (kind === "band" && typeof bandId === "string" && !bands.has(bandId)) {
@@ -830,6 +867,13 @@ export function applyDesignOps(
         });
         break;
       }
+      case "add_carousel": {
+        const { op: _op, x, y, w, h, rotation, productIds } = op;
+        void _op;
+        assertCarouselProducts(productIds);
+        add({ type: "carousel", id: mintId(), productIds, ...place("carousel", { x, y, w, h, rotation }) });
+        break;
+      }
       case "move": {
         const block = find(op.block);
         onWholeCells(block.type, [op.x, op.y], op.viewport === "mobile");
@@ -951,10 +995,11 @@ export function applyDesignOps(
   return { config: edited, added };
 }
 
-/** findFreeCell reads a block's placement and nothing else. */
+/** findFreeCell and the reflow read a block's placement, and whether it keeps
+ *  its rows on a narrower board (a carousel), and nothing else. */
 function asGridBlock(block: StorefrontBlock): GridBlock<StorefrontBlock> {
   const { x, y, w, h, rotation } = block;
-  return { key: blockKey(block), data: block, x, y, w, h, rotation };
+  return { key: blockKey(block), data: block, x, y, w, h, rotation, ...(keepsRowsWhenNarrow(block) ? { keepRows: true } : {}) };
 }
 
 /** What a block is, in a few words, beside where it is. Never a file key. */

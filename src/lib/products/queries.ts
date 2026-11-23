@@ -509,6 +509,24 @@ export type StorefrontPlacement = { id: string; name: string; productPagesOn?: b
  *
  * Fails soft: returns {} on any error so product cards render fine without it.
  */
+/**
+ * boardProductIds over a stored (untrusted) blocks array, read field by field:
+ * a product block's product and a carousel's members. A product only a
+ * carousel shows has a page there too, so it is placed there.
+ */
+function rawBoardProductIds(blocks: readonly unknown[]): string[] {
+  const ids: string[] = [];
+  for (const block of blocks) {
+    if (typeof block !== "object" || block === null) continue;
+    const candidate = block as Record<string, unknown>;
+    if (candidate.type === "product" && typeof candidate.productId === "string") ids.push(candidate.productId);
+    else if (candidate.type === "carousel" && Array.isArray(candidate.productIds)) {
+      for (const id of candidate.productIds) if (typeof id === "string") ids.push(id);
+    }
+  }
+  return ids;
+}
+
 export async function getProductPlacements(): Promise<Record<string, StorefrontPlacement[]>> {
   const account = await getActiveAccount();
   if (!account) return {};
@@ -530,16 +548,7 @@ export async function getProductPlacements(): Promise<Record<string, StorefrontP
     // The raw member, like `blocks` above: product pages are on unless the
     // seller switched them off (DEFAULT_PRODUCT_PAGE_CONFIG.enabled is true).
     const productPagesOn = (config?.productPage as { enabled?: unknown } | undefined)?.enabled !== false;
-    for (const block of blocks) {
-      if (
-        typeof block !== "object" ||
-        block === null ||
-        (block as Record<string, unknown>).type !== "product" ||
-        typeof (block as Record<string, unknown>).productId !== "string"
-      ) {
-        continue;
-      }
-      const productId = (block as Record<string, unknown>).productId as string;
+    for (const productId of rawBoardProductIds(blocks)) {
       const list = result[productId] ?? [];
       if (!list.some((s) => s.id === sf.id)) {
         list.push({ id: sf.id, name: sf.name, productPagesOn });

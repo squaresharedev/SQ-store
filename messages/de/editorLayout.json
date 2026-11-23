@@ -5,13 +5,16 @@
       "groupLabel": "Ein Layout-Element hinzufügen",
       "name": {
         "band": "Band",
-        "button": "Button"
+        "button": "Button",
+        "carousel": "Karussell"
       },
       "add": {
         "band": "Ein Band über die volle Breite hinzufügen",
-        "button": "Einen Button hinzufügen"
+        "button": "Einen Button hinzufügen",
+        "carousel": "Eine Reihe Produkte zum Wischen hinzufügen"
       },
-      "noRoom": "Hinter jeder Zeile liegt schon ein Band."
+      "noRoom": "Hinter jeder Zeile liegt schon ein Band.",
+      "noProducts": "Füge deinem Shop zuerst ein Produkt hinzu, dann kannst du es in ein Karussell legen."
     },
     "bandChrome": {
       "rail": "Band hinter den Zeilen {from} bis {to}. Ziehen zum Verschieben, drücken zum Bearbeiten.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Jetzt shoppen",
       "tileLabel": "Button: {label}"
     },
+    "carousel": {
+      "title": "Karussell",
+      "close": "Karussell schließen",
+      "products": "Produkte im Karussell",
+      "count": "{count} von {max} Produkten",
+      "moveEarlier": "{title} nach vorn schieben",
+      "moveLater": "{title} nach hinten schieben",
+      "remove": "{title} aus dem Karussell nehmen",
+      "keepOne": "Ein Karussell behält immer mindestens ein Produkt.",
+      "addProducts": "Produkte hinzufügen",
+      "add": "{title} zum Karussell hinzufügen",
+      "search": "Produkt suchen",
+      "noMatch": "Kein Produkt passt dazu.",
+      "full": "Ein Karussell fasst bis zu {max} Produkte."
+    },
     "header": {
       "logoAndMenu": "Logo und Menü",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Storefront-Menü",
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen",
-    "logoFallback": "Logo von {store}"
+    "logoFallback": "Logo von {store}",
+    "carousel": {
+      "roleDescription": "Karussell",
+      "label": "{count, plural, one {# Produkt} other {# Produkte}}",
+      "previous": "Vorherige Produkte",
+      "next": "Nächste Produkte"
+    }
   }
 }

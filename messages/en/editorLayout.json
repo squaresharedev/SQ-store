@@ -5,13 +5,16 @@
       "groupLabel": "Add a layout element",
       "name": {
         "band": "Band",
-        "button": "Button"
+        "button": "Button",
+        "carousel": "Carousel"
       },
       "add": {
         "band": "Add a full-width band",
-        "button": "Add a button"
+        "button": "Add a button",
+        "carousel": "Add a row of products to swipe through"
       },
-      "noRoom": "Every row already has a band behind it."
+      "noRoom": "Every row already has a band behind it.",
+      "noProducts": "Add a product to your store first, then put it in a carousel."
     },
     "bandChrome": {
       "rail": "Band behind rows {from} to {to}. Drag to move it, press to edit it.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Shop now",
       "tileLabel": "Button: {label}"
     },
+    "carousel": {
+      "title": "Carousel",
+      "close": "Close the carousel",
+      "products": "Products in the carousel",
+      "count": "{count} of {max} products",
+      "moveEarlier": "Move {title} earlier",
+      "moveLater": "Move {title} later",
+      "remove": "Take {title} out of the carousel",
+      "keepOne": "A carousel keeps at least one product.",
+      "addProducts": "Add products",
+      "add": "Add {title} to the carousel",
+      "search": "Find a product",
+      "noMatch": "No product matches that.",
+      "full": "A carousel holds up to {max} products."
+    },
     "header": {
       "logoAndMenu": "Logo and menu",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Storefront menu",
     "openMenu": "Open the menu",
     "closeMenu": "Close the menu",
-    "logoFallback": "{store} logo"
+    "logoFallback": "{store} logo",
+    "carousel": {
+      "roleDescription": "carousel",
+      "label": "{count, plural, one {# product} other {# products}}",
+      "previous": "Previous products",
+      "next": "Next products"
+    }
   }
 }

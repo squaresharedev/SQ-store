@@ -5,13 +5,16 @@
       "groupLabel": "Adicionar um elemento de esquema",
       "name": {
         "band": "Faixa",
-        "button": "Botão"
+        "button": "Botão",
+        "carousel": "Carrossel"
       },
       "add": {
         "band": "Adicionar uma faixa a toda a largura",
-        "button": "Adicionar um botão"
+        "button": "Adicionar um botão",
+        "carousel": "Adicionar uma fila de produtos para deslizar"
       },
-      "noRoom": "Já há uma faixa atrás de cada linha."
+      "noRoom": "Já há uma faixa atrás de cada linha.",
+      "noProducts": "Adicione primeiro um produto à sua loja e depois coloque-o num carrossel."
     },
     "bandChrome": {
       "rail": "Faixa atrás das linhas {from} a {to}. Arraste para a mover, prima para a editar.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Comprar já",
       "tileLabel": "Botão: {label}"
     },
+    "carousel": {
+      "title": "Carrossel",
+      "close": "Fechar o carrossel",
+      "products": "Produtos no carrossel",
+      "count": "{count} de {max} produtos",
+      "moveEarlier": "Mover {title} para a frente",
+      "moveLater": "Mover {title} para trás",
+      "remove": "Tirar {title} do carrossel",
+      "keepOne": "Um carrossel tem sempre pelo menos um produto.",
+      "addProducts": "Adicionar produtos",
+      "add": "Adicionar {title} ao carrossel",
+      "search": "Procurar um produto",
+      "noMatch": "Nenhum produto corresponde.",
+      "full": "Um carrossel tem no máximo {max} produtos."
+    },
     "header": {
       "logoAndMenu": "Logótipo e menu",
       "logo": "Logótipo",
@@ -95,6 +113,12 @@
     "navLabel": "Menu da montra",
     "openMenu": "Abrir o menu",
     "closeMenu": "Fechar o menu",
-    "logoFallback": "Logótipo de {store}"
+    "logoFallback": "Logótipo de {store}",
+    "carousel": {
+      "roleDescription": "carrossel",
+      "label": "{count, plural, one {# produto} other {# produtos}}",
+      "previous": "Produtos anteriores",
+      "next": "Produtos seguintes"
+    }
   }
 }

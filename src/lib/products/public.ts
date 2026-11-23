@@ -29,7 +29,7 @@ import {
   parseOptionGroups,
   reconcileGalleryOptions,
 } from "@/lib/products/detail";
-import { gatePurchasable, type Purchasable, type PublicProductRow } from "@/lib/products/purchasable";
+import { gatePurchasable, placementOf, type Purchasable, type PublicProductRow } from "@/lib/products/purchasable";
 import { PAGE_BUSY, type PageBusy } from "@/lib/public/busy";
 import { checkoutAvailableFor } from "@/lib/checkout/availability";
 import { productPageUrl } from "@/lib/storefront/product-page-url";
@@ -251,9 +251,9 @@ export const getPublicProductPage = cache(
       showStock: productPage.showStock,
       pricing,
     });
-    const placed = new Set(
-      config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate.productId] : [])),
-    );
+    // What the board shows: its tiles and its carousels' members, the gate's
+    // own answer (placementOf).
+    const { onBoard: placed } = placementOf(config);
     // Offered only where they can be paid for in the same order (the button
     // leads to our checkout), while the section is shown, and while the
     // product itself can be bought: a sold-out product sells nothing beside it.
@@ -267,12 +267,13 @@ export const getPublicProductPage = cache(
             now: gate.now,
             unreadableSales: "busy",
             storeSales: gate.storeSales,
-            // A tile's add-ons each have a page here (the gate admits a
-            // product a tile offers). This page may itself be an add-on's,
-            // whose own add-ons have one only where they are tiles.
+            // The add-ons of a product the board shows (a tile, or a member
+            // of a carousel) each have a page here: the gate admits a product
+            // one of those offers. This page may itself be an add-on's, whose
+            // own add-ons have one only where the board shows them.
             pages: {
               storefrontId: gate.storefront.id,
-              linked: block ? () => true : (id) => placed.has(id),
+              linked: placed.has(row.id) ? () => true : (id) => placed.has(id),
             },
             withRatings: isProductPageSectionShown(productPage, "reviews"),
           })

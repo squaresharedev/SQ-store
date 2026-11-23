@@ -1,30 +1,37 @@
 "use client";
 
-import { MousePointerClick, Rows3 } from "lucide-react";
+import { GalleryHorizontalEnd, MousePointerClick, Rows3 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
 import { focusRingClass, transitionClass } from "@/components/ui/control-styles";
 
 /**
- * The library's "Layout" group: a full-width band and a button. Shown at the
+ * The library's "Layout" group: a full-width band, a button and a product
+ * carousel (a row of products to swipe through). Shown at the
  * top of the shape library (ShapesPanel), as the same square buttons, so the
  * two are found where everything else that goes on the board is.
  */
 export function LayoutInserts({
   onAddBand,
   onAddButton,
+  onAddCarousel,
   canAddBlocks,
 }: {
   onAddBand: () => void;
   onAddButton: () => void;
-  /** False at the block cap: a button is a block, a band is not. */
+  /** Absent where the board has no catalogue to fill one from. */
+  onAddCarousel?: () => void;
+  /** False at the block cap: a button and a carousel are blocks, a band is not. */
   canAddBlocks: boolean;
 }) {
   const t = useTranslations("EditorLayout.panel.insert");
   const items = [
     { id: "band", icon: Rows3, onClick: onAddBand, disabled: false },
     { id: "button", icon: MousePointerClick, onClick: onAddButton, disabled: !canAddBlocks },
+    ...(onAddCarousel
+      ? [{ id: "carousel", icon: GalleryHorizontalEnd, onClick: onAddCarousel, disabled: !canAddBlocks } as const]
+      : []),
   ] as const;
   return (
     <CollapsibleSection title={t("group")}>

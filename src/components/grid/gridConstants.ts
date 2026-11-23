@@ -80,6 +80,31 @@ export interface GridBlock<TData = unknown> extends GridPlacement {
    * block, on a board drawn as placed, with an `onPlace` to call.
    */
   halfSteps?: boolean;
+  /**
+   * On a narrower board (the reflow, a phone layout's automatic placement)
+   * this block keeps its HEIGHT in cells instead of shrinking with the
+   * column ratio, never taller than it is wide there. For a row of cards to
+   * swipe through: scaling its height down only shrinks every card, where
+   * keeping it shows fewer cards at a size a thumb can read. See reflowedSpan.
+   */
+  keepRows?: boolean;
+}
+
+/**
+ * A block's span on a board `ratio` as wide in columns (the reflow, a phone
+ * layout's automatic placement): both sides scaled by the ratio, at least one
+ * cell, no wider than the board. A block that keeps its rows (GridBlock
+ * keepRows) keeps its height instead, up to its new width.
+ */
+export function reflowedSpan(
+  covered: { w: number; h: number },
+  ratio: number,
+  columns: number,
+  keepRows = false,
+): { w: number; h: number } {
+  const w = Math.min(columns, Math.max(1, Math.round(covered.w * ratio)));
+  const h = keepRows ? Math.max(1, Math.min(covered.h, w)) : Math.max(1, Math.round(covered.h * ratio));
+  return { w, h };
 }
 
 // PAINT ORDER BANDS. In ONE place because everything below shares a single
@@ -370,13 +395,7 @@ export function reflowBlocks<TData>(
 ): { blocks: GridBlock<TData>[]; rows: number } {
   const ratio = renderColumns / designColumns;
   const ordered = [...blocks].sort((a, b) => a.y - b.y || a.x - b.x);
-  const scaled = ordered.map((block) => {
-    const covered = blockFootprint(block);
-    return {
-      w: Math.min(renderColumns, Math.max(1, Math.round(covered.w * ratio))),
-      h: Math.max(1, Math.round(covered.h * ratio)),
-    };
-  });
+  const scaled = ordered.map((block) => reflowedSpan(blockFootprint(block), ratio, renderColumns, block.keepRows));
 
   const packed = packFirstFit(scaled, renderColumns);
   let rows = 0;

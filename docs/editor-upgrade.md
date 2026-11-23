@@ -69,7 +69,8 @@ stacking, so it draws as it always did.
 | Button block | `{type: "button", label, link, look}` | `ButtonTileContent`, `ButtonBlockEditor` |
 | Header | `header.logo`, `header.links`, a cart icon where the cart is live | `StorefrontMasthead`, `MastheadNav`, `HeaderLogoMenu` |
 | Scrolling text | `{type: "marquee", text, speed, variant, color}` | `MarqueeTileContent`, `lib/storefront/marquee.ts` |
-| MCP | `palette`, `add_button`, `add_marquee`, `add_band`, `edit_band`, `remove_band` operations; `preview_storefront` full resolution and region; `upload_font`; `copy_product_photo` | `lib/storefront/design-ops.ts`, `lib/agent/` (see `docs/mcp.md`) |
+| Product carousel | `{type: "carousel", id, productIds}` (1 to 12, each once, in order) | `CarouselTileContent`, `CarouselBlockEditor`, `lib/storefront/carousel.ts` |
+| MCP | `palette`, `add_button`, `add_marquee`, `add_carousel`, `add_band`, `edit_band`, `remove_band` operations; `preview_storefront` full resolution and region; `upload_font`; `copy_product_photo` | `lib/storefront/design-ops.ts`, `lib/agent/` (see `docs/mcp.md`) |
 
 Copy for the four editor workstreams is in its own catalogs, in all ten
 locales: `EditorCards`, `EditorType`, `EditorLayout`, `EditorFinish`, each with
@@ -123,6 +124,56 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
   is read back without it (`parseStoredStorefrontConfig`).
 - **Words on a band pick a readable ink** where the seller chose none
   (`textInkOnBackdrop`, WCAG AA). A block off a band keeps the ink it always had.
+- **A carousel shows products that are not product blocks, so every "is this
+  product on this storefront" counts its members.** The one answer is
+  `boardProductIds` (`types/storefront.ts`): product blocks and carousel
+  members, each once, in reading order. The product page and checkout gate
+  (`placementOf` in `lib/products/purchasable.ts`, used by
+  `lib/products/public.ts`), the sitemap, the structured data, the storefront
+  list's previews (`placedProductIds`), the setup checklist, the dashboard's
+  placements and the product cards' "on these storefronts" all ask it. A
+  product only a carousel shows has its own page and can be bought; it has no
+  block, so no manual sold-out mark (`Purchasable.block` is null).
+- **A board sheds a product one way: `keepProducts`
+  (`lib/storefront/carousel.ts`).** A product block naming a product that is
+  not kept goes whole, a carousel loses that member, and a carousel left with
+  none goes too. The save's ownership check (the ACTIVE account's products,
+  so a team member saves the owner's store), the buyer's payload
+  (`buildStorefrontPage`: live, this owner's, not taken down) and the MCP
+  preview all call it. `settleLayout` then drops any link the change left
+  pointing nowhere, and the designer does the same when a product is taken
+  out of a carousel in its panel (`withoutDeadLinks`).
+- **A carousel's cards are the board's cards.** Each is `ProductTileContent`
+  with the theme's card style (no per-card overrides), in a product card's
+  frame, with the cell's corner radius; the card look's shadow is drawn on
+  the carousel's cell (`blockShadow`), where a drop shadow falls under each
+  card. A card's product reaches the buyer as the same built
+  `StorefrontTileProduct` a tile gets (a stock STATE, never a count), and opens
+  its page exactly as a product block's card does: a link (a new tab in the
+  embed frame), or `QuickAddTile` where the card adds to the cart.
+- **A carousel's cards hold still on hover.** The board's hover effects
+  answer to the grid cell, and a row of cards is one cell, so every card would
+  lift at once. "Auto" white blend works as on any card: the photo's edge is
+  the product's (`products.photo_edge`), handed to a carousel's members by the
+  card extras (`tile-extras.ts`).
+- **Swiping is the browser's.** Native CSS scroll snap (`snap-x
+  snap-mandatory`, the `swipe-x` utility for no scrollbar), no library, no
+  autoplay. A card is as wide as the row is tall (container units), the board's
+  gap apart, so a 6 by 2 carousel shows three cards on the board's columns. The
+  previous and next arrows show on a fine pointer only (`pointer-fine`), step
+  a page at a time, jump instead of gliding under reduced motion, and stay
+  focusable (`aria-disabled`, the arrow faded) at an end.
+- **On a narrower board a carousel keeps its height in cells.** The reflow and
+  a phone layout's automatic placement scale a block's width and height by the
+  column ratio; a carousel keeps its rows instead, never more than its new
+  width (`keepsRowsWhenNarrow`, `GridBlock.keepRows`, `reflowedSpan`). A 6 by
+  2 row on a 4 column phone is 4 by 2, two readable cards in view, where
+  scaling would have made it 4 by 1 with three cards a third the size.
+  `block.mobile` places it like any other block.
+- **The embed's JSON route (`/api/embed/[key]`) leaves carousels out, as it
+  leaves out buttons and scrolling text.** That payload has no consumer (the
+  embed is the frame, `/e/...`, drawn by `StorefrontBoard`), so its removal
+  check still asks only about the product tiles it emits.
 - **Motion never hides a board.** Blocks arrive by a CSS animation that ends
   visible with no script; script only hides a block the observer has reported
   off screen. Nothing moves under reduced motion. The MCP preview draws the
@@ -130,13 +181,6 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
 
 ## Not built
 
-- **The product carousel.** It is in the contract (`CarouselBlock`, an
-  exported `carouselBlockSchema`, a stub face) but the schema refuses the kind
-  and the MCP does not offer it. Before it can be saved: its products must be
-  owner-checked in `saveStorefront`, gated for buyers in `buildStorefrontPage`,
-  and counted wherever "is this product on this storefront" decides whether it
-  has a page and can be bought (`lib/products/public.ts`,
-  `lib/products/purchasable.ts`, the sitemap and structured data).
 - **One-click background removal.** The existing in-browser cut-out
   (`lib/share-card/cutout`) loads its runtime and model from third parties at
   run time, which a storefront may not do. Self-host them first.
@@ -145,8 +189,11 @@ a `panel` half (the editor) and a `board` half (what a buyer can read).
 
 Dev-only pages, no sign-in and no database:
 
-- `/dev/editor-demo` is ONE storefront wearing every feature above
-  (`?view=embed` for the embed frame, `&motion=0` to draw it still).
+- `/dev/editor-demo` is ONE storefront wearing every feature above, the
+  carousel included (`?view=embed` for the embed frame, `&motion=0` to draw
+  it still).
 - `/dev/editor-cards`, `/dev/editor-type`, `/dev/editor-layout`,
   `/dev/editor-finish` and `/dev/editor-mcp` are each workstream's gallery.
+  `/dev/editor-layout` ends on a carousel of the sample's five products, and
+  `?view=designer` there has its panel (`+ carousel` adds one).
 - `/dev/sample-storefront?tour=0` is the real designer on the sample storefront.

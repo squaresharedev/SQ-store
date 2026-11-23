@@ -34,8 +34,7 @@ describe("the editor upgrade's demo storefront", () => {
   it("wears every block feature that shipped", () => {
     const { blocks } = demo;
     const kinds = new Set(blocks.map((block) => block.type));
-    // The carousel is in the contract but not built, so it is not here.
-    expect([...kinds].sort()).toEqual(["button", "image", "marquee", "product", "shape", "text"]);
+    expect([...kinds].sort()).toEqual(["button", "carousel", "image", "marquee", "product", "shape", "text"]);
 
     const texts = blocks.filter((block) => block.type === "text");
     expect(new Set(texts.map((block) => block.valign))).toEqual(new Set(["top", "middle", "bottom", undefined]));
@@ -56,6 +55,13 @@ describe("the editor upgrade's demo storefront", () => {
     expect(cards.every((card) => !("photoEdge" in card))).toBe(true);
     expect(cards.some((card) => card.style?.photoShape && card.style.shadow)).toBe(true);
     expect(cards.some((card) => card.style?.cardColor && card.style.whiteBlend === "on")).toBe(true);
+
+    // The carousel holds every product, in an order of its own.
+    const carousel = blocks.find((block) => block.type === "carousel");
+    const tiles = cards.map((card) => card.productId);
+    expect(carousel?.type === "carousel" && [...carousel.productIds].sort()).toEqual([...tiles].sort());
+    expect(carousel?.type === "carousel" && carousel.productIds).not.toEqual(tiles);
+    expect(carousel?.w).toBeGreaterThanOrEqual(3);
 
     const buttons = blocks.filter((block) => block.type === "button");
     expect(new Set(buttons.map((button) => button.link.kind))).toEqual(new Set(["product", "band", "url"]));

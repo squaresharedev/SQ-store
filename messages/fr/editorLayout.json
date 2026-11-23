@@ -5,13 +5,16 @@
       "groupLabel": "Ajouter un élément de mise en page",
       "name": {
         "band": "Bande",
-        "button": "Bouton"
+        "button": "Bouton",
+        "carousel": "Carrousel"
       },
       "add": {
         "band": "Ajouter une bande pleine largeur",
-        "button": "Ajouter un bouton"
+        "button": "Ajouter un bouton",
+        "carousel": "Ajouter une rangée de produits à faire défiler"
       },
-      "noRoom": "Chaque rangée a déjà une bande derrière elle."
+      "noRoom": "Chaque rangée a déjà une bande derrière elle.",
+      "noProducts": "Ajoutez d'abord un produit à votre boutique, puis placez-le dans un carrousel."
     },
     "bandChrome": {
       "rail": "Bande derrière les rangées {from} à {to}. Faites-la glisser pour la déplacer, appuyez pour la modifier.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Acheter",
       "tileLabel": "Bouton : {label}"
     },
+    "carousel": {
+      "title": "Carrousel",
+      "close": "Fermer le carrousel",
+      "products": "Produits du carrousel",
+      "count": "{count} produits sur {max}",
+      "moveEarlier": "Avancer {title}",
+      "moveLater": "Reculer {title}",
+      "remove": "Retirer {title} du carrousel",
+      "keepOne": "Un carrousel garde toujours au moins un produit.",
+      "addProducts": "Ajouter des produits",
+      "add": "Ajouter {title} au carrousel",
+      "search": "Trouver un produit",
+      "noMatch": "Aucun produit ne correspond.",
+      "full": "Un carrousel contient au plus {max} produits."
+    },
     "header": {
       "logoAndMenu": "Logo et menu",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Menu de la vitrine",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
-    "logoFallback": "Logo de {store}"
+    "logoFallback": "Logo de {store}",
+    "carousel": {
+      "roleDescription": "carrousel",
+      "label": "{count, plural, one {# produit} other {# produits}}",
+      "previous": "Produits précédents",
+      "next": "Produits suivants"
+    }
   }
 }

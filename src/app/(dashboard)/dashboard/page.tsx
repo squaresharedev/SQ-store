@@ -11,6 +11,7 @@ import {
   getRestockForecasts,
 } from "@/lib/dashboard/queries";
 import { listStorefronts } from "@/lib/storefront/queries";
+import { boardProductIds } from "@/types/storefront";
 import {
   countOrdersToShip,
   countWithdrawalsToSettle,
@@ -91,17 +92,19 @@ export default async function DashboardOverviewPage({
     after(() => settleWaitingProducts(ownerId));
   }
 
-  // Collect all product IDs referenced by storefront blocks so we can detect
-  // dead blocks (blocks whose product was deleted) in ONE query, not N per block.
+  // Collect all product IDs the storefronts show (product blocks and carousel
+  // members) so we can detect dead blocks and the setup checklist's placements
+  // in ONE query, not N per block.
   const referencedProductIds = Array.from(
-    new Set(
-      storefronts.rows.flatMap((sf) =>
-        sf.config.blocks
-          .filter((b): b is { type: "product"; productId: string } & typeof b =>
-            b.type === "product" && "productId" in b,
-          )
-          .map((b) => b.productId),
-      ),
+    new Set(storefronts.rows.flatMap((sf) => boardProductIds(sf.config.blocks))),
+  );
+  // A DEAD BLOCK is a product block whose product was deleted: its tile shows
+  // the seller a "removed" face to deal with. A carousel member that was
+  // deleted is not one: the carousel skips it everywhere and the next save
+  // drops it, so there is nothing for the seller to do.
+  const productBlockIds = new Set(
+    storefronts.rows.flatMap((sf) =>
+      sf.config.blocks.flatMap((b) => (b.type === "product" ? [b.productId] : [])),
     ),
   );
 
@@ -125,7 +128,7 @@ export default async function DashboardOverviewPage({
       : Promise.resolve(false),
   ]);
   const existingSet = new Set(existingIds);
-  const deadBlockCount = referencedProductIds.filter(
+  const deadBlockCount = [...productBlockIds].filter(
     (id) => !existingSet.has(id),
   ).length;
 

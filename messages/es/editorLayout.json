@@ -5,13 +5,16 @@
       "groupLabel": "Añadir un elemento de diseño",
       "name": {
         "band": "Franja",
-        "button": "Botón"
+        "button": "Botón",
+        "carousel": "Carrusel"
       },
       "add": {
         "band": "Añadir una franja a todo el ancho",
-        "button": "Añadir un botón"
+        "button": "Añadir un botón",
+        "carousel": "Añadir una fila de productos para deslizar"
       },
-      "noRoom": "Ya hay una franja detrás de cada fila."
+      "noRoom": "Ya hay una franja detrás de cada fila.",
+      "noProducts": "Primero añade un producto a tu tienda y luego ponlo en un carrusel."
     },
     "bandChrome": {
       "rail": "Franja detrás de las filas {from} a {to}. Arrástrala para moverla, pulsa para editarla.",
@@ -68,6 +71,21 @@
       "defaultLabel": "Comprar ahora",
       "tileLabel": "Botón: {label}"
     },
+    "carousel": {
+      "title": "Carrusel",
+      "close": "Cerrar el carrusel",
+      "products": "Productos del carrusel",
+      "count": "{count} de {max} productos",
+      "moveEarlier": "Mover {title} antes",
+      "moveLater": "Mover {title} después",
+      "remove": "Quitar {title} del carrusel",
+      "keepOne": "Un carrusel siempre tiene al menos un producto.",
+      "addProducts": "Añadir productos",
+      "add": "Añadir {title} al carrusel",
+      "search": "Buscar un producto",
+      "noMatch": "Ningún producto coincide.",
+      "full": "Un carrusel admite hasta {max} productos."
+    },
     "header": {
       "logoAndMenu": "Logo y menú",
       "logo": "Logo",
@@ -95,6 +113,12 @@
     "navLabel": "Menú del escaparate",
     "openMenu": "Abrir el menú",
     "closeMenu": "Cerrar el menú",
-    "logoFallback": "Logo de {store}"
+    "logoFallback": "Logo de {store}",
+    "carousel": {
+      "roleDescription": "carrusel",
+      "label": "{count, plural, one {# producto} other {# productos}}",
+      "previous": "Productos anteriores",
+      "next": "Productos siguientes"
+    }
   }
 }

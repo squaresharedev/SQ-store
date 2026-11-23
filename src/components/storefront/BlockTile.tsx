@@ -26,6 +26,7 @@ import {
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
+import type { CarouselCards } from "./CarouselTileContent";
 import { BlockBlurCopies } from "./BlockBlurCopies";
 import {
   TILE_FACE_CLASS,
@@ -146,12 +147,16 @@ export const BlockTile = memo(function BlockTile({
   onSpotChange,
   onOpenSpotSetting,
   backdrop,
+  carouselCards,
 }: {
   /** Identity handed back to the callbacks, so they can stay stable. */
   blockKey: string;
   /** What the block's words are read against (lib/storefront/bands
    *  blockBackdrop), handed to the face. Absent = not news here. */
   backdrop?: string;
+  /** Carousel blocks only: where its cards' products come from. One object
+   *  for the whole board, so a memoised tile keeps its props. */
+  carouselCards?: CarouselCards;
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
@@ -780,6 +785,7 @@ export const BlockTile = memo(function BlockTile({
           look={look}
           hover={hover}
           backdrop={backdrop}
+          carouselCards={carouselCards}
           textEditing={typable && isTyping}
           textSelectAll={typingSelectAll}
           onTextChange={

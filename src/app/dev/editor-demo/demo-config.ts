@@ -44,6 +44,7 @@ const ID = {
   quote: "ed0de300-0000-4000-8000-000000000018",
   top: "ed0de300-0000-4000-8000-000000000019",
   story: "ed0de300-0000-4000-8000-00000000001a",
+  carousel: "ed0de300-0000-4000-8000-00000000001b",
 } as const;
 
 /** Storage keys shaped as real ones are ({kind}/{owner}/{uuid}-{name}), so the
@@ -111,6 +112,9 @@ export function editorDemoConfig(sample: SampleStorefront): StorefrontConfig {
     { type: "product", productId: speaker, x: 3, y: 11, w: 3, h: 2, style: { cardColor: PALETTE.muted, whiteBlend: "on", titleBarColor: PALETTE.text } },
     // A link button to an address of the seller's own.
     { type: "button", id: ID.story, label: "Read our story", link: { kind: "url", url: "https://example.com/story" }, look: "link", x: 1, y: 13, w: 4, h: 1, fine: { bottom: true } },
+    // A PRODUCT CAROUSEL: every product in a row to swipe through, wearing
+    // the theme's card look. Three show at a time on a desktop.
+    { type: "carousel", id: ID.carousel, productIds: [speaker, watch, camera, headphones, mouse], x: 0, y: 14, w: 6, h: 2 },
   ];
 
   return {
@@ -119,7 +123,7 @@ export function editorDemoConfig(sample: SampleStorefront): StorefrontConfig {
       // What a new storefront starts with (palette, pairing, card colour,
       // blend, motion), then this storefront's own choices over it.
       ...NEW_STOREFRONT_THEME,
-      rows: 14,
+      rows: 16,
       cornerRadius: 14,
       // THE PALETTE: every colour on this board is one of these five.
       palette: PALETTE,
