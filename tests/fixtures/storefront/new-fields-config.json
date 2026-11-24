@@ -1,0 +1,320 @@
+{
+  "theme": {
+    "background": {
+      "kind": "gradient",
+      "from": "#f4efe6",
+      "to": "#e6dccb",
+      "angle": 180,
+      "via": "#fffaf2"
+    },
+    "accent": "#b4532a",
+    "font": "sans",
+    "columns": 6,
+    "rows": 14,
+    "cornerRadius": 14,
+    "titleStyle": "bar",
+    "titleDisplay": "always",
+    "priceDisplay": "always",
+    "priceTagPosition": "below",
+    "showTitle": true,
+    "gridGap": 12,
+    "soldOutBadge": true,
+    "hideSoldOut": false,
+    "palette": {
+      "background": "#f4efe6",
+      "text": "#1f1a17",
+      "accent": "#b4532a",
+      "surface": "#fffaf2",
+      "muted": "#e6dccb"
+    },
+    "fontPairing": "editorial",
+    "textStyles": {
+      "heading": {
+        "size": 40,
+        "lineHeight": 110
+      },
+      "body": {
+        "size": 16,
+        "lineHeight": 150
+      },
+      "label": {
+        "bold": true,
+        "uppercase": true,
+        "letterSpacing": 12
+      }
+    },
+    "motion": "lively",
+    "texture": "light",
+    "cardColor": "#fffaf2",
+    "whiteBlend": "auto",
+    "titleBarColor": "#fffaf2",
+    "titleTextColor": "#1f1a17",
+    "titleFont": "heading",
+    "photoShape": "rounded",
+    "shadow": "soft"
+  },
+  "blocks": [
+    {
+      "type": "text",
+      "id": "ed0de300-0000-4000-8000-000000000011",
+      "text": "Things for slow mornings",
+      "variant": "heading",
+      "align": "left",
+      "x": 0,
+      "y": 0,
+      "w": 4,
+      "h": 2,
+      "valign": "bottom"
+    },
+    {
+      "type": "text",
+      "id": "ed0de300-0000-4000-8000-000000000012",
+      "text": "Everyday objects, chosen to last.",
+      "variant": "body",
+      "align": "left",
+      "x": 0,
+      "y": 2,
+      "w": 3,
+      "h": 1,
+      "valign": "top"
+    },
+    {
+      "type": "button",
+      "id": "ed0de300-0000-4000-8000-000000000013",
+      "label": "Shop the camera",
+      "link": {
+        "kind": "product",
+        "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a01"
+      },
+      "x": 3,
+      "y": 2,
+      "w": 2,
+      "h": 1,
+      "fine": {
+        "bottom": true
+      }
+    },
+    {
+      "type": "image",
+      "id": "ed0de300-0000-4000-8000-000000000014",
+      "key": "elements/ed0de300-0000-4000-8000-0000000000aa/ed0de300-0000-4000-8000-0000000000b1-portrait.webp",
+      "alt": "A travel speaker",
+      "x": 4,
+      "y": 0,
+      "w": 2,
+      "h": 2,
+      "shape": "circle",
+      "shadow": "lifted"
+    },
+    {
+      "type": "shape",
+      "id": "ed0de300-0000-4000-8000-000000000015",
+      "kind": "star",
+      "color": "#b4532a",
+      "x": 5,
+      "y": 2,
+      "w": 1,
+      "h": 1,
+      "gradient": {
+        "from": "#b4532a",
+        "to": "#1f1a17",
+        "angle": 135
+      },
+      "shadow": "soft",
+      "fine": {
+        "left": true,
+        "top": true
+      }
+    },
+    {
+      "type": "marquee",
+      "id": "ed0de300-0000-4000-8000-000000000016",
+      "text": "Free delivery this week · New pieces every Friday",
+      "speed": "slow",
+      "x": 0,
+      "y": 3,
+      "w": 6,
+      "h": 1
+    },
+    {
+      "type": "product",
+      "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a01",
+      "x": 0,
+      "y": 4,
+      "w": 2,
+      "h": 3
+    },
+    {
+      "type": "product",
+      "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a02",
+      "x": 2,
+      "y": 4,
+      "w": 2,
+      "h": 3,
+      "photoEdge": "white"
+    },
+    {
+      "type": "product",
+      "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a03",
+      "x": 4,
+      "y": 4,
+      "w": 2,
+      "h": 3,
+      "style": {
+        "photoShape": "arch",
+        "shadow": "lifted"
+      },
+      "photoEdge": "white"
+    },
+    {
+      "type": "text",
+      "id": "ed0de300-0000-4000-8000-000000000017",
+      "text": "Picked by hand · Packed with care",
+      "variant": "label",
+      "align": "center",
+      "x": 1,
+      "y": 7,
+      "w": 4,
+      "h": 1
+    },
+    {
+      "type": "text",
+      "id": "ed0de300-0000-4000-8000-000000000018",
+      "text": "Made in small batches, never in a hurry.",
+      "variant": "heading",
+      "align": "center",
+      "x": 1,
+      "y": 8,
+      "w": 4,
+      "h": 2,
+      "valign": "middle",
+      "fine": {
+        "left": true,
+        "right": true
+      }
+    },
+    {
+      "type": "button",
+      "id": "ed0de300-0000-4000-8000-000000000019",
+      "label": "Back to the top",
+      "link": {
+        "kind": "band",
+        "bandId": "ed0de300-0000-4000-8000-000000000001"
+      },
+      "look": "outline",
+      "x": 2,
+      "y": 10,
+      "w": 2,
+      "h": 1,
+      "fine": {
+        "bottom": true
+      }
+    },
+    {
+      "type": "product",
+      "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a04",
+      "x": 0,
+      "y": 11,
+      "w": 3,
+      "h": 2
+    },
+    {
+      "type": "product",
+      "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a05",
+      "x": 3,
+      "y": 11,
+      "w": 3,
+      "h": 2,
+      "style": {
+        "cardColor": "#e6dccb",
+        "whiteBlend": "on",
+        "titleBarColor": "#1f1a17"
+      }
+    },
+    {
+      "type": "button",
+      "id": "ed0de300-0000-4000-8000-00000000001a",
+      "label": "Read our story",
+      "link": {
+        "kind": "url",
+        "url": "https://example.com/story"
+      },
+      "look": "link",
+      "x": 1,
+      "y": 13,
+      "w": 4,
+      "h": 1,
+      "fine": {
+        "bottom": true
+      }
+    }
+  ],
+  "header": {
+    "show": true,
+    "name": "Parallel Goods",
+    "bio": "Objects for slow mornings.",
+    "logo": {
+      "key": "elements/ed0de300-0000-4000-8000-0000000000aa/ed0de300-0000-4000-8000-0000000000b3-logo.png",
+      "size": "small"
+    },
+    "links": [
+      {
+        "label": "Shop",
+        "link": {
+          "kind": "product",
+          "productId": "5a3e1d20-0c4f-4b6e-9a61-1f0d2c3b4a01"
+        }
+      },
+      {
+        "label": "How we work",
+        "link": {
+          "kind": "band",
+          "bandId": "ed0de300-0000-4000-8000-000000000003"
+        }
+      },
+      {
+        "label": "Journal",
+        "link": {
+          "kind": "url",
+          "url": "https://example.com/journal"
+        }
+      }
+    ]
+  },
+  "bands": [
+    {
+      "id": "ed0de300-0000-4000-8000-000000000001",
+      "y": 0,
+      "h": 3,
+      "background": {
+        "kind": "gradient",
+        "from": "#fffaf2",
+        "via": "#f4efe6",
+        "to": "#e6dccb",
+        "angle": 135
+      }
+    },
+    {
+      "id": "ed0de300-0000-4000-8000-000000000002",
+      "y": 7,
+      "h": 1,
+      "background": {
+        "kind": "solid",
+        "color": "#1f1a17"
+      }
+    },
+    {
+      "id": "ed0de300-0000-4000-8000-000000000003",
+      "y": 8,
+      "h": 3,
+      "background": {
+        "kind": "image",
+        "key": "images/ed0de300-0000-4000-8000-0000000000aa/ed0de300-0000-4000-8000-0000000000b2-succulent.webp",
+        "x": 50,
+        "y": 50,
+        "scale": 100,
+        "dim": "dark"
+      }
+    }
+  ]
+}

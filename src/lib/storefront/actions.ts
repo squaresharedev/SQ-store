@@ -525,10 +525,14 @@ export async function updateEmbedSettings(
   }
   if (!row) return failure(notFound("storefront"));
 
-  const config: StorefrontConfig = {
-    ...(parseStoredStorefrontConfig(row.config) ?? DEFAULT_STOREFRONT_CONFIG),
-    embed: parsed.data,
-  };
+  // Never build on a default board: an unreadable stored design would be
+  // overwritten by it.
+  const stored = parseStoredStorefrontConfig(row.config);
+  if (!stored) {
+    console.error("[storefront] embed settings: stored config unreadable", { id });
+    return failure(serverError("saveEmbedSettings"));
+  }
+  const config: StorefrontConfig = { ...stored, embed: parsed.data };
 
   await precheck("storefront", id, { config });
 
