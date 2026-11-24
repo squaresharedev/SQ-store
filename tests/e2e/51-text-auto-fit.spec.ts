@@ -25,6 +25,20 @@ let page: Page;
 const canvasText = () => page.getByRole("textbox", { name: "Block text" });
 const tileText = () => page.locator("[data-block-tile] p").first();
 
+/**
+ * The size control is one of the block's own overrides, so it sits behind the
+ * panel's "More" fold (shut until a block carries an override). Open the fold
+ * that holds the Size field, if it is shut: a shut fold keeps its contents
+ * mounted but `hidden`, and its button names it through aria-controls. Found
+ * from the field, not by the word "More", which other panels use too.
+ */
+async function openMore() {
+  const size = page.getByLabel("Size", { exact: true }).first();
+  const foldId = await size.evaluate((node) => node.closest("[hidden][id]")?.id ?? "");
+  if (foldId) await page.locator(`button[aria-controls="${foldId}"]`).click();
+  await expect(size).toBeVisible();
+}
+
 async function fontSize() {
   return tileText().evaluate((node) => getComputedStyle(node).fontSize);
 }
@@ -55,6 +69,7 @@ test.afterAll(async () => {
 test.describe("text block auto-fit", () => {
   test("short words render at the heading's own base size", async () => {
     await expect.poll(fontSize).toBe("24px");
+    await openMore();
     await expect(page.getByText(/^Auto \(24 px\)$/)).toBeVisible();
   });
 
@@ -75,6 +90,7 @@ test.describe("text block auto-fit", () => {
       .poll(async () => Number((await fontSize()).replace("px", "")))
       .toBeLessThan(24);
     const shrunk = await fontSize();
+    await openMore();
     await expect(page.getByText(new RegExp(`^Auto \\(${shrunk.replace("px", "")} px\\)$`))).toBeVisible();
 
     // Never clipped: the box actually holds what it now renders.
@@ -95,6 +111,7 @@ test.describe("text block auto-fit", () => {
   });
 
   test("an explicit size opts back into overflowing, on purpose", async () => {
+    await openMore();
     await page.getByLabel("Size", { exact: true }).fill("60");
     await expect.poll(fontSize).toBe("60px");
 

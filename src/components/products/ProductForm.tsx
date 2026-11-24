@@ -72,6 +72,8 @@ import {
 import { unexpectedError, type ActionError } from "@/lib/errors";
 import { createProduct, updateProduct } from "@/lib/products/actions";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
+import { measurePhotoBlob } from "@/lib/storefront/photo-edge";
+import { storeUploadedPhotoEdge, usePhotoEdgeBackfill } from "./usePhotoEdgeBackfill";
 import { SaveButton, type SaveResult } from "@/components/ui/SaveButton";
 import { useToast } from "@/components/ui/Toast";
 import type { MessageRef } from "@/i18n/types";
@@ -632,6 +634,10 @@ export function ProductForm({
     if (!pickedCover) return;
     return () => URL.revokeObjectURL(pickedCover);
   }, [pickedCover]);
+  // A stored photo with no measured edge yet is measured here, for the
+  // storefront cards that read it (lib/storefront/photo-edge). Only this
+  // member's own copy is read, and nothing on the form changes.
+  usePhotoEdgeBackfill({ products: product && !imageFile ? [product] : [], record: true });
   const [digitalFile, setDigitalFile] = useState<File | null>(null);
   // Whether the seller interacted with the digital-file picker at all. Needed
   // to tell "left the stored file alone" (keep) apart from "removed it" (clear).
@@ -1130,6 +1136,11 @@ export function ProductForm({
       // Uploads are the slow part of a save (a file can be tens of MB), so
       // each reports real byte progress instead of leaving the button on an
       // indeterminate "Saving…" for a minute.
+      //
+      // The browser holds the new photo's file, so what is at its edges is
+      // read from it beside the upload and stored with the product once the
+      // save lands (lib/storefront/photo-edge).
+      const measuringPhoto = imageFile ? measurePhotoBlob(imageFile) : null;
       const imageKey = imageFile
         ? await uploadToR2(imageFile, "image", (fraction) =>
             setUpload({ what: "image", fraction }),
@@ -1277,6 +1288,11 @@ export function ProductForm({
         }
         return false;
       }
+
+      // The new photo's edge, against the photo this save stored. In the
+      // background: nothing waits on it, and a photo it misses is measured
+      // on a later visit.
+      if (imageKey && measuringPhoto) void storeUploadedPhotoEdge(result.id, imageKey, measuringPhoto);
 
       // Disarm the guard before navigating: the work is saved, so the
       // redirect is not an abandonment.

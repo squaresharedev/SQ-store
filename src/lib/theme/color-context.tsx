@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext } from "react";
+import type { StorefrontPalette } from "@/types/storefront";
+import type { ColorPreset } from "./color-presets";
 import type { ColorTargetRef } from "./color-target";
 
 /**
@@ -32,6 +34,21 @@ export type ColorTargetContextValue = {
   /** Point the panel at a field and open it. */
   open: (ref: ColorTargetRef) => void;
   close: () => void;
+  /**
+   * The storefront's palette (its own, or the one derived from what it wears:
+   * lib/storefront/palette, derivePalette). PALETTE FIRST: with it, every
+   * picker row offers these five instead of the fixed neutrals, and the panel
+   * opens on them. Absent (a provider that predates it) leaves both exactly as
+   * they were.
+   */
+  palette?: StorefrontPalette;
+  /** The same palette as picker swatches, named (palette-swatches,
+   *  paletteContext). Handed down ready-made so the shared ColorPicker never
+   *  carries the editor's words into the pages that use it elsewhere. */
+  paletteSwatches?: readonly ColorPreset[];
+  /** The board's background is a photo: the palette's Background is then no
+   *  colour on the board, and the panel does not offer it as one. */
+  photoBackdrop?: boolean;
 };
 
 const ColorTargetContext = createContext<ColorTargetContextValue | null>(null);
@@ -54,6 +71,9 @@ export function isSameColorTarget(
 ): boolean {
   if (!a || !b) return a === b;
   if (a.kind !== b.kind) return false;
+  // The palette's five slots share a kind and no block: the slot is what
+  // tells them apart.
+  if (a.kind === "palette" && b.kind === "palette") return a.slot === b.slot;
   const aKey = "blockKey" in a ? a.blockKey : null;
   const bKey = "blockKey" in b ? b.blockKey : null;
   return aKey === bKey;

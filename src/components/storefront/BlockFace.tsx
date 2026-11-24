@@ -15,7 +15,10 @@ import type {
   TextEditSource,
   TextRange,
 } from "./InlineTextEditor";
+import { ButtonTileContent } from "./ButtonTileContent";
+import { CarouselTileContent, type CarouselCards } from "./CarouselTileContent";
 import { ImageTileContent } from "./ImageTileContent";
+import { MarqueeTileContent } from "./MarqueeTileContent";
 import { ProductTileContent, type TileQuickAddAction } from "./ProductTileContent";
 import { ShapeTileContent } from "./ShapeTileContent";
 import { TextTileContent } from "./TextTileContent";
@@ -32,8 +35,9 @@ import type { CardHoverTrigger } from "./config-maps";
  * styling, like a shape's, stays in the side panel.
  *
  * Block kinds: "text" → TextTileContent, "shape" → ShapeTileContent,
- * "image" → ImageTileContent, "product" → ProductTileContent (or the
- * removed-product fallback).
+ * "image" → ImageTileContent, "button" → ButtonTileContent, "marquee" →
+ * MarqueeTileContent, "carousel" → CarouselTileContent, "product" →
+ * ProductTileContent (or the removed-product fallback).
  */
 export function BlockFace({
   block,
@@ -47,6 +51,8 @@ export function BlockFace({
   look,
   hover,
   quickAddAction,
+  backdrop,
+  carouselCards,
   onTextChange,
   onToggleBlockFormat,
   onTextRangeChange,
@@ -75,6 +81,14 @@ export function BlockFace({
   /** Product blocks on a buyer's board: the card's "Add to cart" (see
    *  ProductTileContent). */
   quickAddAction?: TileQuickAddAction;
+  /** The hex this block is read against (lib/storefront/backdrop): the band
+   *  it sits on, else the board's background. Faces made of words use it to
+   *  pick an ink that reads when they carry no colour of their own. Absent =
+   *  not known here, and the face keeps the ink it has always had. */
+  backdrop?: string;
+  /** Carousel blocks only: where its cards' products come from, and on a
+   *  buyer's board how each card opens its product (CarouselCards). */
+  carouselCards?: CarouselCards;
   /** Text and the spans that format parts of it, always together. */
   onTextChange?: (text: string, spans: TextSpan[], source: TextEditSource) => void;
   /** Ctrl+B / I / U with nothing selected: the whole block. */
@@ -88,6 +102,7 @@ export function BlockFace({
       <TextTileContent
         block={block}
         theme={theme}
+        backdrop={backdrop}
         editing={textEditing}
         selectAllOnEdit={textSelectAll}
         onTextChange={onTextChange}
@@ -108,6 +123,15 @@ export function BlockFace({
         imageRef={imageRef}
       />
     );
+  }
+  if (block.type === "button") {
+    return <ButtonTileContent block={block} theme={theme} backdrop={backdrop} look={look} />;
+  }
+  if (block.type === "marquee") {
+    return <MarqueeTileContent block={block} theme={theme} backdrop={backdrop} />;
+  }
+  if (block.type === "carousel") {
+    return <CarouselTileContent block={block} theme={theme} look={look} cards={carouselCards} />;
   }
   if (product) {
     return (

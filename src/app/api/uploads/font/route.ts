@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
-import { buildObjectKey, hasR2Credentials, putObject } from "@/lib/r2";
-import { FONT_CONTENT_TYPES, FONT_MAX_BYTES } from "@/lib/validation/product";
-import { sniffFont } from "@/lib/uploads/sniff";
+import { hasR2Credentials } from "@/lib/r2";
+import { FONT_MAX_BYTES } from "@/lib/validation/product";
+import { storeFont } from "@/lib/uploads/store-font";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/security/same-origin";
 import { declaredLengthExceeds } from "@/lib/security/read-json";
@@ -88,31 +88,21 @@ export async function POST(request: Request) {
     );
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  // The measured length is the one that counts: `file.size` is a claim in the
-  // multipart headers, this is what we actually received.
-  if (bytes.byteLength > FONT_MAX_BYTES || bytes.byteLength === 0) {
-    return bad(413, t("tooLarge.font"));
+  // What the file IS, not what it says it is, measured on the bytes we
+  // actually received (`file.size` is a claim in the multipart headers): one
+  // function, shared with an assistant's upload_font.
+  const stored = await storeFont(new Uint8Array(await file.arrayBuffer()), file.name, account.userId);
+  if (!stored.ok) {
+    switch (stored.reason) {
+      case "empty":
+      case "too_large":
+        return bad(413, t("tooLarge.font"));
+      case "unsupported":
+        return bad(415, t("unsupported.font"), t("unsupportedFix.font"));
+      case "store_failed":
+        return bad(502, t("storeFailed.font"), t("fix.tryAgainInAMoment"));
+    }
   }
 
-  // What the file IS, not what it says it is.
-  const sniffed = sniffFont(bytes);
-  const allowed: readonly string[] = FONT_CONTENT_TYPES;
-  if (!sniffed || !allowed.includes(sniffed.mime)) {
-    return bad(
-      415,
-      t("unsupported.font"),
-      t("unsupportedFix.font"),
-    );
-  }
-
-  const key = buildObjectKey("font", account.userId, file.name || `font.${sniffed.ext}`);
-  try {
-    await putObject(key, bytes, sniffed.mime);
-  } catch (error) {
-    console.error("[uploads] font store failed", error);
-    return bad(502, t("storeFailed.font"), t("fix.tryAgainInAMoment"));
-  }
-
-  return Response.json({ key });
+  return Response.json({ key: stored.key });
 }

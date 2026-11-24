@@ -230,6 +230,13 @@ describe("the tile a buyer's board is handed", () => {
     expect(plain).not.toHaveProperty("hoverImageUrl");
     expect(plain).not.toHaveProperty("rating");
     expect(plain).not.toHaveProperty("stockState");
+    expect(plain).not.toHaveProperty("photoEdge");
+  });
+
+  it("carries what its photo's edge measured as one word, and nothing else of the row", async () => {
+    const tile = await tileProduct({ ...row, photo_edge: "white" }, "/s/x/p/y", undefined, { photoEdge: "white" });
+    expect(tile.photoEdge).toBe("white");
+    expect(Object.keys(tile).sort()).toEqual(["currency", "href", "id", "imageUrl", "photoEdge", "price", "title"]);
   });
 });
 
@@ -243,6 +250,16 @@ describe("which extras a board asks for", () => {
     expect([...wanted.hoverPhoto]).toEqual([ids.product]);
     expect([...wanted.rating]).toEqual([ids.other]);
     expect([...wanted.stock].sort()).toEqual([ids.product, ids.other].sort());
+  });
+
+  it("asks for a photo's edge only where the card's look reads it: an auto blend or a shadow title", () => {
+    const wanted = tileExtrasWanted(
+      configWith([{ ...product, style: { whiteBlend: "auto" } }, { ...other, style: { titleStyle: "shadow" } }, text]),
+    );
+    expect([...wanted.photoEdge].sort()).toEqual([ids.product, ids.other].sort());
+    expect([...tileExtrasWanted(configWith([product, other], { whiteBlend: "on" })).photoEdge]).toEqual([]);
+    // A board saved before the card look asks for none.
+    expect([...tileExtrasWanted(configWith([product, other])).photoEdge]).toEqual([]);
   });
 
   it("asks for the stock state for a buy button too, which is not offered once none are left", () => {
@@ -290,7 +307,7 @@ describe("loading the extras", () => {
     const extras = await loadTileExtras(
       fake as never,
       rows,
-      { hoverPhoto: new Set([ids.product, ids.other]), rating: new Set([ids.other]), stock: new Set([ids.product]) },
+      { hoverPhoto: new Set([ids.product, ids.other]), rating: new Set([ids.other]), stock: new Set([ids.product]), photoEdge: new Set() },
       { reviewsShown: true, context: "test" },
     );
     expect(extras.get(ids.product)).toEqual({ hoverImageUrl: `https://cdn.test/${gallery[0].key}`, stockState: "sold_out" });
@@ -299,12 +316,39 @@ describe("loading the extras", () => {
     expect(fake.asked).toEqual([[ids.other]]);
   });
 
+  it("hands a card its photo's stored edge only where it is asked for, and only a real answer", async () => {
+    const measured = [
+      { ...rows[0], photo_edge: "white" },
+      { ...rows[1], image_key: "images/k/other.webp", photo_edge: "other" },
+      { id: "third", image_key: "images/k/third.webp", gallery: [], photo_edge: null, track_stock: false, stock_quantity: null, low_stock_threshold: 3 },
+      { id: "fourth", image_key: "images/k/fourth.webp", gallery: [], photo_edge: "grey", track_stock: false, stock_quantity: null, low_stock_threshold: 3 },
+    ];
+    const none = { hoverPhoto: new Set<string>(), rating: new Set<string>(), stock: new Set<string>() };
+    const extras = await loadTileExtras(
+      client([]) as never,
+      measured,
+      { ...none, photoEdge: new Set([ids.product, "third", "fourth"]) },
+      { reviewsShown: false, context: "test" },
+    );
+    expect(extras.get(ids.product)).toEqual({ photoEdge: "white" });
+    // Not asked for (its card does not read it): left out.
+    expect(extras.get(ids.other)).toEqual({});
+    // Not measured yet, or not an answer: nothing, and its card is left alone.
+    expect(extras.get("third")).toEqual({});
+    expect(extras.get("fourth")).toEqual({});
+
+    // A board whose cards read no edge is handed exactly what it was before.
+    const before = await loadTileExtras(client([]) as never, rows, { ...none, photoEdge: new Set() }, { reviewsShown: false, context: "test" });
+    const after = await loadTileExtras(client([]) as never, measured.slice(0, 2), { ...none, photoEdge: new Set() }, { reviewsShown: false, context: "test" });
+    expect([...after.entries()]).toEqual([...before.entries()]);
+  });
+
   it("reads no ratings while the product page shows no reviews", async () => {
     const fake = client([{ product_id: ids.other, review_count: 4, average: 4.5 }]);
     const extras = await loadTileExtras(
       fake as never,
       rows,
-      { hoverPhoto: new Set(), rating: new Set([ids.other]), stock: new Set() },
+      { hoverPhoto: new Set(), rating: new Set([ids.other]), stock: new Set(), photoEdge: new Set() },
       { reviewsShown: false, context: "test" },
     );
     expect(fake.from).not.toHaveBeenCalled();

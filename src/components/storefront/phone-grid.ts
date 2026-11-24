@@ -2,6 +2,7 @@ import type { GridBlock } from "@/components/grid/gridConstants";
 import { phoneLayout } from "@/lib/storefront/mobile-layout";
 import {
   MOBILE_LAYOUT_MAX_WIDTH_PX,
+  blockFine,
   blockKey,
   drawnOnPhone,
   layerOrder,
@@ -37,6 +38,8 @@ export function phoneGridLayout(
         h: spot.h,
         rotation: spot.block.rotation,
         z: depths.get(key),
+        // Half-cell insets come along, drawn in the phone board's own cells.
+        ...(blockFine(spot.block) ? { inset: blockFine(spot.block) } : {}),
         data: drawnOnPhone(spot.block),
       };
     }),

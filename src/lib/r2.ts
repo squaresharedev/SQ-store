@@ -229,6 +229,56 @@ export async function headObject(key: string): Promise<ObjectMeta | null> {
   };
 }
 
+/** What reading a stored object back came to. */
+export type GetObjectResult =
+  | { ok: true; bytes: Uint8Array<ArrayBuffer> }
+  | { ok: false; reason: "missing" | "too_large" };
+
+/**
+ * SERVER-SIDE GetObject, bounded: the bytes of a stored object, or why not.
+ * Refuses past `maxBytes` before reading the body when the length is stated,
+ * and stops reading as soon as it passes it when it is not, so a caller that
+ * can only use a small file never pulls a large one into memory. Used to copy
+ * a seller's own product photo onto their storefront under another prefix
+ * (lib/agent/product-photo.ts). Throws on transport or credential failures,
+ * like headObject, so the caller fails closed.
+ */
+export async function getObject(key: string, maxBytes: number): Promise<GetObjectResult> {
+  const res = await r2Client().fetch(objectUrl(key).toString(), {
+    method: "GET",
+    // Identity for the same reason as headObject: the length must be a fact.
+    headers: { "Accept-Encoding": "identity" },
+  });
+  if (res.status === 404) return { ok: false, reason: "missing" };
+  if (!res.ok) throw new Error(`R2 GET ${key} failed: ${res.status}${await r2ErrorCode(res)}`);
+  const declared = Number(res.headers.get("content-length") ?? Number.NaN);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    await res.body?.cancel().catch(() => {});
+    return { ok: false, reason: "too_large" };
+  }
+  if (!res.body) return { ok: false, reason: "missing" };
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel().catch(() => {});
+      return { ok: false, reason: "too_large" };
+    }
+    chunks.push(value);
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return { ok: true, bytes };
+}
+
 /**
  * SERVER-SIDE DeleteObject. Idempotent: a 404/204 both mean "gone". Used to
  * evict objects that fail post-upload verification so abusive/oversized uploads

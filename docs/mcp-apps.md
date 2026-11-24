@@ -189,6 +189,34 @@ The e2e stack has no Browser Run, so it answers the same request with its own
 headless Chromium (`/__test/snapshot` in `tests/e2e/stack/server.mjs`), enabled
 only by `AGENT_PREVIEW_TEST_SNAPSHOT_URL`, which a production build never reads.
 
+**Sharper pictures.** 800 pixels is too small to judge type and spacing, so
+`preview_storefront` takes two more options, both inside the same budget:
+
+- `resolution: "full"` photographs the desktop at device scale 1 (1280 wide). A
+  long page then often does not fit: the sample storefront is 113,704 base64
+  characters at full resolution against a 110,000 budget (52,088 at standard).
+  Such a picture is left out, named in `picturesTooLargeToSend` and explained in
+  `pictureNotes` (ask for a region), never shrunk.
+- `region: {x, y, w, h}` in board cells, desktop only. The preview page is opened
+  with `&region=x,y,w,h`; `PreviewProbe` measures the board's grid (its box, its
+  resolved `grid-template-columns`/`rows` tracks and its gaps, `regionBox` in
+  `lib/agent/preview/targets.ts`) and lays an invisible `#ss-preview-region` box
+  exactly over those cells. The snapshot request carries `selector` for that box,
+  at device scale 1 and not full length, so the browser crops to it. The server
+  then reads the JPEG's own frame header (`jpegSize`) and keeps the picture only
+  if it is the region's size: a browser that ignored the selector would hand back
+  the screen, which must not be passed off as the region (`regionNotCropped`).
+  The answer carries `region.page`, the crop's box on the page, so a tile's
+  picture pixels are its page pixels less that box's x and y. Every preview also
+  reports the board grid's own box (`tiles.<screen>.board`).
+
+Checked in a real Chromium on `/dev/editor-mcp` (the sample storefront with the
+probe): the box for cells 3,0,3,3 is exactly the headphones tile drawn there, and
+the crop by selector came back within one pixel of it. That Browser Run's
+`quickAction("snapshot")` honours `selector` is taken from its REST documentation
+(the screenshot format of `/snapshot` lists `selector`) and has not been exercised:
+if it does not, the size check reports it rather than sending the wrong picture.
+
 ## 5. Costs and limits
 
 - Each preview is two browser sessions of a few seconds each on Workers Paid

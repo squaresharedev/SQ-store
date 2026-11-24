@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "motion": {
+      "label": "Movimento",
+      "none": "Nessuno",
+      "subtle": "Discreto",
+      "lively": "Vivace",
+      "hint": "Si anima nel tuo negozio mentre gli acquirenti scorrono. L’editor resta fermo."
+    },
+    "gradient": {
+      "readyLabel": "Sfumature pronte",
+      "custom": "Personalizzata",
+      "middle": "Centro",
+      "shapeLabel": "Oppure una sfumatura",
+      "names": {
+        "soft": "Morbida",
+        "light": "Chiara",
+        "glow": "Bagliore",
+        "wash": "Velo",
+        "sunset": "Tramonto",
+        "accent": "Accento",
+        "deep": "Intensa",
+        "bright": "Brillante",
+        "dusk": "Crepuscolo",
+        "ink": "Inchiostro"
+      }
+    },
+    "more": "Altro",
+    "texture": {
+      "label": "Texture carta",
+      "none": "No",
+      "light": "Leggera",
+      "strong": "Marcata",
+      "hint": "Una grana fine sullo sfondo, come carta stampata."
+    },
+    "marquee": {
+      "textLabel": "Testo",
+      "speedLabel": "Velocità",
+      "speeds": {
+        "slow": "Lenta",
+        "normal": "Normale"
+      },
+      "colorLabel": "Colore",
+      "autoColor": "Automatico",
+      "useAutoColor": "Usa il colore automatico",
+      "defaultText": "Spedizione gratuita su ogni ordine",
+      "add": "Aggiungi testo scorrevole",
+      "inspectorTitle": "Testo scorrevole",
+      "inspectorClose": "Chiudi il pannello del testo scorrevole"
+    }
+  },
+  "board": {}
+}

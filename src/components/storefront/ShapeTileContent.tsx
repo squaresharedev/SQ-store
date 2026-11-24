@@ -3,9 +3,12 @@
 import { useId, type CSSProperties } from "react";
 import {
   RING_DEFAULT_WIDTH,
+  type GradientFill,
   type ShapeBlock,
   type ShapeKind,
 } from "@/types/storefront";
+import { gradientLine, gradientStops } from "@/lib/storefront/gradients";
+import { boxPaint, ringGradientStyle, shapeGradient } from "./shape-fill";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 import { cn } from "@/lib/utils";
 import { SHAPE_SPECS } from "./shape-specs";
@@ -18,7 +21,8 @@ import { defaultRoundness, shapePath, supportsRoundness } from "./shape-geometry
  * attribute is the block's colors — each gated by `isStrictHexColor` — and
  * its schema-bounded integers (border width, opacity, roundness, points). A
  * color that fails the gate falls back to muted tokens, so the shape stays
- * visible and the canvas never crashes.
+ * visible and the canvas never crashes. A gradient (shape-fill) is drawn only
+ * when every one of its stops passes the same gate.
  *
  * Allowlist contract: config data selects a shape by KEY only, and the
  * geometry parameters resolve through shape-geometry's code-defined path
@@ -57,6 +61,9 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
     points: block.points,
     roundness,
   });
+  // Painted instead of `color` when present (shape-fill).
+  const gradient = shapeGradient(block);
+  const gradientId = `${clipId}-fill`;
 
   let shape: React.ReactNode;
 
@@ -76,10 +83,11 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
             <path d={path} />
           </clipPath>
         )}
+        {gradient && <ShapeGradientDef id={gradientId} fill={gradient.fill} />}
         <path
           d={path}
-          className={validColor ? undefined : "fill-muted"}
-          style={validColor ? { fill: validColor } : undefined}
+          className={validColor || gradient ? undefined : "fill-muted"}
+          style={gradient ? { fill: `url(#${gradientId})` } : validColor ? { fill: validColor } : undefined}
           {...(borderWidth > 0
             ? {
                 // Centered stroke at double width, clipped to the shape:
@@ -100,11 +108,11 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
     shape = (
       <div
         aria-hidden="true"
-        className={cn(spec.className, validColor ? "" : "border-muted")}
+        className={cn(spec.className, validColor || gradient ? "" : "border-muted")}
         style={{
           borderStyle: "solid",
           borderWidth: borderWidth > 0 ? borderWidth : RING_DEFAULT_WIDTH,
-          ...(validColor ? { borderColor: validColor } : {}),
+          ...(gradient ? ringGradientStyle(gradient.css) : validColor ? { borderColor: validColor } : {}),
           ...opacityStyle,
         }}
       />
@@ -145,20 +153,20 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
         >
           <span
             aria-hidden="true"
-            className={cn("absolute", validColor ? "" : "bg-muted")}
+            className={cn("absolute", validColor || gradient ? "" : "bg-muted")}
             style={{
               inset: borderWidth,
               borderRadius: "inherit",
-              ...(validColor ? { backgroundColor: validColor } : {}),
+              ...boxPaint(validColor, gradient?.css ?? null),
             }}
           />
         </div>
       ) : (
         <div
           aria-hidden="true"
-          className={cn(spec.className, validColor ? "" : "bg-muted")}
+          className={cn(spec.className, validColor || gradient ? "" : "bg-muted")}
           style={{
-            ...(validColor ? { backgroundColor: validColor } : {}),
+            ...boxPaint(validColor, gradient?.css ?? null),
             ...radiusStyle,
             ...opacityStyle,
           }}
@@ -174,6 +182,19 @@ export function ShapeTileContent({ block }: { block: ShapeBlock }) {
     <div className="flex min-h-0 flex-1 items-center justify-center [container-type:size]">
       {shape}
     </div>
+  );
+}
+
+/** A path kind's gradient, in the shape box's own units so it runs across the
+ *  tile the way a box kind's CSS gradient does (gradientLine). */
+function ShapeGradientDef({ id, fill }: { id: string; fill: GradientFill }) {
+  const stops = gradientStops(fill);
+  return (
+    <linearGradient id={id} gradientUnits="userSpaceOnUse" {...gradientLine(fill.angle)}>
+      {stops.map((stop, index) => (
+        <stop key={index} offset={index / (stops.length - 1)} stopColor={stop} />
+      ))}
+    </linearGradient>
   );
 }
 

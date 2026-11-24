@@ -2,6 +2,7 @@
 
 import { Library, X } from "lucide-react";
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
@@ -42,7 +43,11 @@ export function LibraryPanel({
   onUpload,
   onPlaceUpload,
   onAddShape,
+  onAddBand,
+  onAddButton,
+  onAddCarousel,
   onClose,
+  moreBlocks,
 }: {
   tab: LibraryTab;
   onTabChange: (tab: LibraryTab) => void;
@@ -53,7 +58,14 @@ export function LibraryPanel({
   onUpload: (file: File) => void;
   onPlaceUpload: (upload: StorefrontUpload) => void;
   onAddShape: (kind: ShapeKind) => void;
+  /** The Layout group's band and button (LayoutInserts), shown with the shapes. */
+  onAddBand?: () => void;
+  onAddButton?: () => void;
+  /** And the product carousel, in the same group. */
+  onAddCarousel?: () => void;
   onClose: () => void;
+  /** Other built-in blocks, listed after the shapes (the scrolling strip). */
+  moreBlocks?: ReactNode;
 }) {
   const t = useTranslations("Storefront.library");
 
@@ -118,8 +130,9 @@ export function LibraryPanel({
             onPlace={onPlaceUpload}
           />
         ) : (
-          <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} />
+          <ShapesPanel onAddShape={onAddShape} canAddBlocks={canAddBlocks} onAddBand={onAddBand} onAddButton={onAddButton} onAddCarousel={onAddCarousel} />
         )}
+        {tab === "shapes" && moreBlocks}
       </div>
     </div>
   );

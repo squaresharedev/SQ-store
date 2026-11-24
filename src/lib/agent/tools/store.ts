@@ -17,6 +17,7 @@ import { saveNotifications, updateBio, updateUsername } from "@/lib/settings/act
 import { getTraderIdentityStatus } from "@/lib/settings/seller-identity";
 import { listStorefronts } from "@/lib/storefront/queries";
 import { getTeamRoster } from "@/lib/team/queries";
+import { boardProductIds } from "@/types/storefront";
 
 /** The store and the person: what is true, what is left to do. */
 
@@ -46,9 +47,7 @@ export const storeTools = [
       let setup = null;
       if (account.isOwner && identity.ok) {
         const [products, storefronts] = await Promise.all([getProductsSummary(), listStorefronts()]);
-        const referenced = storefronts.rows.flatMap((storefront) =>
-          storefront.config.blocks.flatMap((block) => (block.type === "product" ? [block.productId] : [])),
-        );
+        const referenced = storefronts.rows.flatMap((storefront) => boardProductIds(storefront.config.blocks));
         const checklist = buildSetupSteps({
           traderMissing: identity.missing,
           productCount: products.total,

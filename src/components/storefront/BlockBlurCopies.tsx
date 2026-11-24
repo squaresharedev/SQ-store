@@ -20,11 +20,15 @@ export function BlockBlurCopies({
   block,
   theme,
   imageUrl,
+  backdrop,
 }: {
   block: StorefrontBlock;
   theme: StorefrontTheme;
   /** Image blocks only: the same signed URL the face is drawing. */
   imageUrl?: string | null;
+  /** The same backdrop the face was handed (see BlockFace), so a copy's words
+   *  wear the ink the face's do. */
+  backdrop?: string;
 }) {
   return blockBlurCopyStyles(block).map((style, index) => (
     <div
@@ -35,7 +39,7 @@ export function BlockBlurCopies({
       className={cn(TILE_FACE_CLASS, "pointer-events-none absolute inset-0")}
       style={style}
     >
-      <BlockFace block={block} product={null} theme={theme} imageUrl={imageUrl} />
+      <BlockFace block={block} product={null} theme={theme} imageUrl={imageUrl} backdrop={backdrop} />
     </div>
   ));
 }

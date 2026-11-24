@@ -1,0 +1,82 @@
+{
+  "panel": {
+    "palette": {
+      "title": "Palet",
+      "hint": "Verander hier een kleur en alles in die kleur verandert mee.",
+      "group": "Paletkleuren",
+      "allColors": "Alle kleuren",
+      "photoName": "Achtergrond (je foto)",
+      "photoHint": "De achtergrond is je foto. Kies je hier een kleur, dan vervangt die de foto. Ongedaan maken haalt de foto terug.",
+      "slots": {
+        "background": {
+          "name": "Achtergrond",
+          "label": "Palet: achtergrond ({value})"
+        },
+        "text": {
+          "name": "Tekst",
+          "label": "Palet: tekst ({value})"
+        },
+        "accent": {
+          "name": "Accent",
+          "label": "Palet: accent ({value})"
+        },
+        "surface": {
+          "name": "Vlak",
+          "label": "Palet: vlak ({value})"
+        },
+        "muted": {
+          "name": "Gedempt",
+          "label": "Palet: gedempt ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Lettertypepaar",
+      "group": "Lettertypeparen",
+      "editorial": {
+        "name": "Redactioneel",
+        "hint": "Een zachte schreef voor koppen, strakke tekst eronder"
+      },
+      "classic": {
+        "name": "Klassiek",
+        "hint": "Een elegante schreef met een goed leesbare schreefloze"
+      },
+      "modern": {
+        "name": "Modern",
+        "hint": "Geometrische koppen met neutrale tekst"
+      },
+      "soft": {
+        "name": "Zacht",
+        "hint": "Een ronde schreef met een vriendelijke schreefloze"
+      },
+      "studio": {
+        "name": "Atelier",
+        "hint": "Een slanke schreef met een open schreefloze"
+      }
+    },
+    "typography": {
+      "singleFont": "Eén lettertype voor alles",
+      "singleFontHint": "Kies je hier een lettertype, dan gaat het paar uit."
+    },
+    "textStyles": {
+      "title": "Tekststijlen",
+      "hint": "Stel elke stijl één keer in. Elk tekstblok in die stijl volgt hem.",
+      "pick": "Stijl om te bewerken",
+      "face": "Lettertype",
+      "faceHeading": "Kop",
+      "faceBody": "Broodtekst",
+      "uppercase": "Hoofdletters",
+      "colorDefault": "Standaard van de stijl",
+      "useColorDefault": "Standaard van de stijl gebruiken",
+      "reset": "Deze stijl herstellen"
+    },
+    "valign": {
+      "label": "Verticale uitlijning",
+      "group": "Verticale tekstuitlijning",
+      "top": "Boven uitlijnen",
+      "middle": "In het midden uitlijnen",
+      "bottom": "Onder uitlijnen"
+    }
+  },
+  "board": {}
+}

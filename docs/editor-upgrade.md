@@ -1,0 +1,212 @@
+# The storefront editor upgrade
+
+What it added, where each part lives, and the rules it was built under. Read
+this before changing any of it.
+
+## Why
+
+A non-designer should be able to build a storefront that looks good. Every
+item came from building a real storefront through the MCP and hitting a wall:
+white studio photos looked like white boxes on a colored board, the serif
+looked like Times, every color was typed as hex, the board always kept side
+margins, small things could not be placed precisely, and nothing linked
+anywhere except product cards.
+
+## The rules it was built under
+
+1. Good by default. A new storefront with zero edits should already look good.
+2. One control per feature: a toggle or 3 to 5 named presets. Numbers live
+   behind "More" or are MCP-only.
+3. Palette first: every color picker opens on the theme's five colors.
+4. Theme first, block second: set it once for the board; per-block overrides
+   sit in the block's "More".
+5. A control budget: at most 5 new visible controls in the whole-storefront
+   panel, at most 2 per block panel.
+6. Grid mode stays bulletproof; the phone layout is automatic.
+7. Plain words in the UI.
+
+## The one hard rule: nothing live changes
+
+Storefronts are embedded on sellers' own websites. Every field this upgrade
+added is OPTIONAL, and an absent field draws exactly as before.
+
+- The nicer starting point is `NEW_STOREFRONT_THEME` (`src/types/storefront.ts`),
+  applied by `createStorefront` only. Never add to `DEFAULT_STOREFRONT_CONFIG`:
+  an old stored config falls back to it.
+- A writer drops a key when its value returns to the default, so an untouched
+  storefront stays byte-identical.
+- `tests/unit/storefront/editor-upgrade-contract.test.ts` pins both: a
+  storefront saved before the upgrade parses to exactly what was stored.
+- `tests/component/photo-cards-legacy.test.tsx` compares legacy cards with a
+  snapshot taken before the card look was written.
+
+Two readability fixes are the only intended changes to existing storefronts:
+
+- A card's labels (price, sale chip, name) are never drawn under 11px
+  (`TILE_LABEL_READABLE_PX`). On a small card a price that used to draw at 8 to
+  10px now draws at 11px.
+- A card narrower than 8.5rem with its price in the name strip stacks the name
+  over the price (`globals.css`), so a phone's small cards keep a readable name.
+
+Neither applies to a MINIATURE of a board (`StorefrontPreview`, the storefront
+list's cards): it sets `--tile-label-floor: 0px` and is left out of the
+stacking, so it draws as it always did.
+
+## Shipping it, and rolling it back
+
+- **Order:** the rollback-safe read (`fix/storefront-forward-compatible-read`,
+  `src/lib/validation/storefront-repair.ts`) ships FIRST, on its own; then the
+  migration `20261123_product_photo_edge.sql` is applied by hand; then this.
+  CI's schema gate refuses a deploy that is ahead of the migration.
+- **A rollback is safe** once the read shipped first: older code reads a
+  config saved with a field it does not know by dropping that field (or the
+  block it cannot draw) and keeping the rest, instead of losing the
+  storefront. A seller who saves during a rollback loses only the dropped
+  parts. The `products.photo_edge` column is harmless to older code, which
+  never selects it.
+
+## What it added
+
+| Area | Fields | Where |
+| --- | --- | --- |
+| Palette | `theme.palette` (background, text, accent, surface, muted) | `lib/storefront/palette.ts`, `ThemePanel`, `ColorPanel` |
+| Font pairings | `theme.fontPairing` (editorial, classic, modern, soft, studio) | `lib/theme/font-pairings.ts`, `src/app/fonts/` (with `LICENSES.md`), `TypographySection` |
+| Text styles | `theme.textStyles`, a fourth `variant` (`label`), `TextBlock.valign` | `lib/storefront/text-styles.ts`, `TextTileContent`, `TextBlockEditor` |
+| Card look | `cardColor`, `whiteBlend`, `titleBarColor`, `titleTextColor`, `titleFont`, `photoShape`, `shadow` on the theme and per card; a photo's measured edge on the PRODUCT (`products.photo_edge`, `Product.photoEdge`) | `components/storefront/card-look.ts`, `lib/storefront/photo-edge.ts`, `lib/products/photo-edge-actions.ts`, `components/products/usePhotoEdgeBackfill.ts`, `CardLookControls` |
+| Images, shapes | `ImageBlock.shape`, `.shadow`; `ShapeBlock.shadow`, `.gradient` | `ImageTileContent`, `ShapeTileContent`, `shape-fill.ts` |
+| Gradients | a third stop (`via`) on the background; ready-made palette gradients | `lib/storefront/gradients.ts` |
+| Motion, finish | `theme.motion`, `theme.texture` | `lib/storefront/motion.ts`, `BoardMotion`, `FinishControls` |
+| Bands | `config.bands` (a color, a gradient or a photo behind a run of rows) | `lib/storefront/bands.ts`, `BandPaint`, `BandEditor`, `Grid` underlays |
+| Fine placement | `fine` on text, shape and button blocks (half-cell insets) | `components/grid/`, `lib/storefront/layout-blocks.ts` |
+| Links | `LinkTarget`: a product on the board, another storefront of the store, a band, an https address | `lib/storefront/links.ts`, `layout-save.ts` |
+| Button block | `{type: "button", label, link, look}` | `ButtonTileContent`, `ButtonBlockEditor` |
+| Header | `header.logo`, `header.links`, a cart icon where the cart is live | `StorefrontMasthead`, `MastheadNav`, `HeaderLogoMenu` |
+| Scrolling text | `{type: "marquee", text, speed, variant, color}` | `MarqueeTileContent`, `lib/storefront/marquee.ts` |
+| Product carousel | `{type: "carousel", id, productIds}` (1 to 12, each once, in order) | `CarouselTileContent`, `CarouselBlockEditor`, `lib/storefront/carousel.ts` |
+| MCP | `palette`, `add_button`, `add_marquee`, `add_carousel`, `add_band`, `edit_band`, `remove_band` operations; `preview_storefront` full resolution and region; `upload_font`; `copy_product_photo` | `lib/storefront/design-ops.ts`, `lib/agent/` (see `docs/mcp.md`) |
+
+Copy for the four editor workstreams is in its own catalogs, in all ten
+locales: `EditorCards`, `EditorType`, `EditorLayout`, `EditorFinish`, each with
+a `panel` half (the editor) and a `board` half (what a buyer can read).
+
+## Decisions worth knowing before changing something
+
+- **The palette recolors by value, it does not link.** Every color field holds
+  plain hex. Changing a palette color replaces that hex wherever the storefront
+  wears it (`recolourPalette`), so no renderer and no live embed can meet a
+  value it does not understand. Colors are found by field NAME: `color`,
+  `accent`, `from`, `via`, `to`, or ending in `Color`. A new color field that
+  follows the rule is recolored with no further wiring. When two palette
+  slots share a color (a white board with white cards), a value cannot say
+  which slot it is, so only the fields whose ROLE is the slot move
+  (`FIELD_ROLES` and `paletteRoleOf` in `palette.ts`, the one place roles
+  are decided); a field with no role stays. The palette row is the one place
+  the accent and a plain background colour are set. A photo background has no
+  colour: its swatch is the photo, and choosing a colour there replaces it.
+- **A band is not a block.** It lives in `config.bands`, so reading order, the
+  phone reflow, the block cap, overlap and layering have no new case. On a
+  phone a band follows the blocks that sit on it.
+- **Fine placement is insets.** A block's rectangle stays whole cells and
+  `fine` pulls each named side in by half a cell, so the block never leaves its
+  cells and every whole-cell rule holds. Product cards never carry it.
+- **A photo's edge is a fact about the photo, stored with the product.**
+  `whiteBlend: "auto"` and the `shadow` title read what is at a product photo's
+  edges (white, or other). Product photos are on another origin, so a buyer's
+  page cannot read their pixels, and the server never decodes a photo. The
+  seller's BROWSER measures it: from the file as it is uploaded (the product
+  form), or, for a photo with no answer yet (stored before this, or uploaded
+  through the MCP), through the seller's same-origin photo route the next time
+  they open Products or the designer. `recordPhotoEdge` stores the answer in
+  `products.photo_edge` against the photo that was measured, and the database
+  clears it whenever `image_key` changes (migration
+  `20261123_product_photo_edge`), so a replaced photo never inherits an old
+  answer. One measurement serves every storefront the product is on. Measuring
+  never touches a storefront: nothing is marked unsaved and no config changes.
+  A buyer's board (hosted, embedded, the MCP preview) is handed the edge with
+  each product whose card reads it (`lib/storefront/tile-extras.ts`); a photo
+  not measured yet is left alone. A board built through the MCP blends on
+  "auto" once its photos are measured, with nothing to save, so "auto" is
+  what an assistant should use.
+- **A buyer's page is handed a built payload.** Bands, band photos, the logo
+  and every link's address are put into `StorefrontPageData` by `boardLayout`
+  (`lib/storefront/storefront-page.ts`), which the MCP preview also calls. A
+  link that leads nowhere a buyer may go is dropped there.
+- **A link never costs a seller their storefront.** The schema refuses a link
+  to a product the board does not show. A save drops such links with the
+  product block it dropped, and a stored config whose only fault is a dead link
+  is read back without it (`parseStoredStorefrontConfig`).
+- **Words on a band pick a readable ink** where the seller chose none
+  (`textInkOnBackdrop`, WCAG AA). A block off a band keeps the ink it always had.
+- **A carousel shows products that are not product blocks, so every "is this
+  product on this storefront" counts its members.** The one answer is
+  `boardProductIds` (`types/storefront.ts`): product blocks and carousel
+  members, each once, in reading order. The product page and checkout gate
+  (`placementOf` in `lib/products/purchasable.ts`, used by
+  `lib/products/public.ts`), the sitemap, the structured data, the storefront
+  list's previews (`placedProductIds`), the setup checklist, the dashboard's
+  placements and the product cards' "on these storefronts" all ask it. A
+  product only a carousel shows has its own page and can be bought; it has no
+  block, so no manual sold-out mark (`Purchasable.block` is null).
+- **A board sheds a product one way: `keepProducts`
+  (`lib/storefront/carousel.ts`).** A product block naming a product that is
+  not kept goes whole, a carousel loses that member, and a carousel left with
+  none goes too. The save's ownership check (the ACTIVE account's products,
+  so a team member saves the owner's store), the buyer's payload
+  (`buildStorefrontPage`: live, this owner's, not taken down) and the MCP
+  preview all call it. `settleLayout` then drops any link the change left
+  pointing nowhere, and the designer does the same when a product is taken
+  out of a carousel in its panel (`withoutDeadLinks`).
+- **A carousel's cards are the board's cards.** Each is `ProductTileContent`
+  with the theme's card style (no per-card overrides), in a product card's
+  frame, with the cell's corner radius; the card look's shadow is drawn on
+  the carousel's cell (`blockShadow`), where a drop shadow falls under each
+  card. A card's product reaches the buyer as the same built
+  `StorefrontTileProduct` a tile gets (a stock STATE, never a count), and opens
+  its page exactly as a product block's card does: a link (a new tab in the
+  embed frame), or `QuickAddTile` where the card adds to the cart.
+- **A carousel's cards hold still on hover.** The board's hover effects
+  answer to the grid cell, and a row of cards is one cell, so every card would
+  lift at once. "Auto" white blend works as on any card: the photo's edge is
+  the product's (`products.photo_edge`), handed to a carousel's members by the
+  card extras (`tile-extras.ts`).
+- **Swiping is the browser's.** Native CSS scroll snap (`snap-x
+  snap-mandatory`, the `swipe-x` utility for no scrollbar), no library, no
+  autoplay. A card is as wide as the row is tall (container units), the board's
+  gap apart, so a 6 by 2 carousel shows three cards on the board's columns. The
+  previous and next arrows show on a fine pointer only (`pointer-fine`), step
+  a page at a time, jump instead of gliding under reduced motion, and stay
+  focusable (`aria-disabled`, the arrow faded) at an end.
+- **On a narrower board a carousel keeps its height in cells.** The reflow and
+  a phone layout's automatic placement scale a block's width and height by the
+  column ratio; a carousel keeps its rows instead, never more than its new
+  width (`keepsRowsWhenNarrow`, `GridBlock.keepRows`, `reflowedSpan`). A 6 by
+  2 row on a 4 column phone is 4 by 2, two readable cards in view, where
+  scaling would have made it 4 by 1 with three cards a third the size.
+  `block.mobile` places it like any other block.
+- **The embed's JSON route (`/api/embed/[key]`) leaves carousels out, as it
+  leaves out buttons and scrolling text.** That payload has no consumer (the
+  embed is the frame, `/e/...`, drawn by `StorefrontBoard`), so its removal
+  check still asks only about the product tiles it emits.
+- **Motion never hides a board.** Blocks arrive by a CSS animation that ends
+  visible with no script; script only hides a block the observer has reported
+  off screen. Nothing moves under reduced motion. The MCP preview draws the
+  board still.
+
+## Not built
+
+- **One-click background removal.** The existing in-browser cut-out
+  (`lib/share-card/cutout`) loads its runtime and model from third parties at
+  run time, which a storefront may not do. Self-host them first.
+
+## Looking at it
+
+Dev-only pages, no sign-in and no database:
+
+- `/dev/editor-demo` is ONE storefront wearing every feature above, the
+  carousel included (`?view=embed` for the embed frame, `&motion=0` to draw
+  it still).
+- `/dev/editor-cards`, `/dev/editor-type`, `/dev/editor-layout`,
+  `/dev/editor-finish` and `/dev/editor-mcp` are each workstream's gallery.
+  `/dev/editor-layout` ends on a carousel of the sample's five products, and
+  `?view=designer` there has its panel (`+ carousel` adds one).
+- `/dev/sample-storefront?tour=0` is the real designer on the sample storefront.

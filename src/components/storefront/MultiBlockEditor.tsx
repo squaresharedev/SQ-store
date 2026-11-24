@@ -30,6 +30,7 @@ import { PriceTagControls } from "./PriceTagControls";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
 import type { BlockFieldSummons } from "./SummonedField";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
+import { derivePalette } from "@/lib/storefront/palette";
 
 /**
  * Inspector card body for a MULTI-selection. Same-type selections get their
@@ -107,6 +108,7 @@ export function MultiBlockEditor({
         <ShapeBlockEditor
           block={shapes[0]}
           summons={summons}
+          palette={derivePalette(theme)}
           onUpdate={onShapeChange}
           onDuplicate={onDuplicate}
           onRemove={onRemove}
@@ -129,6 +131,7 @@ export function MultiBlockEditor({
         <TextBlockEditor
           block={texts[0]}
           accent={theme.accent}
+          textStyles={theme.textStyles}
           hasCustomFont={theme.customFont !== undefined}
           multi
           summons={summons}

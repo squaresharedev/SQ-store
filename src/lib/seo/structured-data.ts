@@ -11,7 +11,7 @@ import { REVIEW_RATING_MAX, REVIEW_RATING_MIN } from "@/lib/reviews/limits";
 import { productOgImagePath } from "@/lib/products/paths";
 import { productPageUrl, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import type { ProductPageData } from "@/types/product-page";
-import { readingOrder } from "@/types/storefront";
+import { boardProductIds } from "@/types/storefront";
 import type { StorefrontPageData } from "@/types/storefront-page";
 import type { ProductReviews } from "@/types/review";
 
@@ -141,16 +141,14 @@ export function storefrontStructuredData(
   displayName: string,
 ): object {
   // Walk the board in reading order, not the order its blocks were stored in
-  // (which is the order they were added). Skip ids with no matching product
-  // and second appearances of one product (the same product on two tiles).
+  // (which is the order they were added): every product it shows, a tile's or
+  // a carousel's member in the carousel's own order, each once
+  // (boardProductIds). Skip ids with no matching product.
   const products = new Map(page.products.map((product) => [product.id, product]));
-  const seen = new Set<string>();
   const items: Array<{ "@type": "ListItem"; position: number; url: string; name: string }> = [];
 
-  for (const block of readingOrder(page.blocks)) {
-    if (block.type !== "product" || seen.has(block.productId)) continue;
-    seen.add(block.productId);
-    const product = products.get(block.productId);
+  for (const productId of boardProductIds(page.blocks)) {
+    const product = products.get(productId);
     if (!product) continue;
     items.push({
       "@type": "ListItem",

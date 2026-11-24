@@ -46,11 +46,12 @@ import { PUBLIC_STOCK_SELECT } from "@/lib/stock/public";
 import { readStoreSales, salesCovering } from "@/lib/discounts/public";
 import type { ActiveSale, StoreSale } from "@/types/discount";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
-import type {
-  ProductBlock,
-  ProductPageConfig,
-  StorefrontConfig,
-  StorefrontSeller,
+import {
+  boardProductIds,
+  type ProductBlock,
+  type ProductPageConfig,
+  type StorefrontConfig,
+  type StorefrontSeller,
 } from "@/types/storefront";
 
 /**
@@ -99,7 +100,8 @@ export type Purchasable = {
   config: StorefrontConfig;
   productPage: ProductPageConfig;
   /** The tile this product sits on, which carries the manual sold-out flag.
-   *  Null for a product that is here only as another tile's add-on. */
+   *  Null for a product that is here only in a carousel, or only as another
+   *  product's add-on. */
   block: ProductBlock | null;
   row: PublicProductRow;
   /** The six buyer-facing identity columns, built field by field. */
@@ -249,24 +251,23 @@ export async function gatePurchasableLines<Extra = undefined>(
   if (!open) return null;
   const { config, productPage } = open;
 
-  // A product is sold here when it is a tile, or a product a tile offers in
-  // "Add to your order" (its details dialog links here). Any other product the
-  // seller has not placed on this storefront has no page here, whatever its
-  // status. Hidden sold-out tiles still count: the page then simply says sold
-  // out.
-  const tiles = config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate] : []));
-  const blocks = new Map(tiles.map((tile) => [tile.productId, tile]));
-  const notTiles = wanted.filter((id) => !blocks.has(id));
+  // A product is sold here when the board shows it (a tile, or a member of a
+  // carousel: boardProductIds), or a product one of those offers in "Add to
+  // your order" (its details dialog links here). Any other product the seller
+  // has not placed on this storefront has no page here, whatever its status.
+  // Hidden sold-out tiles still count: the page then simply says sold out.
+  const { onBoard, blocks } = placementOf(config);
+  const notTiles = wanted.filter((id) => !onBoard.has(id));
   let offered = new Set<string>();
   if (notTiles.length > 0) {
     const found = await offeredByTiles(admin, storefront.owner_id, notTiles, {
-      tileProductIds: tiles.map((tile) => tile.productId),
+      tileProductIds: [...onBoard],
       productPage,
     });
     if (found === null) return PAGE_BUSY;
     offered = found;
   }
-  const placed = wanted.filter((id) => blocks.has(id) || offered.has(id));
+  const placed = wanted.filter((id) => onBoard.has(id) || offered.has(id));
   if (options.stopWhenNonePlaced && placed.length === 0) return null;
 
   // Products, seller identity and the store's running sales all depend only
@@ -347,6 +348,22 @@ export async function gatePurchasableLines<Extra = undefined>(
   };
 }
 
+/**
+ * What a storefront's board places, for the gate: every product it shows
+ * (boardProductIds: its product blocks and its carousels' members, the one
+ * answer to "is this product on this storefront"), and each product block by
+ * its product, which is where the seller's manual sold-out mark lives. A
+ * product only a carousel shows has no block, and so no mark.
+ */
+export function placementOf(config: Pick<StorefrontConfig, "blocks">): {
+  onBoard: ReadonlySet<string>;
+  blocks: ReadonlyMap<string, ProductBlock>;
+} {
+  const blocks = new Map<string, ProductBlock>();
+  for (const block of config.blocks) if (block.type === "product") blocks.set(block.productId, block);
+  return { onBoard: new Set(boardProductIds(config.blocks)), blocks };
+}
+
 /** The rows a products read returned that are for sale here: asked for
  *  (placed on this storefront) and not taken down. A taken-down product is
  *  absent like one that never existed. */
@@ -384,17 +401,16 @@ export async function loadStoreItems(
   const wanted = [...new Set(productIds.filter((id) => idSchema.safeParse(id).success))];
   if (wanted.length === 0) return new Map();
   const admin = createAdminClient();
-  const tiles = store.config.blocks.flatMap((candidate) => (candidate.type === "product" ? [candidate] : []));
-  const blocks = new Map(tiles.map((tile) => [tile.productId, tile]));
-  const notTiles = wanted.filter((id) => !blocks.has(id));
+  const { onBoard, blocks } = placementOf(store.config);
+  const notTiles = wanted.filter((id) => !onBoard.has(id));
   const offered = notTiles.length
     ? await offeredByTiles(admin, store.ownerId, notTiles, {
-        tileProductIds: tiles.map((tile) => tile.productId),
+        tileProductIds: [...onBoard],
         productPage: store.productPage,
       })
     : new Set<string>();
   if (offered === null) return null;
-  const placed = wanted.filter((id) => blocks.has(id) || offered.has(id));
+  const placed = wanted.filter((id) => onBoard.has(id) || offered.has(id));
   if (placed.length === 0) return new Map();
   const { data, error } = await admin
     .from("products")

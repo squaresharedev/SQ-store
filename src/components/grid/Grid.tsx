@@ -20,6 +20,7 @@ import {
   type Point,
 } from "./rotationMath";
 import {
+  CHROME_Z,
   GESTURE_Z,
   GRID_CELL_RADIUS_CLASS,
   GRID_COLUMNS_DEFAULT,
@@ -28,20 +29,36 @@ import {
   GRID_ROWS_DEFAULT,
   blockFootprint,
   boardInLocalFrame,
+  cellPaintStyle,
   columnsThatFit,
+  drawnInset,
+  drawnPlacement,
   edgeCursor,
   edgesUnderPointer,
   EMPTY_CELL_Z,
+  followRows,
+  fromHalves,
+  halfStepSizes,
+  hasInset,
   keyboardResizeStep,
   layerZIndex,
+  moveHalfBox,
   placementFromLocalBox,
   placementIsFree,
   invertReflowResize,
   reflowBlocks,
   reflowHasRoom,
+  resizeHalfBox,
+  resizeHalfCorner,
   resizeLocalBox,
+  roundToStep,
+  toHalves,
+  underlayBehind,
   type GridBlock,
+  type GridInset,
   type GridPlacement,
+  type GridUnderlay,
+  type HalfBox,
   type RenderGridBlock,
   type ResizeEdges,
 } from "./gridConstants";
@@ -248,18 +265,29 @@ function snapToGridStyle(
    *  is laid out from line 1, and is painted a cell up from there. */
   columns: number,
   rows: number,
+  /** Half-cell insets, painted through the same properties (see
+   *  cellPaintStyle): the cell is drawn on the half cells, not just its
+   *  content, so its ring, its corners and its handles all follow. */
+  inset?: GridInset,
 ): React.CSSProperties {
   const offset = footprintOffset(placement, rotation);
   const shiftX =
     placement.x - boardLine(placement.x, placement.w, columns) + offset.x;
   const shiftY =
     placement.y - boardLine(placement.y, placement.h, rows) + offset.y;
-  const pitch = (cells: number, span: number) =>
-    `calc((100% + var(--grid-gap, 0px)) * ${cells} / ${span})`;
-  return {
-    ...(shiftX ? { left: pitch(shiftX, placement.w) } : {}),
-    ...(shiftY ? { top: pitch(shiftY, placement.h) } : {}),
-  };
+  return cellPaintStyle(placement, { x: shiftX, y: shiftY }, inset);
+}
+
+/**
+ * Everything a cell is painted off its stored rect by, in CELLS: the turned
+ * block's half-cell nudge (footprintOffset) plus the half cell each leading
+ * inset pulls it in. What a live preview has to subtract to draw where the
+ * gesture says (see previewBox).
+ */
+function paintedOffset(block: GridPlacement & { rotation?: number; inset?: GridInset }): Point {
+  const offset = footprintOffset(block, block.rotation ?? 0);
+  const inset = drawnInset(block.inset, block.w, block.h);
+  return { x: offset.x + (inset?.left ? 0.5 : 0), y: offset.y + (inset?.top ? 0.5 : 0) };
 }
 
 /** The two CSS custom properties the `.ss-grid` rule reads. Typed (not cast)
@@ -302,6 +330,9 @@ type GesturePreview = ActiveGesture & {
    *  and the reason a rotate has a ghost at all: turning a block changes which
    *  cells it lies across even though its placement never moves. */
   footprint: GridPlacement;
+  /** The insets the block will land with, so the ghost marks the half cells
+   *  it will really be drawn on. Absent = whole cells. */
+  ghostInset?: GridInset;
   valid: boolean;
   offset: { x: number; y: number };
   size?: { w: number; h: number };
@@ -548,6 +579,13 @@ interface GridCommonProps<TData> {
    * see onRotate's note in the storefront designer).
    */
   groupKeys?: readonly string[];
+  /**
+   * Strips drawn behind runs of rows, across every column, under every block
+   * (see FULL-ROW UNDERLAYS in gridConstants). On a reflowed or narrow board
+   * each follows the blocks its consumer says sit on it. Absent = none, and
+   * the board draws exactly what it always has.
+   */
+  underlays?: readonly GridUnderlay[];
 }
 
 /**
@@ -561,6 +599,7 @@ export type GridProps<TData> =
       onMove?: undefined;
       onResize?: undefined;
       onMoveMany?: undefined;
+      onPlace?: undefined;
     })
   | (GridCommonProps<TData> & {
       editable: true;
@@ -578,6 +617,16 @@ export type GridProps<TData> =
        * always did.
        */
       onMoveMany?: (moves: readonly { key: string; x: number; y: number }[]) => void;
+      /**
+       * Where a block landed when its INSETS are part of the answer: a half-step
+       * gesture (GridBlock.halfSteps), or a resize of a block that carries
+       * insets (they are kept, minus any a one-cell side can no longer hold).
+       * Whole cells plus the sides pulled in by half a cell; undefined = none.
+       *
+       * OPTIONAL: without it no block moves in half steps, and insets ride
+       * through every gesture untouched, as data the grid only paints.
+       */
+      onPlace?: (key: string, placement: GridPlacement, inset: GridInset | undefined) => void;
     });
 
 export function Grid<TData>(props: GridProps<TData>) {
@@ -604,6 +653,8 @@ export function Grid<TData>(props: GridProps<TData>) {
     onRotate,
     allowOverlap = false,
     groupKeys,
+    underlays,
+    onPlace,
   } = props;
   const t = useTranslations("Common.grid");
 
@@ -648,6 +699,9 @@ export function Grid<TData>(props: GridProps<TData>) {
       canMoveMany: onMoveMany !== undefined,
     };
   });
+  /** The blocks as last DRAWN (reflowed or not) and the board they were drawn
+   *  on, for putting an inset block's paint back once a gesture ends. */
+  const paintState = useRef({ blocks: blocks as GridBlock<TData>[], columns, rows });
 
   /**
    * The blocks a move on `key` carries: the consumer's selection when this
@@ -853,15 +907,21 @@ export function Grid<TData>(props: GridProps<TData>) {
     //
     // ONE PER BLOCK for a group move, so a selection being carried shows every
     // landing spot rather than one block's and a shrug about the other five.
-    function paintGhost(node: HTMLLIElement | null, covered: GridPlacement) {
+    function paintGhost(node: HTMLLIElement | null, covered: GridPlacement, inset?: GridInset) {
       if (!node) return;
       const left = Math.max(0, covered.x);
       const top = Math.max(0, covered.y);
       node.style.gridColumn = `${left + 1} / span ${Math.max(1, covered.x + covered.w - left)}`;
       node.style.gridRow = `${top + 1} / span ${Math.max(1, covered.y + covered.h - top)}`;
+      // The half cells a half-step landing is drawn on; blanked for whole ones.
+      const paint = cellPaintStyle(covered, { x: 0, y: 0 }, inset);
+      node.style.left = String(paint.left ?? "");
+      node.style.top = String(paint.top ?? "");
+      node.style.width = String(paint.width ?? "");
+      node.style.height = String(paint.height ?? "");
       node.dataset.valid = String(gesture!.valid);
     }
-    paintGhost(ghostRef.current, gesture.footprint);
+    paintGhost(ghostRef.current, gesture.footprint, gesture.ghostInset);
     for (const other of gesture.others ?? []) {
       paintGhost(ghostNodes.current.get(other.key) ?? null, other.footprint);
     }
@@ -896,6 +956,24 @@ export function Grid<TData>(props: GridProps<TData>) {
         node.style.rotate = angle ? `${angle}deg` : "";
         node.style.width = "";
         node.style.height = "";
+      }
+      // An inset block is PAINTED narrower than its area through width and
+      // height (cellPaintStyle), which the resize preview just overwrote. React
+      // will not put back a style that did not change, so it is put back here,
+      // the same way the tilt is.
+      const drawn = paintState.current.blocks.find((block) => block.key === key);
+      if (drawn && hasInset(drawn.inset)) {
+        const paint = snapToGridStyle(
+          drawn,
+          drawn.rotation ?? 0,
+          paintState.current.columns,
+          paintState.current.rows,
+          drawn.inset,
+        );
+        for (const node of chrome ? [cell, chrome] : [cell]) {
+          node.style.width = String(paint.width ?? "");
+          node.style.height = String(paint.height ?? "");
+        }
       }
       delete cell.dataset.valid;
     }
@@ -949,6 +1027,24 @@ export function Grid<TData>(props: GridProps<TData>) {
     };
   }, [blocks, columns, rows, renderColumns, narrow, narrowLayout]);
 
+  useEffect(() => {
+    paintState.current = { blocks: view.blocks, columns: renderColumns, rows: view.rows };
+  });
+
+  /**
+   * The underlays as THIS board draws them: on the rows they name while
+   * coordinates are honoured, and following their blocks once the board has
+   * been repacked (followRows), where one with nothing on it is left out.
+   */
+  const underlayView = useMemo(() => {
+    if (!underlays?.length) return [];
+    if (!view.reflowed) return [...underlays];
+    return underlays.flatMap((underlay) => {
+      const rowsOn = followRows(underlay.members ?? [], view.blocks);
+      return rowsOn ? [{ ...underlay, ...rowsOn }] : [];
+    });
+  }, [underlays, view]);
+
   /**
    * COORDINATES ARE HONOURED, so a gesture that writes them is meaningful.
    * False on a reflowed board, where what is on screen was repacked and no
@@ -957,6 +1053,38 @@ export function Grid<TData>(props: GridProps<TData>) {
    * the seller cannot see the real shape of.
    */
   const interactive = editable && !view.reflowed;
+
+  /**
+   * Whether this block's gestures run in half cells. Asked per gesture: a
+   * level block that wants them, on a board drawn as placed, with somewhere to
+   * hand the insets. A turned block keeps whole cells, since half a cell of a
+   * tilted box has no edge the hand could be said to be on.
+   */
+  const halfStepsFor = (block: GridBlock<TData>) =>
+    Boolean(block.halfSteps && !block.rotation && onPlace && interactive);
+
+  /**
+   * Where a resize lands for a block that carries insets: through onPlace,
+   * insets kept (minus any a one-cell side can no longer hold), so a stretch
+   * never drops them and never stores a pair the schema refuses. Every other
+   * block resizes exactly as it always has.
+   */
+  const commitResize = (block: GridBlock<TData>, placement: GridPlacement) => {
+    if (onPlace && hasInset(block.inset)) {
+      onPlace(block.key, placement, drawnInset(block.inset, placement.w, placement.h));
+      return;
+    }
+    onResize?.(block.key, placement);
+  };
+
+  /** Half-cell lines back into a landing: whole cells plus insets, and
+   *  whether that is anywhere other than where the block already is. */
+  const halfLanding = (block: GridBlock<TData>, box: HalfBox) => {
+    const landed = fromHalves(box);
+    const from = toHalves(block, block.inset);
+    const moved = box.l !== from.l || box.r !== from.r || box.t !== from.t || box.b !== from.b;
+    return { ...landed, moved };
+  };
 
   /**
    * ROTATION IS NOT A COORDINATE, and this is why it has a flag of its own.
@@ -998,7 +1126,9 @@ export function Grid<TData>(props: GridProps<TData>) {
   /** What a landing spot looks like. One class, because a group move draws
    *  several of them and they have to be the same mark. */
   const GHOST_CLASS = cn(
-    "pointer-events-none border-2 border-dashed",
+    // Positioned, so a half-step landing can be drawn on its half cells (the
+    // painter writes left/top/width/height) and so it paints over an underlay.
+    "pointer-events-none relative border-2 border-dashed",
     "data-[valid=true]:border-ring data-[valid=true]:bg-accent/40",
     "data-[valid=false]:border-destructive data-[valid=false]:bg-destructive/10",
     GRID_CELL_RADIUS_CLASS,
@@ -1045,7 +1175,8 @@ export function Grid<TData>(props: GridProps<TData>) {
       clientX: number,
       clientY: number,
     ): ResizeEdges | null => {
-      const box = cellBox(strides, block);
+      // The box the tile is DRAWN on: its half cells, where it is inset.
+      const box = cellBox(strides, drawnPlacement(block, block.inset));
       // The pointer, brought back out of the painted tile's frame into the
       // stored rect's — a quarter-turned block may be drawn half a cell off it
       // (see snapShift), and half a cell is far wider than the grab strip, so
@@ -1141,6 +1272,11 @@ export function Grid<TData>(props: GridProps<TData>) {
     let dragging = false;
     let latestStep = { x: 0, y: 0 };
     let latestValid = true;
+    // HALF STEPS: a small level block travels in half cells along the axes it
+    // is small on (halfStepSizes), as a box of half-cell lines. Null for every
+    // other block, and for a group, which moves in whole cells as one body.
+    const halfOrigin = halfStepsFor(block) ? toHalves(block, block.inset) : null;
+    let latestHalf: HalfBox | null = null;
 
     const handleMove = (moveEvent: PointerEvent) => {
       const dx = moveEvent.clientX - startX;
@@ -1171,6 +1307,29 @@ export function Grid<TData>(props: GridProps<TData>) {
         // The only render this gesture causes: it mounts the ghost(s) and marks
         // the tile — or the whole group — as lifted.
         setActive({ key: block.key, mode: "move", keys: groupKeyList });
+      }
+      if (halfOrigin && !group) {
+        const steps = halfStepSizes(halfOrigin);
+        latestHalf = moveHalfBox(
+          halfOrigin,
+          roundToStep((2 * dx) / strides.strideX, steps.x),
+          roundToStep((2 * dy) / strides.strideY, steps.y),
+          columns,
+          rows,
+        );
+        const landed = fromHalves(latestHalf);
+        latestValid = dropIsLegal(block, landed.placement, blocks);
+        gestureRef.current = {
+          key: block.key,
+          mode: "move",
+          placement: landed.placement,
+          footprint: landed.placement,
+          ghostInset: landed.inset,
+          valid: latestValid,
+          offset: { x: dx / strides.scale, y: dy / strides.scale },
+        };
+        scheduleGesturePaint();
+        return;
       }
       const rawX = Math.round(dx / strides.strideX);
       const rawY = Math.round(dy / strides.strideY);
@@ -1226,6 +1385,11 @@ export function Grid<TData>(props: GridProps<TData>) {
       endGesture(handleMove, handleUp);
       // An invalid drop springs back: committing would overlap a neighbour.
       if (!dragging || !latestValid) return;
+      if (latestHalf) {
+        const landed = halfLanding(block, latestHalf);
+        if (landed.moved) onPlace?.(block.key, landed.placement, landed.inset);
+        return;
+      }
       if (latestStep.x === 0 && latestStep.y === 0) return;
       // A group lands in ONE call, so carrying six tiles is one act and one
       // entry in the consumer's history rather than six.
@@ -1268,6 +1432,10 @@ export function Grid<TData>(props: GridProps<TData>) {
   ) {
     const strides = readStrides();
     if (!strides) return;
+    if (halfStepsFor(block)) {
+      startHalfResize(event, block, strides, edges, "edge");
+      return;
+    }
 
     // The committed box, DERIVED from the grid rect and the pitch rather than
     // measured: the gesture mutates this element (and a turned one never
@@ -1275,12 +1443,12 @@ export function Grid<TData>(props: GridProps<TData>) {
     // preview measuring itself.
     const angle = block.rotation ?? 0;
     settledRotationRef.current = angle;
-    const rect = cellBox(strides, block);
+    const rect = cellBox(strides, drawnPlacement(block, block.inset));
     const center = { x: rect.centerX, y: rect.centerY };
     // What the tile is painted off by, so the pointer can be read in the
     // stored rect's own frame and the live preview drawn where the hand is.
     const shift = snapShift(strides, block);
-    const snapCells = footprintOffset(block, angle);
+    const snapCells = paintedOffset(block);
     const startX = event.clientX;
     const startY = event.clientY;
     const origin: GridPlacement = {
@@ -1365,8 +1533,106 @@ export function Grid<TData>(props: GridProps<TData>) {
         latest.w !== origin.w ||
         latest.h !== origin.h
       ) {
-        onResize?.(block.key, latest);
+        commitResize(block, latest);
       }
+    };
+
+    window.addEventListener("pointermove", handleMove);
+    window.addEventListener("pointerup", handleUp);
+    window.addEventListener("pointercancel", handleUp);
+    cleanupRef.current = () => endGesture(handleMove, handleUp);
+  }
+
+  /**
+   * A resize in HALF CELLS, for a small level block (halfStepsFor): the
+   * dragged lines go to the nearest half-cell line along an axis the block is
+   * small on, and to the nearest whole one along any other. Both the edge drag
+   * and the corner handle come here; the block is level, so its own frame is
+   * the board's and no turning is involved.
+   *
+   * `edge`: the grabbed border goes where the hand is, as an edge drag always
+   * has. `corner`: the handle hangs outside the tile, so the hand starts off
+   * the far corner; what counts is how far it has travelled from there, in
+   * steps, and the far corner moves by that much. Dragged past the block's own
+   * top-left cell the span lands on that cell's other side (resizeHalfCorner),
+   * the way the whole-cell handle always has; an edge drag stops at half a cell.
+   */
+  function startHalfResize(
+    event: React.PointerEvent<HTMLElement>,
+    block: GridBlock<TData>,
+    strides: Strides,
+    edges: ResizeEdges,
+    mode: "edge" | "corner",
+  ) {
+    settledRotationRef.current = 0;
+    const origin = toHalves(block, block.inset);
+    const steps = halfStepSizes(origin);
+    const snapCells = paintedOffset(block);
+    const center = { x: 0, y: 0 };
+    const read = (clientX: number, clientY: number) =>
+      localPointerCell(strides, center, 0, clientX, clientY);
+    const grabbed = read(event.clientX, event.clientY);
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let dragging = mode === "corner";
+    let latest: HalfBox = origin;
+    let latestValid = true;
+    if (dragging) {
+      setDragCursorLock(true);
+      setActive({ key: block.key, mode: "resize" });
+    }
+
+    const handleMove = (moveEvent: PointerEvent) => {
+      if (!dragging) {
+        if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < DRAG_THRESHOLD) return;
+        dragging = true;
+        setDragCursorLock(true);
+        setActive({ key: block.key, mode: "resize" });
+      }
+      const pointer = read(moveEvent.clientX, moveEvent.clientY);
+      const to =
+        mode === "corner"
+          ? {
+              x: origin.r + roundToStep(2 * (pointer.x - grabbed.x), steps.x),
+              y: origin.b + roundToStep(2 * (pointer.y - grabbed.y), steps.y),
+            }
+          : {
+              // The line under the hand, on this axis's step, kept on the same
+              // parity as the edge it moves when the step is a whole cell.
+              x: (edges.w ? origin.l : origin.r) + roundToStep(2 * pointer.x - (edges.w ? origin.l : origin.r), steps.x),
+              y: (edges.n ? origin.t : origin.b) + roundToStep(2 * pointer.y - (edges.n ? origin.t : origin.b), steps.y),
+            };
+      // The corner handle also flips past the anchor cell, as it always has.
+      latest =
+        mode === "corner"
+          ? resizeHalfCorner(origin, to, columns, rows)
+          : resizeHalfBox(origin, edges, to, columns, rows);
+      const landed = fromHalves(latest);
+      latestValid = dropIsLegal(block, landed.placement, blocks);
+      gestureRef.current = {
+        key: block.key,
+        mode: "resize",
+        placement: landed.placement,
+        footprint: landed.placement,
+        ghostInset: landed.inset,
+        valid: latestValid,
+        // Snapped, so the tile and its ghost agree: half a cell is small
+        // enough that following the hand between lines would only jitter.
+        ...previewBox(
+          { x: latest.l / 2, y: latest.t / 2, w: (latest.r - latest.l) / 2, h: (latest.b - latest.t) / 2 },
+          block,
+          strides,
+          snapCells,
+        ),
+      };
+      scheduleGesturePaint();
+    };
+
+    const handleUp = () => {
+      endGesture(handleMove, handleUp);
+      if (!dragging || !latestValid) return;
+      const landed = halfLanding(block, latest);
+      if (landed.moved) onPlace?.(block.key, landed.placement, landed.inset);
     };
 
     window.addEventListener("pointermove", handleMove);
@@ -1385,19 +1651,23 @@ export function Grid<TData>(props: GridProps<TData>) {
     event.stopPropagation();
     const strides = readStrides();
     if (!strides) return;
+    if (halfStepsFor(block)) {
+      startHalfResize(event, block, strides, { n: false, e: true, s: true, w: false }, "corner");
+      return;
+    }
 
     // The committed box, DERIVED rather than measured, for the same two
     // reasons as startEdgeResize: the gesture mutates this element, and a
     // turned cell's bounding rect was never its box to begin with.
     const angle = block.rotation ?? 0;
     settledRotationRef.current = angle;
-    const rect = cellBox(strides, block);
+    const rect = cellBox(strides, drawnPlacement(block, block.inset));
     const center = { x: rect.centerX, y: rect.centerY };
     // Same two as the edge drag: the pointer is read in the stored rect's
     // frame, and the preview is drawn where the gesture says rather than where
     // the tile's own snap nudge has it sitting.
     const shift = snapShift(strides, block);
-    const snapCells = footprintOffset(block, angle);
+    const snapCells = paintedOffset(block);
     const origin: GridPlacement = {
       x: block.x,
       y: block.y,
@@ -1527,7 +1797,7 @@ export function Grid<TData>(props: GridProps<TData>) {
         return;
       }
       if (!reflowed) {
-        onResize?.(block.key, latest);
+        commitResize(block, latest);
         return;
       }
       const real = invertReflowResize(origin, latest, realOrigin, ratio, columns, rows);
@@ -1537,7 +1807,7 @@ export function Grid<TData>(props: GridProps<TData>) {
         real.w !== realOrigin.w ||
         real.h !== realOrigin.h
       ) {
-        onResize?.(block.key, real);
+        commitResize(realOrigin, real);
       }
     };
 
@@ -1575,7 +1845,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     const strides = readStrides();
     if (!strides) return;
 
-    const box = cellBox(strides, block);
+    const box = cellBox(strides, drawnPlacement(block, block.inset));
     // The PAINTED centre: the handle orbits the tile the seller can see, and a
     // quarter-turned tile may be nudged half a cell off its stored box (see
     // snapShift). Every other gesture takes that nudge off the pointer; a spin
@@ -1714,6 +1984,26 @@ export function Grid<TData>(props: GridProps<TData>) {
     // step, as one act — otherwise the keyboard and the pointer would disagree
     // about what "move this" means. Shift is a resize, which stays per block.
     const group = event.shiftKey ? null : groupFor(block.key);
+    // A small level block steps in half cells, by the same rule its drag
+    // follows; Shift moves its far edges. Committed through onPlace, since the
+    // insets are part of where it is.
+    if (!group && halfStepsFor(block)) {
+      const box = toHalves(block, block.inset);
+      const steps = halfStepSizes(box);
+      const next = event.shiftKey
+        ? resizeHalfBox(
+            box,
+            { n: false, e: delta[0] !== 0, s: delta[1] !== 0, w: false },
+            { x: box.r + delta[0] * steps.x, y: box.b + delta[1] * steps.y },
+            columns,
+            rows,
+          )
+        : moveHalfBox(box, delta[0] * steps.x, delta[1] * steps.y, columns, rows);
+      const landed = halfLanding(block, next);
+      if (!landed.moved || !dropIsLegal(block, landed.placement, blocks)) return;
+      onPlace?.(block.key, landed.placement, landed.inset);
+      return;
+    }
     if (group && onMoveMany) {
       const step = clampGroupStep(group, delta[0], delta[1]);
       // Into the board's edge: nothing to report, and reporting it would push
@@ -1759,7 +2049,7 @@ export function Grid<TData>(props: GridProps<TData>) {
     }
     // Keyboard resize stays anchored at the top-left (Shift+Arrow grows or
     // shrinks the far edge). Corner dragging is where the other anchors live.
-    if (event.shiftKey) onResize?.(block.key, candidate);
+    if (event.shiftKey) commitResize(block, candidate);
     else onMove?.(block.key, candidate.x, candidate.y);
   }
 
@@ -1804,6 +2094,42 @@ export function Grid<TData>(props: GridProps<TData>) {
         className={cn(GRID_ROOT_CLASS, "m-0 list-none p-0")}
         style={rootStyle}
       >
+        {/* Underlays: full-row strips under every block. FIRST in the DOM and
+            at the free cells' level, so the guides, the ghost and every block
+            paint over them. Decorative, so not list items a reader hears. */}
+        {underlayView.map((underlay) => (
+          <li
+            key={`underlay-${underlay.key}`}
+            aria-hidden="true"
+            data-grid-underlay={underlay.key}
+            style={{
+              gridColumn: "1 / -1",
+              gridRow: `${underlay.y + 1} / span ${underlay.h}`,
+              zIndex: EMPTY_CELL_Z,
+            }}
+            className="pointer-events-none relative"
+          >
+            {underlay.node}
+          </li>
+        ))}
+        {/* Their controls, above every block, while coordinates are honoured. */}
+        {interactive &&
+          underlayView.map((underlay) =>
+            underlay.chrome ? (
+              <li
+                key={`underlay-chrome-${underlay.key}`}
+                data-grid-underlay-chrome={underlay.key}
+                style={{
+                  gridColumn: "1 / -1",
+                  gridRow: `${underlay.y + 1} / span ${underlay.h}`,
+                  zIndex: CHROME_Z,
+                }}
+                className="pointer-events-none relative"
+              >
+                {underlay.chrome}
+              </li>
+            ) : null,
+          )}
         {/* Ghost: the cells the tile will cover once the gesture ends. Its
             position and validity are written imperatively each frame; the
             colours come from the data-valid attribute so no re-render is
@@ -1921,8 +2247,9 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // ...and the half-cell nudge that keeps that tilt on the cells
                 // the board reserved for it. Beside the tilt because it is part
                 // of it: standing a block on its side is the only thing that
-                // can knock it off, and this is what puts it back.
-                ...snapToGridStyle(placement, block.rotation ?? 0, renderColumns, view.rows),
+                // can knock it off, and this is what puts it back. Half-cell
+                // insets are painted through the same properties.
+                ...snapToGridStyle(placement, block.rotation ?? 0, renderColumns, view.rows, block.inset),
                 // The offset / size / angle of a tile under gesture is written
                 // imperatively, so it is deliberately absent here. The hint
                 // names `translate` and `rotate` because those are the
@@ -1960,6 +2287,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 isDragging: gesture?.mode === "move",
                 isResizing: gesture?.mode === "resize",
                 placement,
+                underlayKey: underlayView.length > 0 ? underlayBehind(underlayView, blockFootprint(block)) : null,
               })}
             </li>
           );
@@ -1998,7 +2326,7 @@ export function Grid<TData>(props: GridProps<TData>) {
                 // depth: the band this layer paints at is the point of it.
                 ...placementStyle(placement, renderColumns, view.rows),
                 ...(block.rotation ? { rotate: `${block.rotation}deg` } : {}),
-                ...snapToGridStyle(placement, block.rotation ?? 0, renderColumns, view.rows),
+                ...snapToGridStyle(placement, block.rotation ?? 0, renderColumns, view.rows, block.inset),
                 ...(gesture ? { willChange: "translate, rotate" } : {}),
               }}
               className="relative"

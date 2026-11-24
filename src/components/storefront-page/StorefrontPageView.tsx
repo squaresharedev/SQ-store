@@ -6,6 +6,8 @@ import { StorefrontCart } from "@/components/cart/StorefrontCart";
 import { CartButton } from "@/components/cart/CartButton";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { storefrontDisplayName } from "@/lib/storefront/display-name";
+import { BAND_FRAME_CLASS } from "@/lib/storefront/bands";
+import { headerHasMenu } from "@/lib/storefront/links";
 import { cn } from "@/lib/utils";
 import type { StorefrontPageData } from "@/types/storefront-page";
 import { StorefrontBoard, storefrontSurface } from "./StorefrontBoard";
@@ -32,6 +34,9 @@ export function StorefrontPageView({
   const displayName = storefrontDisplayName(page);
   const soldBy = page.seller.businessName || page.name;
   const cart = page.cart ?? null;
+  const bands = Boolean(page.bands?.length);
+  // A header with a logo or a menu takes the cart into its menu row.
+  const cartInMenu = cart !== null && headerHasMenu(page.header);
 
   return (
     <StorefrontCart
@@ -41,7 +46,13 @@ export function StorefrontPageView({
       theme={{ ink: surface.ink, cornerRadius: theme.cornerRadius, cta: page.tileLook.buy }}
     >
     <div
-      className={cn("@container relative isolate flex min-h-screen w-full flex-col", surface.className)}
+      className={cn(
+        "@container relative isolate flex min-h-screen w-full flex-col",
+        surface.className,
+        // A band reaches exactly to this page's edges; the clip only makes
+        // sure a rounding pixel can never become a sideways scroll.
+        bands && "overflow-x-clip",
+      )}
       style={surface.style}
       data-storefront-page={page.id}
       data-page-ink={surface.ink}
@@ -50,7 +61,7 @@ export function StorefrontPageView({
       {/* The page's own heading, whether or not the seller shows a masthead:
           the masthead is a design choice, a name for the page is not. */}
       <h1 className="sr-only">{displayName}</h1>
-      {cart && (
+      {cart && !cartInMenu && (
         // In view while the board scrolls, on the shop's own translucent
         // chip fill so it reads over any backdrop. The row passes clicks
         // through everywhere but the button.
@@ -60,8 +71,21 @@ export function StorefrontPageView({
           </span>
         </div>
       )}
-      <main className="mx-auto w-full max-w-[76rem] flex-1 px-4 py-6 @md:px-6 @3xl:px-10">
-        <StorefrontBoard page={page} displayName={displayName} assumedWidth={assumedWidth} />
+      {/* With bands, this box tells them how far past the board the page
+          reaches (BAND_FRAME_CLASS), while the board keeps its margins. */}
+      <main className={cn("mx-auto w-full max-w-[76rem] flex-1 px-4 py-6 @md:px-6 @3xl:px-10", bands && BAND_FRAME_CLASS)}>
+        <StorefrontBoard
+          page={page}
+          displayName={displayName}
+          assumedWidth={assumedWidth}
+          headerCart={
+            cartInMenu ? (
+              <span style={chipStyle(surface.ink, theme.cornerRadius)}>
+                <CartButton ink={surface.ink} />
+              </span>
+            ) : undefined
+          }
+        />
       </main>
       <PoweredByFooter
         ruleColor={ruleColor(surface.ink)}

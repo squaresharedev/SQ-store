@@ -27,7 +27,7 @@ import { TRADER_GATE_SELECT, sellerMaySell, type TraderGateRow } from "@/lib/set
 import { productPageUrl, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { openStorefront } from "@/lib/storefront/public-gate";
 import type { createAdminClient } from "@/lib/supabase/admin";
-import { buyerVisibleBlocks } from "@/types/storefront";
+import { boardProductIds, buyerVisibleBlocks } from "@/types/storefront";
 
 /** One page the sitemap lists. `lastModified` is when its row last changed. */
 export type SitemapPage = { url: string; lastModified?: string };
@@ -126,14 +126,13 @@ export async function listIndexablePages(
     for (const row of rows) {
       const open = openStorefront(row);
       if (!open?.productPage.allowIndexing) continue;
-      const productIds = buyerVisibleBlocks(open.config).flatMap((block) =>
-        block.type === "product" ? [block.productId] : [],
-      );
+      // Every product the board shows a buyer: its tiles and its carousels'
+      // members, each once (boardProductIds).
       listings.push({
         id: row.id,
         ownerId: row.owner_id,
         updatedAt: row.updated_at,
-        productIds: [...new Set(productIds)],
+        productIds: boardProductIds(buyerVisibleBlocks(open.config)),
       });
     }
     last = rows[rows.length - 1]!.id;

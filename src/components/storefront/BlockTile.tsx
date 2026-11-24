@@ -26,6 +26,7 @@ import {
 } from "@/lib/storefront/tile-spots";
 import { cn } from "@/lib/utils";
 import { BlockFace } from "./BlockFace";
+import type { CarouselCards } from "./CarouselTileContent";
 import { BlockBlurCopies } from "./BlockBlurCopies";
 import {
   TILE_FACE_CLASS,
@@ -34,6 +35,7 @@ import {
   tileFrameClass,
   type CardHoverTrigger,
 } from "./config-maps";
+import { blockWords } from "./block-label";
 import type { TileLook } from "@/lib/storefront/tile-look";
 import type {
   InlineFormatKey,
@@ -144,9 +146,17 @@ export const BlockTile = memo(function BlockTile({
   onTypeEnd,
   onSpotChange,
   onOpenSpotSetting,
+  backdrop,
+  carouselCards,
 }: {
   /** Identity handed back to the callbacks, so they can stay stable. */
   blockKey: string;
+  /** What the block's words are read against (lib/storefront/bands
+   *  blockBackdrop), handed to the face. Absent = not news here. */
+  backdrop?: string;
+  /** Carousel blocks only: where its cards' products come from. One object
+   *  for the whole board, so a memoised tile keeps its props. */
+  carouselCards?: CarouselCards;
   block: StorefrontBlock;
   product: Product | null;
   theme: StorefrontTheme;
@@ -207,9 +217,12 @@ export const BlockTile = memo(function BlockTile({
             block.alt.trim()
             ? t("blockTile.imageWithAlt", { alt: block.alt.trim().slice(0, 30) })
             : t("blockTile.imageElement")
-          : block.text.trim()
-            ? t("blockTile.textWithContent", { text: block.text.trim().slice(0, 30) })
-            : t("blockTile.textBlock");
+          : block.type === "text"
+            ? blockWords(block)
+              ? t("blockTile.textWithContent", { text: blockWords(block).slice(0, 30) })
+              : t("blockTile.textBlock")
+            : // A button, a scrolling strip: its own words, else what it is.
+              blockWords(block).slice(0, 30) || t(`blockKinds.${block.type}`);
 
   // While the words are being typed, the tile is a text field and nothing
   // else: a click inside them must not toggle the selection out from under
@@ -771,6 +784,8 @@ export const BlockTile = memo(function BlockTile({
           spotDrag={spotDrag}
           look={look}
           hover={hover}
+          backdrop={backdrop}
+          carouselCards={carouselCards}
           textEditing={typable && isTyping}
           textSelectAll={typingSelectAll}
           onTextChange={
@@ -802,7 +817,7 @@ export const BlockTile = memo(function BlockTile({
       </div>
       {/* A block blurred from one edge is the face above plus these copies
           over it. Gone while typing, like the blur itself. */}
-      {!isTyping && <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} />}
+      {!isTyping && <BlockBlurCopies block={block} theme={theme} imageUrl={imageUrl} backdrop={backdrop} />}
     </div>
   );
 });

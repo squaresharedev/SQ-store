@@ -210,6 +210,11 @@
       "tooLong": "Element alt text must be {maximum} characters or fewer.",
       "unsupported": "Element alt text contains unsupported characters."
     },
+    "linkLabel": {
+      "required": "A link label is required.",
+      "tooLong": "A link label must be {maximum} characters or fewer.",
+      "unsupported": "A link label contains unsupported characters."
+    },
     "notificationTitle": {
       "required": "A notification title is required.",
       "tooLong": "A notification title must be {maximum} characters or fewer.",
@@ -564,7 +569,8 @@
     "spanRange": "A formatted range must end after it starts",
     "blocksTooMany": "A storefront can hold up to {maximum} blocks. Remove some blocks or split this storefront in two.",
     "blocksDuplicate": "Grid blocks must be unique.",
-    "blockOutsideCanvas": "A block sits outside the canvas."
+    "blockOutsideCanvas": "A block sits outside the canvas.",
+    "linkTargetMissing": "A link points to something that is not on this storefront."
   },
   "discountCode": {
     "code": "A code is {min} to {max} letters or numbers, and can also use - or _."

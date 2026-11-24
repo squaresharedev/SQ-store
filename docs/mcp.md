@@ -93,13 +93,68 @@ never resends blocks it was not asked about. The rules are pure data in
 `add_image` through `lib/uploads/store-element.ts`, shared with the upload route.
 `save_storefront` remains for renaming and for replacing a whole config member.
 
+The editor upgrade (`docs/editor-upgrade.md`) is reachable two ways. Every
+field the schema accepts is a `theme`, `header` or `style` change, and
+`get_schema` shows it with its description. What a plain change cannot do has an
+operation of its own:
+
+| Operation | Why it is not a plain change |
+|---|---|
+| `palette` | Sets palette colours through `recolourPalettes`, so everything painted in the old colour follows. Two slots changing at once go through an unused colour first, so a light board turned dark does not merge its ink into its background. A `palette` given in `theme` changes takes the same path. |
+| `add_button`, `add_marquee`, `add_carousel` | New block kinds, placed like any other (a marquee and a carousel default to the board's full width; a carousel to 2 rows). `add_carousel` takes `productIds`, this store's products in order, 1 to 12, each once; a `style` change `{productIds}` replaces them. |
+| `add_band`, `edit_band`, `remove_band` | A band is not a block. `add_band` takes an optional own `id`, so a button in the same list can link to it. A background change without a `kind` is laid over the band's current one. |
+| half cells on `move`, `resize`, `add_*` | Text, shape and button blocks take `x: 2.5, w: 1.5`; design-ops turns that into whole cells plus `fine` insets, and `board.blocks` reports where blocks are drawn in the same half cells. Other kinds and the phone board are refused in words. |
+
+Refused here in words rather than by the schema's one generic sentence: a link to a
+product not on the board or a band that does not exist (naming the button or menu
+link), a photo key on an image block or artwork on a band (`elements/` against
+`images/`), a carousel with no, repeated or more than 12 products, and, in the
+tool, a product that is not this store's, a tile's or a carousel's member alike
+(the save would drop it without a word). `boardSummary` carries the palette
+(stored, or derived and marked `paletteDerived`), the bands, and the new kinds'
+labels, links and products. A new text block with no `variant` starts in `heading` for a few words
+and `body` for a sentence or more, and carries no size of its own, so it follows
+`theme.textStyles`.
+
+Files for a storefront come in as upload ids, never keys:
+
+- `upload_element` (artwork, `lib/uploads/store-element.ts`) and `upload_image`
+  (photos, `lib/uploads/store-image.ts`), as before.
+- `upload_font` stores a typeface through `lib/uploads/store-font.ts`, the one
+  function `/api/uploads/font` also calls: WOFF2, WOFF, TTF or OTF by its bytes,
+  2 MB at most, under the uploader's own `fonts/` key. `theme` changes
+  `{customFont: {file, name}, font: "custom", fontPairing: null}` use it; the save
+  checks it with the same `verifyUpload` a font chosen in the editor gets.
+- `copy_product_photo` puts one of the store's product photos on a storefront
+  without a re-upload (`lib/agent/product-photo.ts`): the product is read under
+  row level security and the store's id, a taken-down or paused one is refused,
+  and the photo's bytes are read back from R2 (`getObject`, bounded) and stored
+  anew through `storeElement` (as artwork, 2 MB at most) or `storeImage` (as a
+  photo, for a band or the board), so the copy is the caller's own upload under
+  the prefix its place demands, with that door's own type, size and moderation
+  rules. It takes a product id and which photo, never a key or a URL.
+
+`whiteBlend: "auto"` (and the pale fade of a `shadow` title) reads what is at
+a product photo's edges, a fact stored with the product (`photoEdge` in
+`list_products` and `get_product`; see `docs/editor-upgrade.md`). The server
+never decodes a photo, so a photo uploaded through `upload_image` has no
+`photoEdge` until the seller's browser measures it, the next time they open
+Products or the designer, with nothing to save. So an assistant sets "auto"
+and does not force `on` per card: "auto" leaves a photo with a scene behind it
+alone, and the board starts blending once its photos are measured.
+
+`file` is the word everywhere an operation takes one: `add_image`, a band's
+background, `header.logo`, `theme.customFont` and an image `theme.background`.
+Each is checked to have come through the right door (artwork, photo, font) and
+refused in words if not.
+
 Phone layouts (`viewport: "mobile"`, `mobile_reset`, `theme.mobileColumns`) and
 `preview_storefront`, which returns screenshots of the real renderer and an MCP
 Apps view, are designed in `docs/mcp-apps.md`.
 
 ## Not exposed yet
 
-Digital file, font and document uploads; review CSV import and export;
+Digital file and document uploads; review CSV import and export;
 payments (`getPaymentsOverview`), until Stripe Connect is live.
 
 ## Operations

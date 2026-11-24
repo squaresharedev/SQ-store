@@ -92,6 +92,15 @@ describe("resolveCardStyle", () => {
       saleBadgePosition: "top-left",
       saleBadgeColor: undefined,
       saleBadgeTextColor: undefined,
+      // The card look (editor upgrade): nothing blended, no shadow, and the
+      // surfaces, name strip and photo outline every card had before.
+      cardColor: undefined,
+      whiteBlend: "off",
+      titleBarColor: undefined,
+      titleTextColor: undefined,
+      titleFont: undefined,
+      photoShape: undefined,
+      shadow: "none",
     });
   });
 

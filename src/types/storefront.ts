@@ -247,7 +247,15 @@ export function withRotation<T extends BlockPlacement>(
  */
 export type StorefrontBackground =
   | { kind: "solid"; color: string }
-  | { kind: "gradient"; from: string; to: string; angle: number }
+  | {
+      kind: "gradient";
+      from: string;
+      to: string;
+      angle: number;
+      /** A third colour between the two. Absent = the two-colour gradient
+       *  every storefront had before (see GradientFill). */
+      via?: string;
+    }
   | ({
       kind: "image";
       /** R2 object key (`images/{uploaderId}/{uuid}-{name}`), never a URL. */
@@ -813,6 +821,11 @@ export type StorefrontHeader = {
    *  inherit the canvas font. */
   nameFont?: StorefrontFont;
   bioFont?: StorefrontFont;
+  /** The store's logo, beside its name. Absent = none. */
+  logo?: HeaderLogo;
+  /** Up to HEADER_LINKS_MAX menu links. Absent = no menu. A cart icon joins
+   *  them by itself wherever the cart is live; it is not stored. */
+  links?: HeaderLink[];
 };
 
 /**
@@ -1431,7 +1444,12 @@ export const SHAPE_KINDS = [
 ] as const;
 export type ShapeKind = (typeof SHAPE_KINDS)[number];
 
-export const TEXT_VARIANTS = ["heading", "subheading", "body"] as const;
+/**
+ * A text block's STYLE: Headline, Subheading, Body or Small label. Append
+ * only (stored). `label` was added with the saved text styles
+ * ({@link StorefrontTextStyles}); the first three are as old as text blocks.
+ */
+export const TEXT_VARIANTS = ["heading", "subheading", "body", "label"] as const;
 export type TextVariant = (typeof TEXT_VARIANTS)[number];
 
 /**
@@ -1460,6 +1478,8 @@ export const TEXT_VARIANT_BASE_PX: Record<TextVariant, number> = {
   heading: 24,
   subheading: 16,
   body: 14,
+  // A small label: a caption, a tag over a photo, a line of fine print.
+  label: 12,
 };
 
 /** Clamp any size into the allowed range (bounded int). */
@@ -1499,6 +1519,260 @@ export type TextSpan = TextStyle & {
 /** Cap on stored spans. 300 characters can hold at most 150 alternating runs,
  *  so this bounds the payload without ever rejecting a real design. */
 export const TEXT_SPANS_MAX = 150;
+
+// ── EDITOR UPGRADE CONTRACT (2026-11) ────────────────────────────────────
+//
+// Everything below this line, down to StorefrontTheme, was added in one pass
+// so a non-designer can build a storefront that looks good: a palette, font
+// pairings, saved text styles, photo cards that blend, full-width bands,
+// links, motion and finish. THE ONE RULE FOR ALL OF IT: every new field is
+// OPTIONAL and ABSENT MEANS "EXACTLY AS BEFORE". Live storefronts are embedded
+// on sellers' own websites, and none of them may change by a pixel because
+// this shipped. The nicer starting point is NEW_STOREFRONT_THEME, which only a
+// newly created storefront receives.
+//
+// Same discipline as the rest of the contract: closed lists, bounded ints,
+// strict hex. The single exception is a link's `url` (see LinkTarget), held to
+// the rule a product's purchase link already lives by.
+//
+// COLOUR FIELD NAMING. A colour is always stored as strict #rrggbb in a field
+// named `color`, `accent`, `from`, `via` or `to`, or ending in `Color`. The
+// palette's "change this colour everywhere" (lib/storefront/palette) finds
+// colours BY THAT RULE, so a new colour field that follows it takes part with
+// no further wiring, and one that does not is silently left behind.
+
+/**
+ * THE PALETTE: five named colours a storefront is built from. Every colour
+ * picker opens on these five, and changing one recolours everything painted in
+ * the colour it replaces (recolourPalette in lib/storefront/palette), which is
+ * how "set it once" works without any field having to store a reference: the
+ * config stays plain hex everywhere, so no renderer can meet a value it does
+ * not understand.
+ *
+ * ABSENT = no palette of its own. The pickers then show one DERIVED from what
+ * the storefront already wears (derivePalette), and nothing is stored until
+ * the seller changes a swatch.
+ */
+export const PALETTE_SLOTS = ["background", "text", "accent", "surface", "muted"] as const;
+export type PaletteSlot = (typeof PALETTE_SLOTS)[number];
+export type StorefrontPalette = Record<PaletteSlot, string>;
+
+/**
+ * FONT PAIRINGS: a heading face and a body face that were chosen to sit
+ * together, under one name. A seller picks a pairing, never two fonts.
+ * Append only (stored). Which faces each one is lives in
+ * lib/theme/font-pairings (FONT_PAIRING_FACES), every one OFL-licensed and
+ * served from this app's own origin, never a font CDN.
+ *
+ * ABSENT = no pairing: the board is set in `theme.font`, headings included,
+ * exactly as before pairings existed. When a pairing IS set it wins over
+ * `theme.font` for the board, and a block's own `font` override still wins
+ * over both.
+ */
+export const FONT_PAIRINGS = ["editorial", "classic", "modern", "soft", "studio"] as const;
+export type FontPairing = (typeof FONT_PAIRINGS)[number];
+
+/** Which of a pairing's two faces something is set in. */
+export const FONT_ROLES = ["heading", "body"] as const;
+export type FontRole = (typeof FONT_ROLES)[number];
+
+/**
+ * ONE SAVED TEXT STYLE, set once for the whole storefront: what "Headline"
+ * (or Subheading, Body, Small label) looks like here. A text block names its
+ * style with `variant` and carries only what it changes. Every member absent
+ * = that style's coded default, which is how it rendered before styles could
+ * be saved.
+ */
+export type TextStyleDef = {
+  /** The pairing's heading or body face. Absent = heading for `heading` and
+   *  `subheading`, body for the rest. Without a pairing there is one face, so
+   *  this says nothing. */
+  font?: FontRole;
+  /** Size in px, TEXT_SIZE_MIN..TEXT_SIZE_MAX. Absent = TEXT_VARIANT_BASE_PX.
+   *  A block with no size of its own still shrinks to fit its box from here. */
+  size?: number;
+  bold?: boolean;
+  italic?: boolean;
+  /** ALL CAPS, as a style: the stored words are never rewritten. */
+  uppercase?: boolean;
+  /** As on a text block: hundredths of an em, TEXT_LETTER_SPACING_MIN..MAX. */
+  letterSpacing?: number;
+  /** As on a text block: percent of the type size, TEXT_LINE_HEIGHT_MIN..MAX. */
+  lineHeight?: number;
+  /** Strict #rrggbb. Absent = the style's own default ink. */
+  color?: string;
+};
+/** The storefront's saved text styles, keyed by the variant that uses each. */
+export type StorefrontTextStyles = Partial<Record<TextVariant, TextStyleDef>>;
+
+/** Where a text block's words sit in its box, top to bottom. ABSENT = middle,
+ *  which is where they have always sat. */
+export const TEXT_VALIGNS = ["top", "middle", "bottom"] as const;
+export type TextValign = (typeof TEXT_VALIGNS)[number];
+
+/**
+ * BLEND WHITE BACKGROUND. Product photos are mostly white studio shots, and
+ * on any coloured board they read as white boxes. Blending lets the card's
+ * colour show through the white, so the product sits ON the card.
+ *   - `auto`: blend only a photo whose edges are near-white (Product.photoEdge,
+ *     measured once per photo, see lib/storefront/photo-edge); every other
+ *     photo, and one not measured yet, is left alone;
+ *   - `on`: always blend; `off`: never.
+ * ABSENT = `off`, so a storefront saved before this draws its photos as it
+ * always has. New storefronts start on `auto`.
+ */
+export const WHITE_BLENDS = ["auto", "on", "off"] as const;
+export type WhiteBlend = (typeof WHITE_BLENDS)[number];
+export const DEFAULT_WHITE_BLEND: WhiteBlend = "off";
+
+/**
+ * The outline a photo is cut to: as the card's own corners leave it
+ * (`rectangle`), softly rounded, an arch (round on top, square below) or a
+ * circle. ABSENT = no shape of its own, the picture simply fills its frame.
+ * Shared by product cards (theme and per card) and image blocks.
+ */
+export const PHOTO_SHAPES = ["rectangle", "rounded", "arch", "circle"] as const;
+export type PhotoShape = (typeof PHOTO_SHAPES)[number];
+
+/**
+ * A drop shadow, from a closed list: none, a soft one close to the surface,
+ * or one that lifts the thing off the board. ABSENT = none. Shared by product
+ * cards (theme and per card), image blocks and shape blocks.
+ */
+export const SHADOW_PRESETS = ["none", "soft", "lifted"] as const;
+export type ShadowPreset = (typeof SHADOW_PRESETS)[number];
+
+/**
+ * How the board arrives on screen: still, a fade as each block scrolls into
+ * view (`subtle`), or a fade with a slight rise, one block after another
+ * (`lively`). Never moves under reduced motion, and never shifts layout: a
+ * block holds its place before it is revealed. ABSENT = none.
+ */
+export const MOTION_PRESETS = ["none", "subtle", "lively"] as const;
+export type MotionPreset = (typeof MOTION_PRESETS)[number];
+
+/** A paper grain over the board's background, drawn in code (no image is
+ *  fetched). ABSENT = none. */
+export const TEXTURES = ["none", "light", "strong"] as const;
+export type Texture = (typeof TEXTURES)[number];
+
+/**
+ * A gradient: two colours, an optional one between them, and a direction.
+ * Never a CSS string. Offered to sellers as ready-made gradients built from
+ * their palette, not as a gradient editor.
+ */
+export type GradientFill = {
+  from: string;
+  /** The colour in the middle. Absent = a two-colour gradient. */
+  via?: string;
+  to: string;
+  /** Whole degrees, 0..360. */
+  angle: number;
+};
+
+// FULL-WIDTH BANDS. A band is a strip of colour, gradient or photo that runs
+// the FULL WIDTH of whatever the storefront sits in (edge to edge on the
+// hosted page, the whole frame in the embed) behind a run of the board's rows.
+// Blocks keep their places and simply sit on top of it.
+//
+// NOT A BLOCK, deliberately. It lives in `config.bands`, beside `blocks`, so
+// nothing that reasons about blocks (reading order, the phone reflow, the
+// block cap, overlap, layering) has a new case to get wrong. On a phone a band
+// follows the blocks that sit on it (lib/storefront/bands), so the seller
+// never arranges it twice.
+
+/** How many bands one storefront may carry. */
+export const BANDS_MAX = 12;
+
+/** A veil over a band's photo so words on it stay readable: none, a light one
+ *  (for dark words) or a dark one (for light words). ABSENT = none. */
+export const BAND_DIMS = ["none", "light", "dark"] as const;
+export type BandDim = (typeof BAND_DIMS)[number];
+
+export type BandBackground =
+  | { kind: "solid"; color: string }
+  | ({ kind: "gradient" } & GradientFill)
+  | ({
+      kind: "image";
+      /** R2 object key (`images/{uploaderId}/{uuid}-{name}`), never a URL. */
+      key: string;
+      dim?: BandDim;
+    } & ImagePlacement);
+
+export type StorefrontBand = {
+  /** Client-minted uuid: what a link names to scroll here. */
+  id: string;
+  /** The first board row it sits behind, and how many rows it runs. */
+  y: number;
+  h: number;
+  background: BandBackground;
+};
+
+/**
+ * FINE PLACEMENT: half-cell steps for small things (text, shapes, buttons),
+ * so a caption can sit between two cells or a dot can be half a cell across.
+ *
+ * Stored as INSETS of the block's own cell rectangle: each side set here is
+ * pulled in by half a cell. The block therefore always lies INSIDE the cells
+ * x/y/w/h name, which is what keeps every rule written against whole cells
+ * (on the board, overlap, the phone layout, drag targets) true without change.
+ * Product cards never carry it: they stay on the main grid.
+ */
+export type FinePlacement = {
+  left?: true;
+  right?: true;
+  top?: true;
+  bottom?: true;
+};
+
+/**
+ * WHERE A LINK GOES. Used by button blocks and the header's menu.
+ *   - `product`: that product's page on this storefront. It must be on this
+ *     board (a product block, or in a carousel), which is what gives it a page.
+ *   - `storefront`: another storefront of the same store.
+ *   - `band`: scroll to a band on this page.
+ *   - `url`: an https address, held to the purchase link's rule (a real
+ *     domain, no credentials). Opens in a new tab, never followed by crawlers.
+ */
+export type LinkTarget =
+  | { kind: "product"; productId: string }
+  | { kind: "storefront"; storefrontId: string }
+  | { kind: "band"; bandId: string }
+  | { kind: "url"; url: string };
+export const LINK_TARGET_KINDS = ["product", "storefront", "band", "url"] as const;
+export type LinkTargetKind = (typeof LINK_TARGET_KINDS)[number];
+/** Shorter than a purchase link's cap: this one is shown in a panel field. */
+export const LINK_URL_MAX = 500;
+
+/** A button's words, and how it is drawn. */
+export const BUTTON_LABEL_MAX = 40;
+export const BUTTON_LOOKS = ["solid", "outline", "link"] as const;
+export type ButtonLook = (typeof BUTTON_LOOKS)[number];
+
+/** The header's logo: one of three sizes, never a number. */
+export const HEADER_LOGO_SIZES = ["small", "medium", "large"] as const;
+export type HeaderLogoSize = (typeof HEADER_LOGO_SIZES)[number];
+/** Uploaded exactly like an image block's artwork (an `elements/` key, SVG
+ *  review included). */
+export type HeaderLogo = {
+  key: string;
+  /** For screen readers. Absent = the store's name. */
+  alt?: string;
+  /** Absent = medium. */
+  size?: HeaderLogoSize;
+};
+export const HEADER_LINKS_MAX = 4;
+export const HEADER_LINK_LABEL_MAX = 24;
+export type HeaderLink = { label: string; link: LinkTarget };
+
+/** A scrolling text strip's pace. ABSENT = normal. It pauses under the
+ *  pointer and stands still under reduced motion. */
+export const MARQUEE_SPEEDS = ["slow", "normal"] as const;
+export type MarqueeSpeed = (typeof MARQUEE_SPEEDS)[number];
+export const MARQUEE_TEXT_MAX = 120;
+
+/** How many products one carousel holds. */
+export const CAROUSEL_PRODUCTS_MAX = 12;
 
 export type StorefrontTheme = {
   /** Solid / gradient / pattern — see StorefrontBackground. */
@@ -1614,6 +1888,32 @@ export type StorefrontTheme = {
   /** The phone board's width in cells, MOBILE_COLUMNS_MIN..MAX. Absent = no
    *  phone layout: the board reflows by itself (see PHONE LAYOUT). */
   mobileColumns?: number;
+  // THE EDITOR UPGRADE'S THEME MEMBERS (see EDITOR UPGRADE CONTRACT above).
+  // Every one absent on a storefront saved before them, and absent = as before.
+  /** The five colours every picker opens on. Absent = derived, nothing stored. */
+  palette?: StorefrontPalette;
+  /** A heading face and a body face under one name. Absent = `font` alone. */
+  fontPairing?: FontPairing;
+  /** What Headline, Subheading, Body and Small label look like here. Absent
+   *  (or an absent entry) = that style's coded default. */
+  textStyles?: StorefrontTextStyles;
+  /** How the board arrives on screen (MOTION_PRESETS). Absent = none. */
+  motion?: MotionPreset;
+  /** A paper grain over the background (TEXTURES). Absent = none. */
+  texture?: Texture;
+  /**
+   * THE CARD LOOK, the theme's side of it (each also a per-card override, see
+   * CardStyle): the card's own colour, whether a photo's white background is
+   * blended into it, the name strip's colours and face, the photo's outline
+   * and the card's shadow.
+   */
+  cardColor?: string;
+  whiteBlend?: WhiteBlend;
+  titleBarColor?: string;
+  titleTextColor?: string;
+  titleFont?: FontRole;
+  photoShape?: PhotoShape;
+  shadow?: ShadowPreset;
 };
 
 /**
@@ -1688,6 +1988,27 @@ export type CardStyle = {
   saleBadgeColor?: string;
   /** Optional for the same reason: "whichever ink reads" is a state too. */
   saleBadgeTextColor?: string;
+  /**
+   * THE CARD LOOK (EDITOR UPGRADE CONTRACT).
+   *
+   * `cardColor` is the card's own surface: what shows behind the photo, and
+   * through a blended one. Optional after resolution: absent is "the surface
+   * every card had before" (the photo frame's muted grey, the name strip's
+   * white), a state the picker's inherit dot has to be able to show.
+   */
+  cardColor?: string;
+  /** Resolved to a value: DEFAULT_WHITE_BLEND when nobody set one. */
+  whiteBlend: WhiteBlend;
+  /** The name strip's fill. Absent = `cardColor`, else the old white. */
+  titleBarColor?: string;
+  /** The name's ink. Absent = whichever ink reads on the strip. */
+  titleTextColor?: string;
+  /** The name's face under a font pairing. Absent = body. */
+  titleFont?: FontRole;
+  /** The photo's outline. Absent = it fills its frame, as before. */
+  photoShape?: PhotoShape;
+  /** Resolved to a value: "none" when nobody set one. */
+  shadow: ShadowPreset;
 };
 
 /** Per-block card styling: an absent field means "follow the theme", so a
@@ -1746,6 +2067,13 @@ export function resolveCardStyle(
       overrides?.saleBadgePosition ?? theme.saleBadgePosition ?? DEFAULT_SALE_BADGE_POSITION,
     saleBadgeColor: overrides?.saleBadgeColor ?? theme.saleBadgeColor,
     saleBadgeTextColor: overrides?.saleBadgeTextColor ?? theme.saleBadgeTextColor,
+    cardColor: overrides?.cardColor ?? theme.cardColor,
+    whiteBlend: overrides?.whiteBlend ?? theme.whiteBlend ?? DEFAULT_WHITE_BLEND,
+    titleBarColor: overrides?.titleBarColor ?? theme.titleBarColor,
+    titleTextColor: overrides?.titleTextColor ?? theme.titleTextColor,
+    titleFont: overrides?.titleFont ?? theme.titleFont,
+    photoShape: overrides?.photoShape ?? theme.photoShape,
+    shadow: overrides?.shadow ?? theme.shadow ?? "none",
   };
 }
 
@@ -1907,6 +2235,10 @@ export type TextBlock = BlockPlacement & {
   blur?: number;
   /** Which way that blur runs. Absent = DEFAULT_BLUR_DIRECTION. */
   blurDirection?: BlurDirection;
+  /** Where the words sit in the box, top to bottom. Absent = middle. */
+  valign?: TextValign;
+  /** Half-cell steps (FinePlacement). Absent = whole cells. */
+  fine?: FinePlacement;
 };
 
 /**
@@ -1970,6 +2302,13 @@ export type ShapeBlock = BlockPlacement & {
   /** Point count for the star-family kinds, SHAPE_POINTS_MIN..MAX. Absent =
    *  the kind's classic default (star 5, sparkle 4, burst 10). */
   points?: number;
+  /** A gradient fill, painted instead of `color` (which stays, as what a
+   *  renderer without gradients falls back to). Absent = the solid colour. */
+  gradient?: GradientFill;
+  /** A drop shadow (SHADOW_PRESETS). Absent = none. */
+  shadow?: ShadowPreset;
+  /** Half-cell steps (FinePlacement). Absent = whole cells. */
+  fine?: FinePlacement;
 };
 
 /** How an uploaded element fills its block: cropped to fill, or shown whole. */
@@ -2012,13 +2351,92 @@ export type ImageBlock = BlockPlacement & {
   blur?: number;
   /** Which way that blur runs. Absent = DEFAULT_BLUR_DIRECTION. */
   blurDirection?: BlurDirection;
+  /** The outline the picture is cut to (PHOTO_SHAPES). Absent = its frame. */
+  shape?: PhotoShape;
+  /** A drop shadow (SHADOW_PRESETS). Absent = none. */
+  shadow?: ShadowPreset;
+};
+
+/**
+ * A BUTTON: a few words that lead somewhere (LinkTarget). Its paint is the
+ * storefront's own button, the one the cards and the product page already
+ * wear, so there is nothing to style here but which of its three looks it
+ * takes.
+ */
+export type ButtonBlock = BlockPlacement & {
+  type: "button";
+  /** Client-minted uuid; only used to key the block. */
+  id: string;
+  /** Plain text. NEVER rendered as markup. */
+  label: string;
+  link: LinkTarget;
+  /** Absent = solid. */
+  look?: ButtonLook;
+  /** Half-cell steps (FinePlacement). Absent = whole cells. */
+  fine?: FinePlacement;
+};
+
+/**
+ * A SCROLLING TEXT STRIP: one line of words crossing its block, over and
+ * over. It pauses under the pointer and stands still under reduced motion.
+ */
+export type MarqueeBlock = BlockPlacement & {
+  type: "marquee";
+  /** Client-minted uuid; only used to key the block. */
+  id: string;
+  /** Plain text, one line. NEVER rendered as markup. */
+  text: string;
+  /** Absent = normal. */
+  speed?: MarqueeSpeed;
+  /** Which saved text style the words wear. Absent = label. */
+  variant?: TextVariant;
+  /** Strict #rrggbb. Absent = the style's own ink. */
+  color?: string;
+};
+
+/**
+ * A PRODUCT CAROUSEL: a row of the seller's products in one block, swiped on
+ * a phone and stepped with arrows on a desktop. Each card is drawn by the
+ * theme's card style and opens its product's page, like a product block's.
+ * A product may be in a carousel AND on the board as a block of its own.
+ */
+export type CarouselBlock = BlockPlacement & {
+  type: "carousel";
+  /** Client-minted uuid; only used to key the block. */
+  id: string;
+  /** The seller's own products, in order; ownership re-checked on save, like
+   *  a product block's. 1..CAROUSEL_PRODUCTS_MAX, each at most once. */
+  productIds: string[];
 };
 
 export type StorefrontBlock =
   | ProductBlock
   | TextBlock
   | ShapeBlock
-  | ImageBlock;
+  | ImageBlock
+  | ButtonBlock
+  | MarqueeBlock
+  | CarouselBlock;
+
+/** The half-cell insets a block carries, whatever its kind (product cards and
+ *  the kinds that never carry any answer none). */
+export function blockFine(block: StorefrontBlock): FinePlacement | undefined {
+  return block.type === "text" || block.type === "shape" || block.type === "button" ? block.fine : undefined;
+}
+
+/**
+ * Every product a board SHOWS, each once, in reading order: its product
+ * blocks and the members of its carousels. What "is this product on this
+ * storefront" means, for a link's target and for the public page's loader.
+ */
+export function boardProductIds(blocks: readonly StorefrontBlock[]): string[] {
+  const seen = new Set<string>();
+  for (const block of readingOrder([...blocks])) {
+    if (block.type === "product") seen.add(block.productId);
+    else if (block.type === "carousel") for (const id of block.productIds) seen.add(id);
+  }
+  return [...seen];
+}
 
 /**
  * Reading order for anything that needs a LINE rather than a board: the
@@ -2136,6 +2554,12 @@ export function blockKey(block: StorefrontBlock): string {
       return `s_${block.id}`;
     case "image":
       return `i_${block.id}`;
+    case "button":
+      return `b_${block.id}`;
+    case "marquee":
+      return `m_${block.id}`;
+    case "carousel":
+      return `c_${block.id}`;
   }
 }
 
@@ -2153,6 +2577,9 @@ export type StorefrontConfig = {
   checkoutPage?: CheckoutPageConfig;
   /** The cart. Absent = DEFAULT_CART_PAGE_CONFIG (on, every default). */
   cartPage?: CartPageConfig;
+  /** Full-width bands behind runs of rows (see FULL-WIDTH BANDS). Absent =
+   *  none, as on every storefront saved before them. */
+  bands?: StorefrontBand[];
   // NO `seller`, `policies` OR `shippingProfiles` MEMBER. Trader identity (see
   // the StorefrontSeller doc comment above) and shipping/returns terms (see
   // SellerShippingPolicy in types/shipping-policy.ts) are both account-level
@@ -2189,3 +2616,47 @@ export const DEFAULT_STOREFRONT_CONFIG: StorefrontConfig = {
   header: DEFAULT_STOREFRONT_HEADER,
   embed: DEFAULT_EMBED_SETTINGS,
 };
+
+/**
+ * WHAT A NEWLY CREATED STOREFRONT STARTS WITH, on top of
+ * DEFAULT_STOREFRONT_CONFIG's theme: the nicer defaults of the editor upgrade.
+ *
+ * ONLY EVER APPLIED AT CREATION (createStorefront). DEFAULT_STOREFRONT_CONFIG
+ * itself must not grow these: it is also what an OLD stored config's missing
+ * members fall back to (parseStoredStorefrontConfig), so anything added there
+ * would repaint storefronts that are live on sellers' own websites.
+ *
+ * One object, so "what does a new storefront look like" is one edit in one
+ * place. The colours are the palette, spelled once and reused below.
+ */
+const NEW_STOREFRONT_PALETTE: StorefrontPalette = {
+  background: "#f7f4ef",
+  text: "#1c1917",
+  accent: "#1c1917",
+  surface: "#ffffff",
+  muted: "#e7e1d8",
+};
+
+export const NEW_STOREFRONT_THEME: Partial<StorefrontTheme> = {
+  palette: NEW_STOREFRONT_PALETTE,
+  background: { kind: "solid", color: NEW_STOREFRONT_PALETTE.background },
+  accent: NEW_STOREFRONT_PALETTE.accent,
+  // Space Grotesk over Inter: both already ship with the app, so the default
+  // costs a new storefront no extra font download.
+  fontPairing: "modern",
+  cornerRadius: 12,
+  gridGap: 12,
+  // White studio photos sit on the card instead of reading as white boxes.
+  cardColor: NEW_STOREFRONT_PALETTE.surface,
+  whiteBlend: "auto",
+  motion: "subtle",
+};
+
+/** The config a new storefront is created with (before its header, product
+ *  page and any carried-over design are laid on top). */
+export function newStorefrontConfig(): StorefrontConfig {
+  return {
+    ...DEFAULT_STOREFRONT_CONFIG,
+    theme: { ...DEFAULT_STOREFRONT_CONFIG.theme, ...NEW_STOREFRONT_THEME },
+  };
+}

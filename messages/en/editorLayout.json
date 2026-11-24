@@ -1,0 +1,124 @@
+{
+  "panel": {
+    "insert": {
+      "group": "Layout",
+      "groupLabel": "Add a layout element",
+      "name": {
+        "band": "Band",
+        "button": "Button",
+        "carousel": "Carousel"
+      },
+      "add": {
+        "band": "Add a full-width band",
+        "button": "Add a button",
+        "carousel": "Add a row of products to swipe through"
+      },
+      "noRoom": "Every row already has a band behind it.",
+      "noProducts": "Add a product to your store first, then put it in a carousel."
+    },
+    "bandChrome": {
+      "rail": "Band behind rows {from} to {to}. Drag to move it, press to edit it.",
+      "stretch": "Drag to change how many rows the band covers"
+    },
+    "band": {
+      "title": "Band",
+      "close": "Close the band",
+      "background": "Background",
+      "kind": {
+        "solid": "Colour",
+        "gradient": "Gradient",
+        "image": "Photo"
+      },
+      "palette": "Your colours",
+      "custom": "Custom colour",
+      "gradients": "Ready-made gradients",
+      "gradientOption": "Gradient {n}",
+      "photo": "Photo",
+      "shade": "Shade",
+      "shadeInfo": "A light or dark shade over the photo keeps words on it readable.",
+      "dim": {
+        "none": "None",
+        "light": "Light",
+        "dark": "Dark"
+      },
+      "moveHint": "Drag the handle beside the board to move the band. On a phone it follows the blocks on it.",
+      "linked": "A link leads to this band. Point it somewhere else before you remove the band.",
+      "remove": "Remove band"
+    },
+    "button": {
+      "title": "Button",
+      "close": "Close the button",
+      "label": "Words",
+      "labelProblem": "A button needs a few words.",
+      "charsLeft": "{n, plural, one {# character left} other {# characters left}}",
+      "destination": "Leads to",
+      "kind": {
+        "product": "Product",
+        "band": "Band on this page",
+        "storefront": "Storefront",
+        "url": "A web address"
+      },
+      "bandName": "Band at rows {from} to {to}",
+      "url": "Web address",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Use a full address that starts with https://",
+      "look": "Look",
+      "looks": {
+        "solid": "Solid",
+        "outline": "Outline",
+        "link": "Link"
+      },
+      "defaultLabel": "Shop now",
+      "tileLabel": "Button: {label}"
+    },
+    "carousel": {
+      "title": "Carousel",
+      "close": "Close the carousel",
+      "products": "Products in the carousel",
+      "count": "{count} of {max} products",
+      "moveEarlier": "Move {title} earlier",
+      "moveLater": "Move {title} later",
+      "remove": "Take {title} out of the carousel",
+      "keepOne": "A carousel keeps at least one product.",
+      "addProducts": "Add products",
+      "add": "Add {title} to the carousel",
+      "search": "Find a product",
+      "noMatch": "No product matches that.",
+      "full": "A carousel holds up to {max} products."
+    },
+    "header": {
+      "logoAndMenu": "Logo and menu",
+      "logo": "Logo",
+      "uploadLogo": "Upload a logo",
+      "replaceLogo": "Replace logo",
+      "removeLogo": "Remove logo",
+      "logoAlt": "What the logo says",
+      "logoSize": "Logo size",
+      "sizes": {
+        "small": "Small",
+        "medium": "Medium",
+        "large": "Large"
+      },
+      "menu": "Menu links",
+      "addLink": "Add a link",
+      "linkLabel": "Words",
+      "linkDestination": "Leads to",
+      "removeLink": "Remove this link",
+      "newLinkLabel": "Shop",
+      "menuFull": "A menu holds up to 4 links.",
+      "cartNote": "A cart icon joins the menu by itself wherever the cart is on."
+    }
+  },
+  "board": {
+    "navLabel": "Storefront menu",
+    "openMenu": "Open the menu",
+    "closeMenu": "Close the menu",
+    "logoFallback": "{store} logo",
+    "carousel": {
+      "roleDescription": "carousel",
+      "label": "{count, plural, one {# product} other {# products}}",
+      "previous": "Previous products",
+      "next": "Next products"
+    }
+  }
+}

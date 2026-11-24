@@ -4,12 +4,15 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
+  AlignVerticalJustifyCenter,
+  AlignVerticalJustifyEnd,
+  AlignVerticalJustifyStart,
   Bold,
   Italic,
   Underline,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { TEXT_ALIGNS, type TextAlign } from "@/types/storefront";
+import { TEXT_ALIGNS, TEXT_VALIGNS, type TextAlign, type TextValign } from "@/types/storefront";
 import { cn } from "@/lib/utils";
 import { labelClass } from "@/components/ui/control-styles";
 
@@ -24,7 +27,9 @@ import { labelClass } from "@/components/ui/control-styles";
  * than a set of checkboxes: the button IS the state.
  */
 
-const TOGGLE_CLASS =
+/** One pressed-state toggle: shared by the toolbar here and the saved text
+ *  styles editor (TextStylesEditor), so every text switch looks the same. */
+export const TEXT_TOGGLE_CLASS =
   "inline-flex size-8 items-center justify-center rounded-none border border-border text-muted-foreground transition-colors duration-base ease-standard hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background motion-reduce:transition-none";
 
 export type InlineFormat = "bold" | "italic" | "underline";
@@ -69,7 +74,7 @@ export function FormatToggles({
               aria-label={formatLabels[format]}
               aria-pressed={active[format]}
               className={cn(
-                TOGGLE_CLASS,
+                TEXT_TOGGLE_CLASS,
                 active[format] && "bg-accent text-foreground",
               )}
             >
@@ -119,7 +124,50 @@ export function AlignmentToggles({
               onClick={() => onChange(value)}
               aria-label={alignLabels[value]}
               aria-pressed={active}
-              className={cn(TOGGLE_CLASS, active && "bg-accent text-foreground")}
+              className={cn(TEXT_TOGGLE_CLASS, active && "bg-accent text-foreground")}
+            >
+              <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+const VALIGN_ICONS: Record<TextValign, typeof AlignLeft> = {
+  top: AlignVerticalJustifyStart,
+  middle: AlignVerticalJustifyCenter,
+  bottom: AlignVerticalJustifyEnd,
+};
+
+/** Top / middle / bottom: where a text block's words sit in its box. Middle
+ *  is where they have always sat, and choosing it stores nothing (the caller
+ *  is handed `undefined`). */
+export function VerticalAlignToggles({
+  valign,
+  onChange,
+}: {
+  valign: TextValign | undefined;
+  onChange: (valign: TextValign | undefined) => void;
+}) {
+  const t = useTranslations("EditorType.panel.valign");
+  const current = valign ?? "middle";
+  return (
+    <div className="space-y-1.5">
+      <span className={labelClass}>{t("label")}</span>
+      <div role="group" aria-label={t("group")} className="flex gap-1">
+        {TEXT_VALIGNS.map((value) => {
+          const Icon = VALIGN_ICONS[value];
+          const active = current === value;
+          return (
+            <button
+              key={value}
+              type="button"
+              onClick={() => onChange(value === "middle" ? undefined : value)}
+              aria-label={t(value)}
+              aria-pressed={active}
+              className={cn(TEXT_TOGGLE_CLASS, active && "bg-accent text-foreground")}
             >
               <Icon className="size-4" strokeWidth={2} aria-hidden="true" />
             </button>

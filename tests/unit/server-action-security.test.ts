@@ -141,6 +141,9 @@ const REGISTRY: Record<string, Classification> = {
   "lib/products/add-on-actions.ts::setProductAddOns": limited(),
   "lib/products/actions.ts::createProduct": limited(),
   "lib/products/actions.ts::updateProduct": limited(),
+  // A photo's measured edge: its own budget (productPhotoEdge), so measuring a
+  // big catalogue never spends the seller's product-edit budget.
+  "lib/products/photo-edge-actions.ts::recordPhotoEdge": limited(),
   "lib/products/actions.ts::deleteProduct": limited(),
   "lib/products/card-actions.ts::setProductStatus": limited(),
   "lib/products/card-actions.ts::duplicateProduct": limited(),

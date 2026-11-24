@@ -92,6 +92,11 @@ import { CANVAS_PANEL_ATTR } from "./useCanvasAnchor";
 import { PageNodeIcon } from "./page-node-icons";
 import type { CanvasViewport } from "./useCanvasViewport";
 
+/** The kinds that carry a blur of their own (and a slider for it in their
+ *  panel): a text block, a shape, an element. A product card, a button, a
+ *  scrolling strip and a carousel have none to point at. */
+const BLURRED_KINDS: ReadonlySet<StorefrontBlock["type"]> = new Set(["text", "shape", "image"]);
+
 /** How far above the block the bar floats, in screen pixels. */
 const ANCHOR_GAP = 10;
 /** How close to the canvas window's own edges it is allowed to get. */
@@ -619,7 +624,7 @@ export function SelectionToolbar({
    *  while the inspector holds the slider it points at: one block, or several
    *  of ONE kind (a mixed selection's inspector has the group actions only). */
   const blurKeys = blocks.every(
-    (block) => block.type !== "product" && block.type === blocks[0].type,
+    (block) => BLURRED_KINDS.has(block.type) && block.type === blocks[0].type,
   )
     ? keys
     : [];

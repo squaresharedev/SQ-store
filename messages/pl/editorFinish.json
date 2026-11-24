@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "motion": {
+      "label": "Ruch",
+      "none": "Brak",
+      "subtle": "Subtelny",
+      "lively": "Żywy",
+      "hint": "Działa w Twoim sklepie, gdy kupujący przewijają stronę. Edytor pozostaje nieruchomy."
+    },
+    "gradient": {
+      "readyLabel": "Gotowe gradienty",
+      "custom": "Własny",
+      "middle": "Środek",
+      "shapeLabel": "Albo gradient",
+      "names": {
+        "soft": "Miękki",
+        "light": "Jasny",
+        "glow": "Poświata",
+        "wash": "Mgiełka",
+        "sunset": "Zachód słońca",
+        "accent": "Akcent",
+        "deep": "Głęboki",
+        "bright": "Wyrazisty",
+        "dusk": "Zmierzch",
+        "ink": "Atrament"
+      }
+    },
+    "more": "Więcej",
+    "texture": {
+      "label": "Faktura papieru",
+      "none": "Wył.",
+      "light": "Lekka",
+      "strong": "Mocna",
+      "hint": "Delikatne ziarno na tle, jak na zadrukowanym papierze."
+    },
+    "marquee": {
+      "textLabel": "Tekst",
+      "speedLabel": "Prędkość",
+      "speeds": {
+        "slow": "Wolno",
+        "normal": "Normalnie"
+      },
+      "colorLabel": "Kolor",
+      "autoColor": "Automatyczny",
+      "useAutoColor": "Użyj automatycznego koloru",
+      "defaultText": "Darmowa dostawa przy każdym zamówieniu",
+      "add": "Dodaj przewijany tekst",
+      "inspectorTitle": "Przewijany tekst",
+      "inspectorClose": "Zamknij panel przewijanego tekstu"
+    }
+  },
+  "board": {}
+}

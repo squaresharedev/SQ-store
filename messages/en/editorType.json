@@ -1,0 +1,82 @@
+{
+  "panel": {
+    "palette": {
+      "title": "Palette",
+      "hint": "Change a color here and everything painted in it changes with it.",
+      "group": "Palette colors",
+      "allColors": "All colors",
+      "photoName": "Background (your photo)",
+      "photoHint": "The background is your photo. Choosing a color here replaces it. Undo brings it back.",
+      "slots": {
+        "background": {
+          "name": "Background",
+          "label": "Palette background ({value})"
+        },
+        "text": {
+          "name": "Text",
+          "label": "Palette text ({value})"
+        },
+        "accent": {
+          "name": "Accent",
+          "label": "Palette accent ({value})"
+        },
+        "surface": {
+          "name": "Surface",
+          "label": "Palette surface ({value})"
+        },
+        "muted": {
+          "name": "Muted",
+          "label": "Palette muted ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Font pairing",
+      "group": "Font pairings",
+      "editorial": {
+        "name": "Editorial",
+        "hint": "A soft serif for headlines, clean text below"
+      },
+      "classic": {
+        "name": "Classic",
+        "hint": "An elegant serif with an easy-reading sans"
+      },
+      "modern": {
+        "name": "Modern",
+        "hint": "Geometric headlines with neutral text"
+      },
+      "soft": {
+        "name": "Soft",
+        "hint": "A round serif with a friendly sans"
+      },
+      "studio": {
+        "name": "Studio",
+        "hint": "A slim serif with an open sans"
+      }
+    },
+    "typography": {
+      "singleFont": "One font for everything",
+      "singleFontHint": "Choosing a font here turns the pairing off."
+    },
+    "textStyles": {
+      "title": "Text styles",
+      "hint": "Set each style once. Every text block in that style follows it.",
+      "pick": "Style to edit",
+      "face": "Face",
+      "faceHeading": "Headline",
+      "faceBody": "Body",
+      "uppercase": "All caps",
+      "colorDefault": "Style default",
+      "useColorDefault": "Use the style default",
+      "reset": "Reset this style"
+    },
+    "valign": {
+      "label": "Vertical alignment",
+      "group": "Vertical text alignment",
+      "top": "Align top",
+      "middle": "Align middle",
+      "bottom": "Align bottom"
+    }
+  },
+  "board": {}
+}

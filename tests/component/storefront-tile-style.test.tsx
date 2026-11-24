@@ -17,6 +17,7 @@ import {
 import { MAX_BLOCKS } from "@/lib/validation/storefront";
 import { StorefrontPreview } from "@/components/storefront/StorefrontPreview";
 import { ProductTileContent } from "@/components/storefront/ProductTileContent";
+import { TILE_LABEL_READABLE_PX } from "@/components/storefront/config-maps";
 
 /**
  * Per-tile style overrides through the REAL render path (StorefrontPreview →
@@ -197,12 +198,13 @@ describe("per-tile style overrides", () => {
     expect(tag.style.borderRadius).toBe("4px");
     // The tag is sized against the tile rather than pinned to the px: 14 is
     // what it renders at on a reference-width cell, bounded by the seller's
-    // own number so the slider still means something either side. The size
-    // lands on one custom property and the padding reads it back, so the chip
-    // keeps its proportions at whatever the browser resolves.
+    // own number so the slider still means something either side, and never
+    // under the readable floor. The size lands on one custom property and the
+    // padding reads it back, so the chip keeps its proportions at whatever the
+    // browser resolves.
     expect(tag.style.fontSize).toBe("var(--tag-font-size)");
     expect(tag.style.getPropertyValue("--tag-font-size")).toBe(
-      `clamp(${14 * TILE_LABEL_AUTO_SCALE.min}px, ${
+      `clamp(max(${14 * TILE_LABEL_AUTO_SCALE.min}px, var(--tile-label-floor, ${TILE_LABEL_READABLE_PX}px)), ${
         Math.round(((14 * 100) / TILE_LABEL_AUTO_SCALE.referencePx) * 100) / 100
       }cqmin, ${14 * TILE_LABEL_AUTO_SCALE.max}px)`,
     );

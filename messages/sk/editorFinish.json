@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "motion": {
+      "label": "Pohyb",
+      "none": "Žiadny",
+      "subtle": "Jemný",
+      "lively": "Živý",
+      "hint": "Prehráva sa vo vašom obchode, keď zákazníci posúvajú stránku. Editor zostáva pokojný."
+    },
+    "gradient": {
+      "readyLabel": "Hotové prechody",
+      "custom": "Vlastný",
+      "middle": "Stred",
+      "shapeLabel": "Alebo prechod",
+      "names": {
+        "soft": "Jemný",
+        "light": "Svetlý",
+        "glow": "Žiara",
+        "wash": "Nádych",
+        "sunset": "Západ slnka",
+        "accent": "Zvýraznenie",
+        "deep": "Sýty",
+        "bright": "Jasný",
+        "dusk": "Súmrak",
+        "ink": "Atrament"
+      }
+    },
+    "more": "Viac",
+    "texture": {
+      "label": "Papierová textúra",
+      "none": "Vypnuté",
+      "light": "Jemná",
+      "strong": "Výrazná",
+      "hint": "Jemné zrno na pozadí, ako tlačený papier."
+    },
+    "marquee": {
+      "textLabel": "Text",
+      "speedLabel": "Rýchlosť",
+      "speeds": {
+        "slow": "Pomaly",
+        "normal": "Normálne"
+      },
+      "colorLabel": "Farba",
+      "autoColor": "Automaticky",
+      "useAutoColor": "Použiť automatickú farbu",
+      "defaultText": "Doprava zadarmo pri každej objednávke",
+      "add": "Pridať bežiaci text",
+      "inspectorTitle": "Bežiaci text",
+      "inspectorClose": "Zavrieť panel bežiaceho textu"
+    }
+  },
+  "board": {}
+}

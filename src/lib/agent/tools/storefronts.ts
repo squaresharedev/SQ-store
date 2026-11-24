@@ -1,6 +1,7 @@
 import { z } from "zod";
-import { bytesFromImageInput, imageInputShape } from "@/lib/agent/image-input";
+import { bytesFromImageInput, fileInputShape, imageInputShape } from "@/lib/agent/image-input";
 import { collectObjectKeys, rememberUpload, restoreObjectKeys, withholdObjectKeys } from "@/lib/agent/object-refs";
+import { PRODUCT_PHOTO_USES, copyProductPhoto } from "@/lib/agent/product-photo";
 import { DESTRUCTIVE, READ, ToolFailure, WRITE, defineTool, formDataFrom, unwrap, unwrapState } from "@/lib/agent/tool";
 import {
   GET as getCheckoutPageRoute,
@@ -25,13 +26,15 @@ import {
 import { DesignOpRefused, applyDesignOps, boardSummary, designOpSchema } from "@/lib/storefront/design-ops";
 import { getShippingChoices, getStorefront, listStorefronts } from "@/lib/storefront/queries";
 import { storeElement } from "@/lib/uploads/store-element";
+import { storeFont } from "@/lib/uploads/store-font";
 import { msg } from "@/i18n/types";
 import { firstIssue } from "@/lib/validation/messages";
-import { ELEMENT_MAX_BYTES, productWriteSchema } from "@/lib/validation/product";
+import { ELEMENT_MAX_BYTES, FONT_MAX_BYTES, productWriteSchema } from "@/lib/validation/product";
 import { shippingPolicySchema } from "@/lib/validation/shipping-policy";
 import { discountInputSchema } from "@/lib/validation/discounts";
 import { storefrontConfigSchema } from "@/lib/validation/storefront";
-import { PRODUCT_PAGE_CTA_MAX } from "@/types/storefront";
+import { createClient } from "@/lib/supabase/server";
+import { boardProductIds } from "@/types/storefront";
 
 const storefrontId = z.string().describe("The storefront's id.");
 
@@ -99,6 +102,22 @@ const pageSettings = z
 
 /** How many changes one edit_storefront call may make: a whole board's worth. */
 const DESIGN_OPS_MAX = 200;
+
+const BYTES_PER_MB = 1024 * 1024;
+/** The caps in the words the descriptions use. */
+const FONT_MAX_MB = Math.round(FONT_MAX_BYTES / BYTES_PER_MB);
+const ELEMENT_MAX_MB = Math.round(ELEMENT_MAX_BYTES / BYTES_PER_MB);
+
+/** Of `productIds`, those that are not this store's (or no longer exist),
+ *  read under row level security the way saveStorefront reads them. */
+async function notThisStores(productIds: string[], accountId: string): Promise<string[]> {
+  if (productIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("products").select("id").eq("owner_id", accountId).in("id", productIds);
+  if (error) throw new ToolFailure(serverError("agentTools"));
+  const owned = new Set((data ?? []).map((row) => row.id));
+  return productIds.filter((productId) => !owned.has(productId));
+}
 
 /** A refusal in words written for the assistant reading it. */
 function refused(message: string, fix?: string): ToolFailure {
@@ -240,16 +259,16 @@ export const storefrontTools = [
     name: "edit_storefront",
     title: "Edit a storefront's design",
     description:
-      "Move, resize, turn, restyle, layer, add or remove things on a storefront, in as many steps as you like: the whole list is saved together or not at all, so a refused step changes nothing. The way to change a design, because nothing you do not name is touched. " +
-      "The board is theme.columns by theme.rows cells; x and y count from 0 at the top left, and blocks may overlap on purpose. Operations (`op`): " +
-      "add_product, add_text, add_shape, add_image (the file is an upload_id from upload_element) place something new, on the next free cells unless you give x and y; " +
-      "move (x, y), resize (w, h), rotate (clockwise degrees), layer (front, forward, backward, back), remove; " +
-      "style changes a block's look with `changes`: on a shape kind, color, borderWidth, borderColor, opacity, blur, blurDirection, roundness, points; on text text, variant, align, color, fontSize, font, bold, italic, underline, letterSpacing (hundredths of the type size, -10 to 50), lineHeight (percent of the type size, 80 to 250), blur, blurDirection; on an image alt, fit, opacity, blur, blurDirection, imagePlacement, file; on a product tile the per-tile look such as cornerRadius, titleStyle, titleShadowBlur, photoBlur, photoBlurDirection, priceTagPosition, priceTagColor, the card extras hoverEffect (none, lift, zoom, tilt), hoverPhoto (true shows the product's second photo on hover), buyButton (none, solid, outline, link: a button on the card with an arrow after its words, starting as the product page's button), buyButtonLabel (the button's own words, up to " + PRODUCT_PAGE_CTA_MAX + " characters), buyButtonColor (a solid button's fill, an outline's ring, unused by a link) and buyButtonTextColor (its words; each of the three null to follow the product page's button again), showRating (buyers' stars under the name, while the product page shows reviews) and showLowStock (the words Low stock at or below the product's own low-stock level, never a count), and imagePlacement to frame its photo; " +
-      "theme changes the whole board with `changes`: background ({kind:solid,color} or {kind:gradient,from,to,angle}), accent, font, columns, rows, cornerRadius, gridGap, every card field above as the default for all product tiles, and more; header changes the store name and bio above the board. " +
-      "PHONES: most buyers are on a phone. Without a phone layout a board reflows by itself, or shrinks whole when blocks are tilted or stacked; `board.phone` in the answer says which and where things land. " +
-      "Give move, resize or remove `viewport: \"mobile\"` to place a block on the phone board instead (remove then only hides it on phones), and style `viewport: \"mobile\"` with {fontSize} to size a text block for phones alone (a headline that fits a desktop board is often too big for a phone's); the first one starts a phone layout " +
-      "(theme.mobileColumns, 2 to 6 columns, default 4) and blocks you have not placed keep being placed automatically around yours. mobile_reset hands a block back to automatic placement; theme changes {mobileColumns: null} drops the phone layout. " +
-      "get_schema with of=storefront_config has every field and limit. Colors are strict #rrggbb. Answers with the board as it now stands and the new `version`.",
+      "Change a storefront's design in small operations, saved together or not at all (a refused step changes nothing); nothing you do not name is touched. Answers with `board` (palette, bands, each block where it is drawn, the phone) and the new `version`. " +
+      "DESIGN FROM PRESETS, IN THIS ORDER: 1. `palette` sets the five colours (background, text, accent, surface, muted) and recolours everything painted in the old ones; take every colour you set from it. " +
+      "2. theme: fontPairing (editorial, classic, modern, soft, studio) rather than font; textStyles, set once, for what heading, subheading, body and label look like; the card presets cardColor, whiteBlend (auto), photoShape, shadow; motion. " +
+      "3. Blocks: text wears a saved style by its variant, so give fontSize, font or color only where one block must differ. " +
+      "The board is theme.columns by theme.rows cells, x and y from 0 at the top left; blocks may overlap. Text, shape and button blocks may sit on half cells (x 2.5, w 1.5). Operations (`op`): " +
+      "add_product, add_text, add_shape, add_image (file: an upload_id from upload_element), add_button (label, link), add_marquee (one line of scrolling text), add_carousel (productIds: a row of products to swipe through, full width and 2 rows tall by default) land on the next free cells unless given x and y; " +
+      "move, resize, rotate (clockwise degrees), layer (front, forward, backward, back), remove; style changes a block with `changes`, any field of its kind in get_schema (on a product tile, its own card look over the theme's: cornerRadius, titleStyle, hoverEffect, buyButton, showRating and so on; on a carousel, productIds, its products in order); " +
+      "add_band, edit_band, remove_band: a full-width strip of colour, gradient or photo behind rows y to y+h, which blocks sit on (not a block itself); theme and header change those members with `changes` (header.logo takes {file, alt, size}). null clears a field. " +
+      "PHONES: most buyers are on one, and board.phone says what a phone draws. viewport \"mobile\" on move, resize or remove places or hides a block on the phone board alone, and on style sets a text block's fontSize there; the first starts a phone layout (theme.mobileColumns, 2 to 6, default 4) and blocks you have not placed follow automatically. mobile_reset hands one back; theme {mobileColumns: null} drops the layout. " +
+      "get_schema with of=storefront_config has every field and limit. Colours are strict #rrggbb.",
     scope: "storefronts:write",
     permission: "storefront.write",
     annotations: WRITE,
@@ -262,7 +281,7 @@ export const storefrontTools = [
         .optional()
         .describe("From get_storefront or the last edit. If the seller has saved since, this refuses rather than overwriting them."),
     }),
-    handler: async ({ id, operations, version }, { grantId }) => {
+    handler: async ({ id, operations, version }, { account, grantId }) => {
       const current = await getStorefront(id);
       if (!current) throw new ToolFailure(notFound("storefront"));
       const operationsWithFiles = await restoreObjectKeys(operations, collectObjectKeys(current.config), grantId);
@@ -275,17 +294,31 @@ export const storefrontTools = [
       }
       const parsed = storefrontConfigSchema.safeParse(edited.config);
       if (!parsed.success) {
-        const offBoard = parsed.error.issues.some((issue) => issue.path[0] === "blocks");
+        const offBoard = parsed.error.issues.some((issue) => issue.path[0] === "blocks" || issue.path[0] === "bands");
         const { columns, rows } = edited.config.theme;
         throw new ToolFailure(
           invalidInput(
             firstIssue(parsed.error),
             offBoard
               ? msg("Errors.agent.passThrough", {
-                  message: `The board is ${columns} by ${rows} cells: x + w may reach ${columns} and y + h may reach ${rows}. A theme operation in the same list can make it bigger.`,
+                  message: `The board is ${columns} by ${rows} cells: x + w may reach ${columns} and y + h may reach ${rows}, for blocks and bands alike. A theme operation in the same list can make it bigger.`,
                 })
               : undefined,
           ),
+        );
+      }
+      // A product placed by this list (a tile or a carousel's) must be this
+      // store's. The save drops one that is not without a word; said here, the
+      // assistant learns which id was wrong.
+      const before = new Set(boardProductIds(current.config.blocks));
+      const strangers = await notThisStores(
+        boardProductIds(parsed.data.blocks).filter((productId) => !before.has(productId)),
+        account.accountId,
+      );
+      if (strangers.length) {
+        throw refused(
+          `Not a product of this store: ${strangers.join(", ")}.`,
+          "list_products shows the store's products and their ids.",
         );
       }
       // Always compared: the board was just read, and a seller's save landing
@@ -339,11 +372,89 @@ export const storefrontTools = [
   }),
 
   defineTool({
+    name: "upload_font",
+    title: "Upload a typeface for a storefront",
+    description:
+      `Store the seller's own typeface (WOFF2, WOFF, TTF or OTF, up to ${FONT_MAX_MB} MB; judged by its bytes, not its name) and get an upload_id. ` +
+      "Use it with edit_storefront: theme changes {customFont: {file: <upload_id>, name: <the face's name>}, font: \"custom\", fontPairing: null} (a pairing wins over font). " +
+      "Every buyer downloads it, so a WOFF2 is best. Only upload a face the seller holds a licence to put on a website. An upload_id lasts 24 hours.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: { ...WRITE, openWorldHint: true },
+    input: z.strictObject(fileInputShape("font file")),
+    handler: async (input, { account, grantId }) => {
+      const cannotRead = refused("That font file could not be read.", "Send a public HTTPS url, or base64 within about 3 MB.");
+      if (!input.url && !input.base64) throw cannotRead;
+      if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
+        throw new ToolFailure(rateLimited("agentTools"));
+      }
+      const bytes = await bytesFromImageInput(input, FONT_MAX_BYTES);
+      if (!bytes) throw cannotRead;
+      const stored = await storeFont(bytes, input.filename, account.userId);
+      if (!stored.ok) {
+        if (stored.reason === "store_failed") throw new ToolFailure(serverError("agentTools"));
+        throw refused("That file cannot be used as a typeface.", `Send a WOFF2, WOFF, TTF or OTF file within ${FONT_MAX_MB} MB.`);
+      }
+      const uploadId = await rememberUpload({ grantId, kind: "font", objectKey: stored.key });
+      if (!uploadId) throw new ToolFailure(serverError("agentTools"));
+      return { uploadId };
+    },
+  }),
+
+  defineTool({
+    name: "copy_product_photo",
+    title: "Use a product photo on a storefront",
+    description:
+      "Put one of this store's product photos on a storefront without uploading it again (product image links expire; this copy does not). Answers with an upload_id: " +
+      `as artwork, for edit_storefront's add_image (up to ${ELEMENT_MAX_MB} MB), or as a photo, for a band's background {file} or the board's photo background. ` +
+      "index 0 is the main photo, 1 and on the gallery in get_product's order. An upload_id lasts 24 hours.",
+    scope: "storefronts:write",
+    permission: "storefront.write",
+    annotations: WRITE,
+    input: z.strictObject({
+      productId: z.string().max(64).describe("The product's id."),
+      index: z.number().int().min(0).optional().describe("Which photo: 0 (the default) is the main one."),
+      as: z.enum(PRODUCT_PHOTO_USES).describe("artwork (an image block) or photo (a background)."),
+    }),
+    handler: async ({ productId, index = 0, as }, { account, grantId }) => {
+      if (!(await rateLimit("upload_presign", RATE_LIMITS.uploadPresign))) {
+        throw new ToolFailure(rateLimited("agentTools"));
+      }
+      const copied = await copyProductPhoto({ productId, photo: index, use: as, accountId: account.accountId, uploaderId: account.userId });
+      if (!copied.ok) {
+        switch (copied.reason) {
+          case "no_product":
+            throw new ToolFailure(notFound("product"));
+          case "taken_down":
+            throw refused("That product has been taken down, so its photos cannot be used.");
+          case "no_photo":
+            throw refused(
+              copied.photos ? `That product has ${copied.photos} photo${copied.photos === 1 ? "" : "s"}, so there is no photo ${index}.` : "That product has no photo.",
+              copied.photos ? `index is 0 to ${copied.photos - 1}.` : "Give it one with update_product first.",
+            );
+          case "too_large":
+            throw refused(
+              `That photo is past the ${ELEMENT_MAX_MB} MB artwork may be.`,
+              "Use it as a photo (a band's background) instead, or upload a smaller copy with upload_element.",
+            );
+          case "unavailable":
+            throw new ToolFailure(serverError("agentTools"));
+          default:
+            throw refused("That photo cannot be copied.", "Upload the picture with upload_element or upload_image instead.");
+        }
+      }
+      const uploadId = await rememberUpload({ grantId, kind: as === "artwork" ? "element" : "image", objectKey: copied.key });
+      if (!uploadId) throw new ToolFailure(serverError("agentTools"));
+      return { uploadId };
+    },
+  }),
+
+  defineTool({
     name: "save_storefront",
     title: "Save a storefront",
     description:
-      "Rename a storefront, or replace whole parts of its design. To change things on a board use edit_storefront instead: here `blocks` is replaced whole, so anything left out is gone. Send only the top-level config members you are changing: theme, header, blocks and so on, each replaced whole, the rest kept. Call get_schema with of=storefront_config for what is valid. " +
-      "Pass the version from get_storefront: if the seller has saved since, this refuses rather than overwriting them, so read it again. A product block must name a product of this store. New photos go in as upload_id values from upload_image.",
+      "Rename a storefront, or replace whole parts of its design. To change things on a board use edit_storefront instead: here `blocks` is replaced whole, so anything left out is gone. Send only the top-level config members you are changing: theme, header, blocks, bands and so on, each replaced whole, the rest kept. Call get_schema with of=storefront_config for what is valid. " +
+      "Pass the version from get_storefront: if the seller has saved since, this refuses rather than overwriting them, so read it again. A product block must name a product of this store. New files go in as upload_id values: photos from upload_image, artwork from upload_element. A palette set here recolours nothing: use edit_storefront's palette operation for that.",
     scope: "storefronts:write",
     permission: "storefront.write",
     annotations: WRITE,

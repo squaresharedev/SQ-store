@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Título",
     "subheading": "Subtítulo",
-    "body": "Texto do corpo"
+    "body": "Texto do corpo",
+    "label": "Etiqueta pequena"
   },
   "layoutPresets": {
     "standard": "Padrão",
@@ -85,7 +86,10 @@
     "product": "Produto",
     "text": "Texto",
     "shape": "Forma",
-    "image": "Imagem"
+    "image": "Imagem",
+    "button": "Botão",
+    "marquee": "Texto em movimento",
+    "carousel": "Carrossel"
   },
   "settings": {
     "groups": {
@@ -444,7 +448,6 @@
     "sectionPalettes": "Paletas"
   },
   "themePanel": {
-    "accent": "Destaque",
     "accentHint": "Utilizada nos botões, etiquetas de promoção, títulos e no nome da sua loja."
   },
   "panelSearch": {
@@ -483,7 +486,7 @@
     "uploadImage": "Carregar imagem",
     "uploadingProgress": "A carregar imagem de fundo",
     "uploadHint": "Até 10 MB. JPEG, PNG, WebP, GIF ou AVIF.",
-    "colorLabel": "Cor",
+    "colorFromPalette": "A cor é a amostra Fundo da paleta acima.",
     "from": "De",
     "to": "Para",
     "angle": "Ângulo",
@@ -1262,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Cor de destaque",
       "storeName": "Nome da loja",
       "bio": "Biografia",
-      "background": "Fundo",
       "gradientFrom": "Gradiente de",
       "gradientTo": "Gradiente até",
       "fill": "Preenchimento",
@@ -1314,22 +1315,6 @@
       "ink": {
         "name": "Tinta",
         "label": "Tinta ({value})"
-      },
-      "paleAccent": {
-        "name": "Destaque pálido",
-        "label": "Destaque pálido ({value})"
-      },
-      "softAccent": {
-        "name": "Destaque suave",
-        "label": "Destaque suave ({value})"
-      },
-      "accent": {
-        "name": "Destaque",
-        "label": "Destaque ({value})"
-      },
-      "deepAccent": {
-        "name": "Destaque intenso",
-        "label": "Destaque intenso ({value})"
       }
     },
     "standard": {

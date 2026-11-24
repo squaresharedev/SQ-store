@@ -21,7 +21,8 @@
 //   - a product tile is drawn only for a product that is live (active, this
 //     seller's, not taken down). Anything else is dropped whole, like the
 //     embed drops a removed product: a hole labelled "something was here" is
-//     neither the buyer's business nor something they can act on;
+//     neither the buyer's business nor something they can act on. A carousel
+//     keeps only its live members, and one left with none is dropped whole;
 //   - of each product, only what a tile prints: title, price, photo. No stock
 //     count, no per-order limit, no description, no object key.
 //
@@ -66,7 +67,16 @@ import {
 import { resolveTileLook } from "@/lib/storefront/tile-look";
 import { productPagePath, storefrontPageUrl } from "@/lib/storefront/product-page-url";
 import { uuidField } from "@/lib/validation/inputs";
-import { blockKey, buyerVisibleBlocks, type StorefrontBlock, type StorefrontConfig } from "@/types/storefront";
+import { keepProducts } from "@/lib/storefront/carousel";
+import {
+  blockKey,
+  boardProductIds,
+  buyerVisibleBlocks,
+  type StorefrontBlock,
+  type StorefrontConfig,
+  type StorefrontHeader,
+} from "@/types/storefront";
+import { linkedStorefrontIds, resolveLink, resolveLinks } from "@/lib/storefront/links";
 import type { StorefrontPageData, StorefrontTileProduct } from "@/types/storefront-page";
 import { cartFor, cartLaunched } from "@/lib/cart/availability";
 import { QUICK_ADD_SELECT, quickAddFor, type QuickAdd, type QuickAddRow } from "@/lib/cart/quick-add";
@@ -212,9 +222,9 @@ export async function buildStorefrontPage(
 
   const admin = createAdminClient();
   const visible = buyerVisibleBlocks(config);
-  const productIds = [
-    ...new Set(visible.flatMap((block) => (block.type === "product" ? [block.productId] : []))),
-  ];
+  // Every product the board shows: its tiles and its carousels' members, each
+  // once (boardProductIds), all read and gated alike below.
+  const productIds = boardProductIds(visible);
 
   // Compute which extras each tile wants BEFORE reading tile products, so the
   // gallery column (up to 24 JSON objects per product) is included in the
@@ -271,12 +281,19 @@ export async function buildStorefrontPage(
   if (storeSales === null) return PAGE_BUSY;
 
   // THE REMOVAL GATE, product half: a product staff have taken down has no
-  // tile, the same as one that is a draft or was deleted.
+  // tile, the same as one that is a draft or was deleted. A carousel loses
+  // such a member the same way, and a carousel left with none draws nothing
+  // (keepProducts).
   const live = products.data.filter((row) => isContentVisible(row.moderation_status));
   const liveIds = new Set(live.map((row) => row.id));
-  const blocks: StorefrontBlock[] = visible.filter(
-    (block) => block.type !== "product" || liveIds.has(block.productId),
+  const liveBlocks: StorefrontBlock[] = keepProducts(visible, (productId) => liveIds.has(productId));
+  // Bands, and where each link leads (a button whose link leads nowhere a
+  // buyer may go is dropped, like a tile whose product is not live).
+  const layout = await boardLayout(admin, storefront.owner_id, config, liveBlocks, (productId) =>
+    liveIds.has(productId) ? options.tileHref(productId) : null,
   );
+  if (layout === PAGE_BUSY) return PAGE_BUSY;
+  const { blocks } = layout;
 
   const tileLook = resolveTileLook(config);
   const [pricing, extras] = await Promise.all([
@@ -329,8 +346,9 @@ export async function buildStorefrontPage(
       id: storefront.id,
       name: storefront.name,
       theme,
-      ...(config.header ? { header: config.header } : {}),
+      ...(layout.header ? { header: layout.header } : {}),
       blocks,
+      ...layout.extras,
       products: tiles,
       tileLook,
       imageUrls,
@@ -378,8 +396,88 @@ export async function tileProduct(
     ...(extras?.hoverImageUrl ? { hoverImageUrl: extras.hoverImageUrl } : {}),
     ...(extras?.rating ? { rating: { average: extras.rating.average, count: extras.rating.count } } : {}),
     ...(extras?.stockState ? { stockState: extras.stockState } : {}),
+    ...(extras?.photoEdge ? { photoEdge: extras.photoEdge } : {}),
     ...(quickAdd ? { quickAdd: { optionIds: [...quickAdd.optionIds] } } : {}),
     href,
+  };
+}
+
+/** What boardLayout adds to the payload, each member present only when the
+ *  board has it, so a board without bands or links is handed what it was. */
+type BoardLayoutExtras = Pick<StorefrontPageData, "bands" | "bandImageUrls" | "links" | "logoUrl">;
+
+/**
+ * THE LAYOUT HALF OF THE PAYLOAD, built on purpose like the tiles: the bands
+ * (and their photos, signed), the header's logo (signed), and every link
+ * resolved into an address (lib/storefront/links.ts).
+ *
+ * A link leads only where a buyer may go: a product with a live page here, a
+ * band this page draws, an https address, or another storefront of THIS store
+ * that is open to buyers (one read, only when a link names one). A button
+ * whose link leads nowhere is dropped, and so is such a menu entry.
+ *
+ * Exported for the assistant's preview (lib/agent/preview/storefront-preview),
+ * which builds its own page data and must draw the same bands, links and logo.
+ */
+export async function boardLayout(
+  admin: ReturnType<typeof createAdminClient>,
+  ownerId: string,
+  config: StorefrontConfig,
+  liveBlocks: StorefrontBlock[],
+  productHref: (productId: string) => string | null,
+): Promise<{ blocks: StorefrontBlock[]; header: StorefrontHeader | undefined; extras: BoardLayoutExtras } | PageBusy> {
+  const bands = config.bands ?? [];
+  const header = config.header;
+  const headerLinks = header?.links ?? [];
+  const hasButtons = liveBlocks.some((block) => block.type === "button");
+  if (bands.length === 0 && headerLinks.length === 0 && !hasButtons && !header?.logo) {
+    return { blocks: liveBlocks, header, extras: {} };
+  }
+
+  const storefrontIds = linkedStorefrontIds(liveBlocks, headerLinks);
+  const openStorefronts = new Set<string>();
+  if (storefrontIds.length > 0) {
+    const { data, error } = await admin
+      .from("storefronts")
+      .select("id, config, moderation_status")
+      .eq("owner_id", ownerId)
+      .in("id", storefrontIds);
+    if (error) {
+      console.error("[storefront page] linked storefront read failed", error.message);
+      return PAGE_BUSY;
+    }
+    for (const row of data ?? []) if (openStorefront(row)) openStorefronts.add(row.id);
+  }
+
+  const world = { productHref, openStorefronts, bands };
+  const blocks = liveBlocks.filter((block) => block.type !== "button" || resolveLink(block.link, world) !== null);
+  const keptLinks = headerLinks.filter((entry) => resolveLink(entry.link, world) !== null);
+  let nextHeader = header;
+  if (header?.links) {
+    const { links: _stored, ...rest } = header;
+    void _stored;
+    nextHeader = keptLinks.length > 0 ? { ...rest, links: keptLinks } : rest;
+  }
+  const links = resolveLinks(blocks, keptLinks, world);
+
+  const photoKeys = bands.flatMap((band) => (band.background.kind === "image" ? [[band.id, band.background.key] as const] : []));
+  const [signedPhotos, logoUrl] = await Promise.all([
+    Promise.all(photoKeys.map(async ([id, key]) => [id, await presignGetUrl(key)] as const)),
+    header?.logo ? presignGetUrl(header.logo.key) : null,
+  ]);
+  const bandImageUrls = Object.fromEntries(
+    signedPhotos.filter((entry): entry is readonly [string, string] => Boolean(entry[1])),
+  );
+
+  return {
+    blocks,
+    header: nextHeader,
+    extras: {
+      ...(bands.length > 0 ? { bands } : {}),
+      ...(Object.keys(bandImageUrls).length > 0 ? { bandImageUrls } : {}),
+      ...(Object.keys(links).length > 0 ? { links } : {}),
+      ...(logoUrl ? { logoUrl } : {}),
+    },
   };
 }
 

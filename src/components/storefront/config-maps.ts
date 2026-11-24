@@ -24,9 +24,11 @@ import {
   TITLE_INSET_AUTO,
   blockCornerRadius,
   blockKey,
+  resolveCardStyle,
   type BlurDirection,
   type ChipScale,
   type PriceTagFont,
+  type ShadowPreset,
   type SpotRow,
   type StorefrontBlock,
   type StorefrontFont,
@@ -148,11 +150,71 @@ export function blockTileClipStyle(
     if ((gestureKeys?.has(entry.key) ?? false) !== moving) continue;
     cover = cover === null ? entry.cornerRadius : Math.min(cover, entry.cornerRadius);
   }
-  if (cover === null) return tileClipStyle(scaledCornerRadius(own, placement));
-  return tileClipStyle(
-    scaledCornerRadius(Math.max(own, cover), placement),
-    TILE_COVER_INSET_PX,
-  );
+  // The block's drop shadow rides on the cell, the one box round a tile that
+  // clips nothing (see blockShadowStyle). Empty for a block without one.
+  const shadow = blockShadowStyle(theme, block);
+  if (cover === null) return { ...tileClipStyle(scaledCornerRadius(own, placement)), ...shadow };
+  return {
+    ...tileClipStyle(scaledCornerRadius(Math.max(own, cover), placement), TILE_COVER_INSET_PX),
+    ...shadow,
+  };
+}
+
+/**
+ * THE SHADOW PRESETS (SHADOW_PRESETS), shared by cards, image blocks and
+ * shapes (Photo cards, editor upgrade). Drop shadows rather than box shadows:
+ * they follow what is actually drawn, so a circle's shadow is round, a cut-out
+ * logo's follows the logo and a card's follows its rounded corners. Each
+ * layer's lengths are shares of one grid cell (cellLength), like the blur's:
+ * the board is drawn at every width from a phone to a wide screen, and a
+ * shadow pinned in px that is soft on a desktop would swallow a phone's cells.
+ */
+const SHADOW_LAYERS: Record<Exclude<ShadowPreset, "none">, readonly { y: number; blur: number; alpha: number }[]> = {
+  soft: [{ y: 0.02, blur: 0.06, alpha: 0.24 }],
+  lifted: [
+    { y: 0.015, blur: 0.025, alpha: 0.14 },
+    { y: 0.08, blur: 0.14, alpha: 0.24 },
+  ],
+};
+
+/** A shadow preset as a CSS filter, or nothing for none. */
+export function shadowFilter(preset: ShadowPreset): string | undefined {
+  if (preset === "none") return undefined;
+  return SHADOW_LAYERS[preset]
+    .map(({ y, blur, alpha }) => `drop-shadow(0 ${cellLength(y)} ${cellLength(blur)} rgb(0 0 0 / ${alpha}))`)
+    .join(" ");
+}
+
+/** The shadow a block wears: a card's from its card style (theme and tile),
+ *  a carousel's cards the theme's, an image's or a shape's its own. Every
+ *  other kind wears none. A carousel's is drawn on its whole cell, and as a
+ *  drop shadow it falls under each card, not under the row. */
+export function blockShadow(theme: StorefrontTheme, block: StorefrontBlock): ShadowPreset {
+  switch (block.type) {
+    case "product":
+      return resolveCardStyle(theme, block.style).shadow;
+    case "carousel":
+      return resolveCardStyle(theme, undefined).shadow;
+    case "image":
+    case "shape":
+      return block.shadow ?? "none";
+    default:
+      return "none";
+  }
+}
+
+/**
+ * The block's shadow, for its grid CELL. The face clips itself to the tile's
+ * corners and a shadow drawn inside it would be cut away; the cell clips
+ * nothing (Grid), so the shadow is drawn there, as a filter over everything
+ * the cell shows. That also takes it along when a card lifts or tilts on
+ * hover. A filter, not a box-shadow, so it never fights the rings the grid
+ * and the tiles draw with box-shadow. Empty for no shadow, so an untouched
+ * block's cell carries nothing new.
+ */
+export function blockShadowStyle(theme: StorefrontTheme, block: StorefrontBlock): CSSProperties {
+  const filter = shadowFilter(blockShadow(theme, block));
+  return filter ? { filter } : {};
 }
 
 // Tile spot -> absolute placement over the image area. Center spots translate
@@ -307,6 +369,16 @@ const BLUR_CURVE = 1.5;
  */
 export function blurRadius(amount: number): string {
   const share = Math.round((amount / BLUR_MAX) ** BLUR_CURVE * BLUR_FULL_CELL_SHARE * 10000) / 10000;
+  return cellLength(share);
+}
+
+/**
+ * A length that is `share` of ONE GRID CELL's side (--ss-cell, globals.css),
+ * so it follows the board from a phone to a wide screen. Outside a grid
+ * (--ss-in-grid 0) it measures against the reference tile the labels use.
+ * What the blur, the shadows and an image block's rounding are measured in.
+ */
+export function cellLength(share: number): string {
   const cell = `(var(--ss-cell) * var(--ss-in-grid) + ${TILE_LABEL_AUTO_SCALE.referencePx}px * (1 - var(--ss-in-grid)))`;
   return `calc(${cell} * ${share})`;
 }
@@ -324,7 +396,7 @@ const BLUR_FROM: Record<BlurEdge, string> = {
 };
 
 /** A mask in both spellings: Safari before 18 knows only the prefix. */
-function maskStyle(mask: {
+export function maskStyle(mask: {
   image: string;
   clip?: string;
   size?: string;
@@ -344,7 +416,8 @@ function maskStyle(mask: {
 /** A block's blur and the way it runs, or null when the block is sharp.
  *  Products blur their photo only (photoBlurStyle), never their labels. */
 function blockBlur(block: StorefrontBlock): { amount: number; direction: BlurDirection } | null {
-  if (block.type === "product" || !block.blur) return null;
+  // Only the kinds that carry a blur of their own.
+  if (!("blur" in block) || !block.blur) return null;
   return { amount: block.blur, direction: block.blurDirection ?? DEFAULT_BLUR_DIRECTION };
 }
 
@@ -492,6 +565,7 @@ export const TEXT_VARIANT_WEIGHT_CLASSES: Record<TextVariant, string> = {
   heading: "font-semibold",
   subheading: "font-medium",
   body: "font-normal",
+  label: "font-medium",
 };
 
 /**
@@ -532,6 +606,34 @@ type PriceTagChip = {
   priceTagBorderColor?: string;
 };
 
+/**
+ * THE SMALLEST A TILE LABEL IS EVER DRAWN, in px: the price tag, the sale chip
+ * and the product name (Photo cards, editor upgrade). The labels scale with
+ * the tile (TILE_LABEL_AUTO_SCALE), and the old floors (the price tag's 8px,
+ * the name's 9px) let a small card or a board of "cell" sized chips print a
+ * price no one could read: at the default size every 1x1 card narrower than
+ * the reference tile went under 10px, and a phone's small cards went to 8.
+ * The floor of every label is this or its own, whichever is higher, so a tile
+ * big enough to scale past it is untouched.
+ */
+export const TILE_LABEL_READABLE_PX = 11;
+
+/**
+ * The custom property a surface sets to change the readable floor for the
+ * tiles it draws. ONE surface does: a MINIATURE of a board (StorefrontPreview,
+ * the storefront list's cards) sets it to 0px, because a miniature is a
+ * picture of the board, not something to read, and labels held at a readable
+ * size on tiles a few dozen px across stop looking like the board they show.
+ * Unset everywhere else, where the floor is TILE_LABEL_READABLE_PX.
+ */
+export const TILE_LABEL_FLOOR_VAR = "--tile-label-floor";
+
+/** What a miniature's root carries, as a style to spread and an attribute for
+ *  the stylesheet (globals.css stacks a narrow card's name and price on live
+ *  boards only, by `[data-storefront-miniature]`). */
+export const MINIATURE_BOARD_STYLE = { [TILE_LABEL_FLOOR_VAR]: "0px" } as CSSProperties;
+export const MINIATURE_BOARD_ATTR = { "data-storefront-miniature": "" } as const;
+
 /** Rounded to hundredths: these numbers go straight into a CSS expression, and
  *  a full float there is noise in the inspector for a difference under a
  *  hundredth of a pixel. */
@@ -560,16 +662,23 @@ export function roundForCss(value: number): string {
  * tile, so every tile on the board gets the label a 1x1 tile would: the grid
  * hands its cell's side down as `--ss-cell` (globals.css). Outside a grid
  * `--ss-in-grid` is 0 and the tile's own size is used, as before.
+ *
+ * NEVER UNDER TILE_LABEL_READABLE_PX on a board someone reads, whatever the
+ * tile or the setting: a price nobody can read cannot sell, and a name that
+ * small is not a name. The readable floor is asked through
+ * TILE_LABEL_FLOOR_VAR, so a miniature of a board can draw its labels at the
+ * label's own floor, as miniatures always did.
  */
 export function tileLabelSize(size: number, floorPx: number, scale: ChipScale = DEFAULT_CHIP_SCALE): string {
   const { referencePx, min, max } = TILE_LABEL_AUTO_SCALE;
-  const floor = Math.max(floorPx, size * min);
+  const own = Math.max(floorPx, size * min);
+  const floor = `max(${roundForCss(own)}px, var(${TILE_LABEL_FLOOR_VAR}, ${TILE_LABEL_READABLE_PX}px))`;
   const tile = `${roundForCss((size * 100) / referencePx)}cqmin`;
   const preferred =
     scale === "cell"
       ? `calc(var(--ss-cell) * ${roundForCss(size / referencePx)} * var(--ss-in-grid) + ${tile} * (1 - var(--ss-in-grid)))`
       : tile;
-  return `clamp(${roundForCss(floor)}px, ${preferred}, ${roundForCss(size * max)}px)`;
+  return `clamp(${floor}, ${preferred}, ${roundForCss(size * max)}px)`;
 }
 
 /**
@@ -751,6 +860,7 @@ export const TEXT_VARIANT_LABELS: Record<TextVariant, MessageKey> = {
   heading: "Storefront.textVariants.heading",
   subheading: "Storefront.textVariants.subheading",
   body: "Storefront.textVariants.body",
+  label: "Storefront.textVariants.label",
 };
 
 export const TEXT_ALIGN_CLASSES: Record<TextAlign, string> = {
@@ -906,13 +1016,16 @@ export function tileBuyButtonPaint(
   look: Exclude<CardBuyButton, "none">,
   cta: CtaAppearance,
   own: TileBuyButtonOwn = {},
+  /** The buy row's own fill, on a card with a colour of its own (cardColor).
+   *  Absent = the card's white. */
+  surface: string = TILE_BUY_SURFACE,
 ): { color: string; ink: string } {
   if (look === "solid") {
     const color = own.buyButtonColor ?? cta.fill;
     const ink = own.buyButtonTextColor ?? (own.buyButtonColor === undefined ? cta.text : readableOn(color));
     return { color, ink };
   }
-  const color = own.buyButtonColor ?? legibleInkOn(cta.fill, TILE_BUY_SURFACE);
+  const color = own.buyButtonColor ?? legibleInkOn(cta.fill, surface);
   return { color, ink: own.buyButtonTextColor ?? color };
 }
 
@@ -924,8 +1037,10 @@ export function tileBuyButtonStyle(
   look: Exclude<CardBuyButton, "none">,
   cta: CtaAppearance,
   own: TileBuyButtonOwn = {},
+  /** As tileBuyButtonPaint's. */
+  surface?: string,
 ): CSSProperties {
-  const { color, ink } = tileBuyButtonPaint(look, cta, own);
+  const { color, ink } = tileBuyButtonPaint(look, cta, own, surface);
   const box = { padding: TILE_BUY_PADDING, gap: TILE_BUY_GAP };
   if (look === "solid") {
     const recoloured = own.buyButtonColor !== undefined || own.buyButtonTextColor !== undefined;

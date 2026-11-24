@@ -210,6 +210,11 @@
       "tooLong": "Le champ Texte alternatif de l’élément doit compter au maximum {maximum} caractères.",
       "unsupported": "Le champ Texte alternatif de l’élément contient des caractères non pris en charge."
     },
+    "linkLabel": {
+      "required": "Le champ Texte du lien est obligatoire.",
+      "tooLong": "Le champ Texte du lien doit compter au maximum {maximum} caractères.",
+      "unsupported": "Le champ Texte du lien contient des caractères non pris en charge."
+    },
     "notificationTitle": {
       "required": "Le champ Titre de la notification est obligatoire.",
       "tooLong": "Le champ Titre de la notification doit compter au maximum {maximum} caractères.",
@@ -564,7 +569,8 @@
     "spanRange": "Une période formatée doit se terminer après son début",
     "blocksTooMany": "Une vitrine peut contenir jusqu’à {maximum} blocs. Supprimez des blocs ou divisez cette vitrine en deux.",
     "blocksDuplicate": "Les blocs de la grille doivent être uniques.",
-    "blockOutsideCanvas": "Un bloc se trouve en dehors du canevas."
+    "blockOutsideCanvas": "Un bloc se trouve en dehors du canevas.",
+    "linkTargetMissing": "Un lien mène à un élément qui ne se trouve pas dans cette vitrine."
   },
   "discountCode": {
     "code": "Un code comporte de {min} à {max} lettres ou chiffres, avec éventuellement - ou _."

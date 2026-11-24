@@ -1,4 +1,5 @@
-import { columnsThatFit } from "@/components/grid/gridConstants";
+import { columnsThatFit, reflowedSpan } from "@/components/grid/gridConstants";
+import { keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import { orientedSpan, rotatedFootprint } from "@/lib/geometry/rotated-box";
 import {
   MOBILE_COLUMNS_MAX,
@@ -83,10 +84,7 @@ export function phoneLayout(
   const ratio = columns / theme.columns;
   const auto = unpinned.map((block): PhonePlacement => {
     const covered = blockFootprint(block);
-    const room = {
-      w: Math.min(columns, Math.max(1, Math.round(covered.w * ratio))),
-      h: Math.max(1, Math.round(covered.h * ratio)),
-    };
+    const room = reflowedSpan(covered, ratio, columns, keepsRowsWhenNarrow(block));
     let x = 0;
     let y = 0;
     for (;;) {

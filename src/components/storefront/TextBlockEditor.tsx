@@ -5,14 +5,15 @@ import { Type } from "lucide-react";
 import { useTranslations } from "next-intl";
 import {
   STOREFRONT_FONTS,
-  TEXT_VARIANT_BASE_PX,
   TEXT_VARIANTS,
   type StorefrontFont,
+  type StorefrontTextStyles,
   blockKey,
   type TextBlock,
 } from "@/types/storefront";
 import { textBlockThemeColor } from "@/lib/theme/color-target";
 import { rangeColor } from "@/lib/storefront/text-spans";
+import { resolveTextStyle } from "@/lib/storefront/text-styles";
 import { Select, type SelectOption } from "@/components/ui/select";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import {
@@ -24,10 +25,11 @@ import { BlockActions } from "./BlockActions";
 import { BlurSlider } from "./BlurSlider";
 import { FONT_LABELS, TEXT_VARIANT_LABELS } from "./config-maps";
 import { FontSizeField } from "./FontSizeField";
+import { MoreDisclosure } from "./MoreDisclosure";
 import { SummonedField, type BlockFieldSummons } from "./SummonedField";
 import { TextSpacingFields } from "./TextSpacingFields";
 import { useReportedAutoFitSize } from "./text-autofit-registry";
-import { AlignmentToggles, FormatToggles } from "./TextFormatControls";
+import { AlignmentToggles, FormatToggles, VerticalAlignToggles } from "./TextFormatControls";
 import { InfoTip } from "@/components/ui/InfoTip";
 
 export type TextBlockPatch = Partial<
@@ -47,6 +49,7 @@ export type TextBlockPatch = Partial<
     | "lineHeight"
     | "blur"
     | "blurDirection"
+    | "valign"
   >
 >;
 
@@ -55,10 +58,11 @@ export type TextBlockPatch = Partial<
 type FontChoice = StorefrontFont | "theme";
 
 /**
- * Text-block editor rendered in the side panel: style, formatting, alignment,
- * per-block font / size / color overrides (all optional — a fresh block
- * simply follows the theme) and a blur. Every change is applied live (no "done" step);
- * the tile updates as you set it.
+ * Text-block editor rendered in the side panel: style, colour, formatting,
+ * alignment both ways, and behind "More" the block's own font / size /
+ * spacing overrides and a blur (all optional: a fresh block simply follows
+ * its saved text style). Every change is applied live (no "done" step); the
+ * tile updates as you set it.
  *
  * The WORDS are deliberately not here. They are typed on the tile itself, at
  * the size and colour they will really have (see TextTileContent); this panel
@@ -67,6 +71,7 @@ type FontChoice = StorefrontFont | "theme";
 export function TextBlockEditor({
   block,
   accent,
+  textStyles,
   hasCustomFont = false,
   onUpdate,
   onDuplicate,
@@ -81,6 +86,9 @@ export function TextBlockEditor({
   block: TextBlock;
   /** Theme accent — what a heading renders in when no override is set. */
   accent: string;
+  /** The storefront's saved text styles (theme.textStyles): what the block's
+   *  style sets its size and colour to. Absent = the coded defaults. */
+  textStyles?: StorefrontTextStyles;
   /** Whether the storefront has an uploaded face to offer as a font choice. */
   hasCustomFont?: boolean;
   onUpdate: (patch: TextBlockPatch) => void;
@@ -143,12 +151,25 @@ export function TextBlockEditor({
   // (or outside the designer entirely — see text-autofit-registry), which is
   // exactly the old, unshrinking number this used to always show.
   const autoFitSize =
-    useReportedAutoFitSize(blockKey(block)) ?? TEXT_VARIANT_BASE_PX[block.variant];
+    useReportedAutoFitSize(blockKey(block)) ?? resolveTextStyle({ textStyles }, block.variant).size;
 
   // What the tile renders with when no override is stored, and what the
   // picker's "Theme color" option points at. Shared with the ColorPanel so the
   // two cannot answer "what does inheriting look like" differently.
-  const themeColor = textBlockThemeColor(accent, block);
+  const themeColor = textBlockThemeColor(accent, block, textStyles);
+
+  // The block's own overrides of its style wait behind "More", open from the
+  // start when the block already carries one (so nothing a seller set is
+  // hidden from them), and opened by the selection toolbar when it points at
+  // a slider folded in there.
+  const hasOverrides =
+    block.font !== undefined ||
+    block.fontSize !== undefined ||
+    block.letterSpacing !== undefined ||
+    block.lineHeight !== undefined ||
+    (block.blur ?? 0) > 0;
+  const moreSummons =
+    summons && (summons.field === "spacing" || summons.field === "blur") ? summons.nonce : null;
 
   // How many characters a colour would land on, when it would land on part of
   // the text rather than all of it. Group-editing never routes to a range: one
@@ -194,27 +215,6 @@ export function TextBlockEditor({
           onChange={(variant) => onUpdate({ variant })}
         />
       </div>
-
-      <div className="space-y-1.5">
-        <label htmlFor={`${fieldId}-font`} className={labelClass}>
-          {t("textBlock.font.label")}
-        </label>
-        <Select
-          id={`${fieldId}-font`}
-          value={(block.font ?? "theme") as FontChoice}
-          options={fontOptionsForBlock}
-          onChange={(font) =>
-            onUpdate({ font: font === "theme" ? undefined : font })
-          }
-        />
-      </div>
-
-      <FontSizeField
-        id={`${fieldId}-size`}
-        value={block.fontSize}
-        autoSize={autoFitSize}
-        onChange={(fontSize) => onUpdate({ fontSize })}
-      />
 
       {/* "Follow the theme" is an option INSIDE the picker, not a reset link
           beside it — same affordance every optional color field gets. */}
@@ -270,29 +270,61 @@ export function TextBlockEditor({
         onChange={(align) => onUpdate({ align })}
       />
 
-      <SummonedField field="spacing" summons={summons} variant="slider">
-        {(highlighted) => (
-          <TextSpacingFields
-            id={`${fieldId}-spacing`}
-            value={block}
-            onChange={onUpdate}
-            highlighted={highlighted}
-          />
-        )}
+      <SummonedField field="valign" summons={summons}>
+        <VerticalAlignToggles
+          valign={block.valign}
+          onChange={(valign) => onUpdate({ valign })}
+        />
       </SummonedField>
 
-      <SummonedField field="blur" summons={summons} variant="slider">
-        {(highlighted) => (
-          <BlurSlider
-            id={`${fieldId}-blur`}
-            value={block.blur ?? 0}
-            onChange={(blur) => onUpdate({ blur })}
-            direction={block.blurDirection}
-            onDirectionChange={(blurDirection) => onUpdate({ blurDirection })}
-            highlighted={highlighted}
+      {/* The block's own overrides of its style: a font, a size, spacing
+          and a blur. Most blocks need none of them, so they fold away. */}
+      <MoreDisclosure defaultOpen={hasOverrides} openKey={moreSummons}>
+        <div className="space-y-1.5">
+          <label htmlFor={`${fieldId}-font`} className={labelClass}>
+            {t("textBlock.font.label")}
+          </label>
+          <Select
+            id={`${fieldId}-font`}
+            value={(block.font ?? "theme") as FontChoice}
+            options={fontOptionsForBlock}
+            onChange={(font) =>
+              onUpdate({ font: font === "theme" ? undefined : font })
+            }
           />
-        )}
-      </SummonedField>
+        </div>
+
+        <FontSizeField
+          id={`${fieldId}-size`}
+          value={block.fontSize}
+          autoSize={autoFitSize}
+          onChange={(fontSize) => onUpdate({ fontSize })}
+        />
+
+        <SummonedField field="spacing" summons={summons} variant="slider">
+          {(highlighted) => (
+            <TextSpacingFields
+              id={`${fieldId}-spacing`}
+              value={block}
+              onChange={onUpdate}
+              highlighted={highlighted}
+            />
+          )}
+        </SummonedField>
+
+        <SummonedField field="blur" summons={summons} variant="slider">
+          {(highlighted) => (
+            <BlurSlider
+              id={`${fieldId}-blur`}
+              value={block.blur ?? 0}
+              onChange={(blur) => onUpdate({ blur })}
+              direction={block.blurDirection}
+              onDirectionChange={(blurDirection) => onUpdate({ blurDirection })}
+              highlighted={highlighted}
+            />
+          )}
+        </SummonedField>
+      </MoreDisclosure>
 
       <BlockActions
         onDuplicate={onDuplicate}

@@ -11,7 +11,21 @@ import {
   settingIdFromHref,
 } from "@/lib/storefront/setting-ref";
 import { searchLocalRegistry } from "@/lib/search/registry";
+import { editorEntries, searchEditor } from "@/components/storefront/editor-search";
+import type { StorefrontBlock } from "@/types/storefront";
 import { english } from "../setup/translate";
+import en from "../../messages/en";
+import cs from "../../messages/cs";
+import de from "../../messages/de";
+import fr from "../../messages/fr";
+import es from "../../messages/es";
+import it_ from "../../messages/it";
+import nl from "../../messages/nl";
+import pl from "../../messages/pl";
+import ptPT from "../../messages/pt-PT";
+import sk from "../../messages/sk";
+
+const CATALOGUES = { en, cs, de, fr, es, it: it_, nl, pl, "pt-PT": ptPT, sk };
 
 /**
  * The settings catalogue is the contract between three things that must agree:
@@ -26,9 +40,15 @@ describe("the catalogue", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("only ever points at a group the panel actually has, or at a block's own control", () => {
+  it("only ever points at a group the panel actually has, at a block's own control, or at the drawer that adds one", () => {
     for (const entry of STOREFRONT_SETTINGS) {
       const group = settingGroup(entry.ref);
+      if (entry.ref.kind === "library") {
+        // The drawer that adds a band, a button or scrolling text.
+        expect(group).toBeNull();
+        expect(["uploads", "shapes"]).toContain(entry.ref.tab);
+        continue;
+      }
       if (entry.ref.kind === "block") {
         // A block's setting opens in that block's inspector, never a group,
         // and names a field that block kind's inspector really has.
@@ -79,6 +99,78 @@ describe("the catalogue", () => {
     for (const entry of STOREFRONT_SETTINGS) {
       expect(entry.keywords.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("the editor upgrade's controls", () => {
+  const NEW_IDS = [
+    "palette",
+    "font-pairing",
+    "text-styles",
+    "text-valign",
+    "card-color",
+    "card-blend",
+    "card-name-strip",
+    "card-photo-shape",
+    "card-shadow",
+    "motion",
+    "paper-texture",
+    "bands",
+    "button-block",
+    "scrolling-text",
+    "header-logo-menu",
+  ];
+
+  it("has an entry for each, with its own words as the label in all ten locales", () => {
+    for (const id of NEW_IDS) {
+      const entry = settingById(id);
+      expect(entry, id).not.toBeNull();
+      for (const catalogue of Object.values(CATALOGUES)) {
+        const text = entry!.label.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], catalogue);
+        expect(typeof text === "string" && text.length > 0, id).toBe(true);
+      }
+    }
+  });
+
+  it("compares a library ref by its tab", () => {
+    expect(isSameSettingRef({ kind: "library", tab: "shapes" }, { kind: "library", tab: "shapes" })).toBe(true);
+    expect(isSameSettingRef({ kind: "library", tab: "shapes" }, { kind: "library", tab: "uploads" })).toBe(false);
+  });
+
+  it("is found by the words a person who is not a designer would type", () => {
+    const entries = editorEntries([], new Map(), english);
+    const first = (query: string) =>
+      searchEditor(entries, query, english)
+        .flatMap((section) => section.hits)
+        .find((hit) => hit.entry.id.startsWith("setting:"))?.entry.id;
+    const expected: Record<string, string> = {
+      colours: "setting:palette",
+      "colour scheme": "setting:palette",
+      fonts: "setting:font-pairing",
+      "white background": "setting:card-blend",
+      animation: "setting:motion",
+      logo: "setting:header-logo-menu",
+      menu: "setting:header-logo-menu",
+      "round photos": "setting:card-photo-shape",
+      "drop shadow": "setting:card-shadow",
+      paper: "setting:paper-texture",
+      marquee: "setting:scrolling-text",
+      "full width section": "setting:bands",
+      "add a button": "setting:button-block",
+      "card colour": "setting:card-color",
+      "name font": "setting:card-name-strip",
+      "all caps": "setting:text-styles",
+    };
+    for (const [query, id] of Object.entries(expected)) expect(first(query), query).toBe(id);
+  });
+
+  it("offers the vertical alignment only while there is text to align", () => {
+    const text: StorefrontBlock = { type: "text", id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa", text: "Hi", variant: "body", align: "left", x: 0, y: 0, w: 1, h: 1 };
+    const ids = (blocks: StorefrontBlock[]) => editorEntries(blocks, new Map(), english).map((entry) => entry.id);
+    expect(ids([])).not.toContain("setting:text-valign");
+    expect(ids([text])).toContain("setting:text-valign");
+    // The drawers that add a block are there whatever is on the board.
+    expect(ids([])).toEqual(expect.arrayContaining(["setting:bands", "setting:button-block", "setting:scrolling-text"]));
   });
 });
 

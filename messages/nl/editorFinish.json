@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "motion": {
+      "label": "Beweging",
+      "none": "Geen",
+      "subtle": "Subtiel",
+      "lively": "Levendig",
+      "hint": "Speelt af in je winkel terwijl kopers scrollen. De editor blijft stil."
+    },
+    "gradient": {
+      "readyLabel": "Kant-en-klare verlopen",
+      "custom": "Eigen",
+      "middle": "Midden",
+      "shapeLabel": "Of een verloop",
+      "names": {
+        "soft": "Zacht",
+        "light": "Licht",
+        "glow": "Gloed",
+        "wash": "Waas",
+        "sunset": "Zonsondergang",
+        "accent": "Accent",
+        "deep": "Diep",
+        "bright": "Fel",
+        "dusk": "Schemer",
+        "ink": "Inkt"
+      }
+    },
+    "more": "Meer",
+    "texture": {
+      "label": "Papierstructuur",
+      "none": "Uit",
+      "light": "Licht",
+      "strong": "Sterk",
+      "hint": "Een fijne korrel over de achtergrond, zoals bedrukt papier."
+    },
+    "marquee": {
+      "textLabel": "Tekst",
+      "speedLabel": "Snelheid",
+      "speeds": {
+        "slow": "Langzaam",
+        "normal": "Normaal"
+      },
+      "colorLabel": "Kleur",
+      "autoColor": "Automatisch",
+      "useAutoColor": "Automatische kleur gebruiken",
+      "defaultText": "Gratis verzending bij elke bestelling",
+      "add": "Lopende tekst toevoegen",
+      "inspectorTitle": "Lopende tekst",
+      "inspectorClose": "Paneel voor lopende tekst sluiten"
+    }
+  },
+  "board": {}
+}

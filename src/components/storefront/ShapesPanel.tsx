@@ -7,6 +7,7 @@ import { focusRingClass, transitionClass } from "@/components/ui/control-styles"
 import type { ShapeKind } from "@/types/storefront";
 import { ShapeKindGlyph } from "./ShapeTileContent";
 import { SHAPE_GROUPS } from "./shape-specs";
+import { LayoutInserts } from "./LayoutInserts";
 
 /**
  * The shape library, the second half of the left-hand library panel.
@@ -24,14 +25,25 @@ import { SHAPE_GROUPS } from "./shape-specs";
 export function ShapesPanel({
   onAddShape,
   canAddBlocks,
+  onAddBand,
+  onAddButton,
+  onAddCarousel,
 }: {
   onAddShape: (kind: ShapeKind) => void;
   /** False at the block cap; the buttons disable rather than fail silently. */
   canAddBlocks: boolean;
+  /** A band and a button, as the Layout group above the shapes. */
+  onAddBand?: () => void;
+  onAddButton?: () => void;
+  /** A product carousel, in the same group. */
+  onAddCarousel?: () => void;
 }) {
   const t = useTranslations("Storefront.shapes");
   return (
     <div>
+      {onAddBand && onAddButton && (
+        <LayoutInserts onAddBand={onAddBand} onAddButton={onAddButton} onAddCarousel={onAddCarousel} canAddBlocks={canAddBlocks} />
+      )}
       {SHAPE_GROUPS.map((group) => (
         <CollapsibleSection key={group.id} title={t(`group.${group.id}`)}>
           <div

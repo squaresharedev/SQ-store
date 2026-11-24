@@ -77,7 +77,7 @@ import {
   updateEmbedSettings,
   deleteStorefront,
 } from "@/lib/storefront/actions";
-import { DEFAULT_STOREFRONT_CONFIG } from "@/types/storefront";
+import { DEFAULT_STOREFRONT_CONFIG, newStorefrontConfig } from "@/types/storefront";
 import { storefrontVersion } from "@/lib/storefront/version";
 
 // ---- test constants ------------------------------------------------------
@@ -160,10 +160,11 @@ describe("createStorefront - happy path", () => {
     expect(insertPayload.name).toBe("Untitled storefront");
     // Nothing is asked first, so nothing is stored about the store.
     expect(insertPayload).not.toHaveProperty("brief");
-    // SF-02/SF-03/SF-04: the default look, the name in the header, and
-    // indexing on for a storefront created from now on.
+    // SF-02/SF-03/SF-04: the look a NEW storefront starts with (the coded
+    // default with NEW_STOREFRONT_THEME on top, given at creation only), the
+    // name in the header, and indexing on for a storefront created from now on.
     const config = insertPayload.config as Record<string, unknown>;
-    expect(config.theme).toMatchObject(DEFAULT_STOREFRONT_CONFIG.theme);
+    expect(config.theme).toEqual(newStorefrontConfig().theme);
     expect((config.header as Record<string, unknown>).show).toBe(true);
     expect((config.header as Record<string, unknown>).name).toBe("Untitled storefront");
     expect((config.productPage as Record<string, unknown>).allowIndexing).toBe(true);
@@ -358,6 +359,75 @@ describe("saveStorefront - product block ownership check", () => {
     });
 
     expect(result).toMatchObject({ ok: true, droppedBlocks: 0 });
+  });
+});
+
+describe("saveStorefront - carousel ownership check", () => {
+  const CAROUSEL_ID = "c0000000-0000-4000-8000-000000000001";
+  const LONELY_ID = "c0000000-0000-4000-8000-000000000002";
+  const BUTTON_ID = "b0000000-0000-4000-8000-000000000001";
+  const carousel = (id: string, productIds: string[], y = 0) => ({ type: "carousel", id, productIds, x: 0, y, w: 6, h: 2 });
+
+  async function save(blocks: unknown[], owned: string[]) {
+    // First read: the ownership check, asked of every product the board shows.
+    dbFn.mockResolvedValueOnce({ data: owned.map((id) => ({ id })), error: null });
+    dbFn.mockResolvedValueOnce({ data: { config: VALID_CONFIG }, error: null });
+    dbFn.mockResolvedValueOnce({ data: { id: STOREFRONT_ID }, error: null });
+    const result = await saveStorefront(STOREFRONT_ID, { name: "My Store", config: { ...VALID_CONFIG, blocks } });
+    const saved = db.update.mock.calls[0]?.[0] as { config: { blocks: Record<string, unknown>[] } } | undefined;
+    return { result, blocks: saved?.config.blocks ?? [] };
+  }
+
+  it("asks about a carousel's products with the tiles', and keeps only the owner's", async () => {
+    // A team member saves the OWNER's store: the check is scoped to the
+    // active account, not to whoever is signed in.
+    getActiveAccountMock.mockResolvedValue({ ...ownerAccount(), userId: EDITOR_ID, role: "editor", isOwner: false });
+    const { result, blocks } = await save([carousel(CAROUSEL_ID, [UNOWNED_PRODUCT_ID, OWNED_PRODUCT_ID])], [OWNED_PRODUCT_ID]);
+    expect(result).toMatchObject({ ok: true, droppedBlocks: 0 });
+    const asked = db.in.mock.calls.find((call: unknown[]) => call[0] === "id")?.[1] as string[];
+    expect([...asked].sort()).toEqual([OWNED_PRODUCT_ID, UNOWNED_PRODUCT_ID].sort());
+    expect(db.eq).toHaveBeenCalledWith("owner_id", OWNER_ID);
+    expect(blocks).toEqual([carousel(CAROUSEL_ID, [OWNED_PRODUCT_ID])]);
+  });
+
+  it("drops a carousel whose products are all someone else's, and counts it", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    const { result, blocks } = await save(
+      [carousel(CAROUSEL_ID, [OWNED_PRODUCT_ID]), carousel(LONELY_ID, [UNOWNED_PRODUCT_ID], 2)],
+      [OWNED_PRODUCT_ID],
+    );
+    expect(result).toMatchObject({ ok: true, droppedBlocks: 1 });
+    expect(blocks.map((block) => block.id)).toEqual([CAROUSEL_ID]);
+  });
+
+  it("prunes a button that led to a product the save took out of a carousel", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    const { result, blocks } = await save(
+      [
+        carousel(CAROUSEL_ID, [OWNED_PRODUCT_ID, UNOWNED_PRODUCT_ID]),
+        { type: "button", id: BUTTON_ID, label: "Go", link: { kind: "product", productId: UNOWNED_PRODUCT_ID }, x: 0, y: 3, w: 2, h: 1 },
+      ],
+      [OWNED_PRODUCT_ID],
+    );
+    expect(result.ok).toBe(true);
+    expect(blocks.map((block) => block.type)).toEqual(["carousel"]);
+  });
+
+  it("refuses a carousel that names a product twice, before reading anything", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    const result = await saveStorefront(STOREFRONT_ID, {
+      name: "My Store",
+      config: { ...VALID_CONFIG, blocks: [carousel(CAROUSEL_ID, [OWNED_PRODUCT_ID, OWNED_PRODUCT_ID])] },
+    });
+    expect(result.ok).toBe(false);
+    expect(db.from).not.toHaveBeenCalled();
+  });
+
+  it("stores a board without a carousel exactly as before", async () => {
+    getActiveAccountMock.mockResolvedValue(ownerAccount());
+    const tiles = [{ type: "product", productId: OWNED_PRODUCT_ID, x: 0, y: 0, w: 1, h: 1 }];
+    const { blocks } = await save(tiles, [OWNED_PRODUCT_ID]);
+    expect(blocks).toEqual(tiles);
   });
 });
 

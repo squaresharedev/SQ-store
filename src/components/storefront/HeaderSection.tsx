@@ -18,6 +18,7 @@ import {
   quietIconLinkClass,
 } from "@/components/ui/control-styles";
 import { InfoTip } from "@/components/ui/InfoTip";
+import { HeaderLogoMenu } from "./HeaderLogoMenu";
 
 /**
  * Store header controls: a show toggle plus the plain text of the two lines
@@ -123,6 +124,8 @@ export function HeaderSection({
         {styleLink("bio")}
       </div>
 
+      {/* The logo and the menu, folded away until asked for. */}
+      <HeaderLogoMenu header={header} onChange={onChange} />
     </div>
   );
 }

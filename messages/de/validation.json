@@ -210,6 +210,11 @@
       "tooLong": "Alternativtext des Elements darf höchstens {maximum} Zeichen lang sein.",
       "unsupported": "Alternativtext des Elements enthält nicht unterstützte Zeichen."
     },
+    "linkLabel": {
+      "required": "Linktext ist erforderlich.",
+      "tooLong": "Linktext darf höchstens {maximum} Zeichen lang sein.",
+      "unsupported": "Linktext enthält nicht unterstützte Zeichen."
+    },
     "notificationTitle": {
       "required": "Benachrichtigungstitel ist erforderlich.",
       "tooLong": "Benachrichtigungstitel darf höchstens {maximum} Zeichen lang sein.",
@@ -564,7 +569,8 @@
     "spanRange": "Ein formatierter Bereich muss nach seinem Anfang enden.",
     "blocksTooMany": "Ein Schaufenster kann bis zu {maximum} Blöcke enthalten. Entferne einige Blöcke oder teile dieses Schaufenster in zwei.",
     "blocksDuplicate": "Rasterblöcke müssen eindeutig sein.",
-    "blockOutsideCanvas": "Ein Block liegt außerhalb der Arbeitsfläche."
+    "blockOutsideCanvas": "Ein Block liegt außerhalb der Arbeitsfläche.",
+    "linkTargetMissing": "Ein Link führt zu etwas, das nicht in diesem Schaufenster ist."
   },
   "discountCode": {
     "code": "Ein Code besteht aus {min} bis {max} Buchstaben oder Ziffern und kann auch - oder _ enthalten."

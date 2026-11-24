@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { presignGetUrl } from "@/lib/r2";
 import { RATE_LIMITS, rateLimit } from "@/lib/rate-limit";
+import { PHOTO_KEY_HEADER } from "@/lib/storefront/photo-edge";
 import { getActiveAccount } from "@/lib/team/account-context";
 import { can } from "@/lib/team/permissions";
 import { RASTER_IMAGE_TYPES } from "@/lib/uploads/sniff";
@@ -14,7 +15,11 @@ import { productIdSchema } from "@/lib/validation/product";
  * pixels are on another origin. The share cards cut the product out of its
  * photo in the browser (lib/share-card/cutout), and that needs the pixels.
  * Same origin needs no CORS rule on the bucket, and no rule is one that
- * cannot be missing in some environment.
+ * cannot be missing in some environment. The designer and the Products list
+ * read it too, to measure what is at a photo's edges (lib/storefront/
+ * photo-edge), so the answer names the photo it is (PHOTO_KEY_HEADER, its
+ * storage key, which this member's own signed URLs already carry): a
+ * measurement is then stored against that photo and no later one.
  *
  * THE CHECKS: a signed-in member of the ACTIVE store with `store.read`, and a
  * product of that store (the store id comes from the session, never the
@@ -66,6 +71,7 @@ export async function GET(
       "Content-Type": type,
       "Cache-Control": `private, max-age=${PHOTO_MAX_AGE_SECONDS}`,
       "X-Content-Type-Options": "nosniff",
+      [PHOTO_KEY_HEADER]: data.image_key,
     },
   });
 }

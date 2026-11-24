@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useMemo, useRef, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, type CSSProperties, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import type { SellerShippingPolicy } from "@/types/shipping-policy";
 import { ShoppingBag } from "lucide-react";
@@ -8,11 +8,12 @@ import type { Product } from "@/types/product";
 import type { PagePhotoView } from "@/types/product-page";
 import { pagePhotoView } from "@/lib/storefront/product-page";
 import { resolveTileLook } from "@/lib/storefront/tile-look";
-import { CART_SWITCHED_OFF } from "@/lib/storefront/cart-page";
+import { CART_SWITCHED_OFF, cartSwitchedOn } from "@/lib/storefront/cart-page";
 import {
   CANVAS_ROWS_MAX,
+  blockFine,
   blockKey,
-  isFreelyArranged,
+  boardProductIds,
   layerOrder,
   tileCovers,
   type HeaderLine,
@@ -21,6 +22,7 @@ import {
   type CartPageConfig,
   type CheckoutPageConfig,
   type ProductPageConfig,
+  type StorefrontBand,
   type StorefrontBlock,
   type StorefrontHeader,
   type StorefrontSeller,
@@ -42,14 +44,22 @@ import {
   customFontVars,
   fontPresentation,
 } from "@/lib/theme/storefront-fonts";
+import { pairingFontPresentation } from "@/lib/theme/font-pairing-presentation";
+import { paletteInkStyle } from "@/lib/storefront/palette";
 import { Grid } from "@/components/grid/Grid";
 import { phoneGridLayout } from "./phone-grid";
 import {
   FRAME_Z,
   OVERLAY_Z,
   type GridBlock,
+  type GridInset,
   type GridPlacement,
 } from "@/components/grid/gridConstants";
+import { DESIGNER_BAND_BLEED, blockBackdrop } from "@/lib/storefront/bands";
+import { isFreelyArrangedAsDrawn, takesFine } from "@/lib/storefront/layout-blocks";
+import { headerHasMenu } from "@/lib/storefront/links";
+import { BandChrome } from "./BandChrome";
+import { bandUnderlays, followUnderlays } from "./band-underlays";
 import {
   InlineTextEditor,
   type InlineFormatKey,
@@ -63,17 +73,20 @@ import {
 } from "@/lib/storefront/text-selection";
 import { EditorSlotsContext } from "./editor-slots";
 import { BlockTile } from "./BlockTile";
+import type { CarouselCards } from "./CarouselTileContent";
+import { keepsRowsWhenNarrow } from "@/lib/storefront/carousel";
 import type { SpotDrop, SpotToken } from "./TileSpotDragLayer";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { SuggestedTile } from "./SuggestedTile";
-import { resolveBackgroundStyle } from "./background-presets";
+import { boardBackgroundStyle } from "./background-presets";
 import {
   blockTileClipStyle,
   gridGapStyle,
   scaledCornerRadius,
   tileClipStyle,
 } from "./config-maps";
+import { blockWords } from "./block-label";
 import { jumpToElement, type CanvasViewport } from "./useCanvasViewport";
 import { CanvasCameraProvider, type CanvasCamera } from "@/lib/storefront/canvas-camera";
 import { iconPopClass, primaryButtonClass } from "@/components/ui/control-styles";
@@ -229,7 +242,22 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   celebrationPlays = 0,
   shippingPolicy = {},
   seller = {},
+  bands,
+  selectedBandId = null,
+  onSelectBand,
+  onMoveBand,
+  onPlaceBlock,
 }: {
+  /** Full-width bands behind the board's rows (config.bands). */
+  bands?: readonly StorefrontBand[];
+  /** The band open in the inspector, if any. */
+  selectedBandId?: string | null;
+  onSelectBand?: (id: string) => void;
+  /** A band dragged by its rows on the canvas, or stretched. */
+  onMoveBand?: (id: string, at: { y: number; h: number }) => void;
+  /** Where a half-step gesture left a block: whole cells plus half-cell
+   *  insets (FinePlacement). Absent = every block moves in whole cells. */
+  onPlaceBlock?: (key: string, placement: GridPlacement, inset: GridInset | undefined) => void;
   blocks: StorefrontBlock[];
   productsById: Map<string, Product>;
   theme: StorefrontTheme;
@@ -368,11 +396,18 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   seller?: StorefrontSeller;
 }) {
   const t = useTranslations("Storefront");
+  const tButton = useTranslations("EditorLayout.panel.button");
   const productFor = useCallback(
     (block: StorefrontBlock): Product | null =>
       block.type === "product"
         ? (productsById.get(block.productId) ?? null)
         : null,
+    [productsById],
+  );
+  // A carousel's cards, from the seller's own catalogue (drafts included, as
+  // a product block's are). One object for the board, so tiles stay memoised.
+  const carouselCards = useMemo<CarouselCards>(
+    () => ({ product: (productId) => productsById.get(productId) ?? null }),
     [productsById],
   );
 
@@ -704,6 +739,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
         // the grid's placement rules never see either of them.
         rotation: block.rotation,
         z: depths.get(key),
+        // Half cells: drawn inset, and small text, shapes and buttons drag in
+        // half steps (product cards stay on the main grid).
+        ...(blockFine(block) ? { inset: blockFine(block) } : {}),
+        ...(takesFine(block) ? { halfSteps: true } : {}),
+        // A carousel keeps its height on a phone (keepsRowsWhenNarrow).
+        ...(keepsRowsWhenNarrow(block) ? { keepRows: true } : {}),
         data: block,
       };
     });
@@ -724,7 +765,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // Whether this board is arranged in a way a straight line cannot express.
   // Cheap enough to run per render on a 120-block board, and it has to follow
   // the blocks, since one drag onto a neighbour is what changes the answer.
-  const freelyArranged = useMemo(() => isFreelyArranged(blocks), [blocks]);
+  const freelyArranged = useMemo(() => isFreelyArrangedAsDrawn(blocks), [blocks]);
   // The board's own phone layout, when it has one: the phone preview shows
   // what a buyer's phone draws (StorefrontBoard), not the automatic reflow.
   const phone = useMemo(() => phoneGridLayout(theme, blocks), [theme, blocks]);
@@ -741,6 +782,19 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // One spare row underneath gives a block somewhere lower to go.
   const phoneBoard =
     !isDesign && phone ? { ...phone, rows: Math.min(CANVAS_ROWS_MAX, phone.rows + 1) } : null;
+  // The full-width bands: following their blocks on the phone board, and with
+  // a rail beside the frame on the design board to select and move them.
+  const bandLayer = bandUnderlays(bands, blocks, {
+    imageUrl: (band) => (band.background.kind === "image" ? pagePhotoUrls?.[band.background.key] : null),
+    anchor: false,
+    chrome:
+      isDesign && onSelectBand && onMoveBand
+        ? (band) => (
+            <BandChrome band={band} selected={band.id === selectedBandId} onSelect={onSelectBand} onMove={onMoveBand} />
+          )
+        : undefined,
+  });
+  const underlays = phoneBoard ? followUnderlays(bandLayer, phoneBoard.blocks) : bandLayer;
   // The first cell of an empty design board. The phone preview reflows, so it
   // has no honest cell to offer and keeps the empty state.
   const suggestion =
@@ -771,7 +825,7 @@ export const DesignerCanvas = memo(function DesignerCanvas({
   // The canvas font. An uploaded face is declared here as a custom property
   // and applied through it, so text blocks that opt into the same face inherit
   // it without every tile having to be handed a font URL.
-  const canvasFont = fontPresentation(theme.font);
+  const canvasFont = pairingFontPresentation(theme) ?? fontPresentation(theme.font);
 
   // THE PAGES THE SELLER HAS OUT, as artboards beside the board — in design
   // view AND in mobile preview, the same way. A page whose product has left
@@ -782,13 +836,11 @@ export const DesignerCanvas = memo(function DesignerCanvas({
     [productPage, openPages, productsById],
   );
 
-  // What a page's sample cart is made of: the board's products, each once, in
-  // board order. Keyed by that list rather than by the blocks, so moving a
-  // tile does not hand the open cart a new sample (and forget its steps).
-  const boardProductKey = blocks
-    .flatMap((block) => (block.type === "product" ? [block.productId] : []))
-    .filter((id, index, ids) => ids.indexOf(id) === index)
-    .join(",");
+  // What a page's sample cart is made of: the board's products (its tiles and
+  // its carousels' members), each once, in reading order. Keyed by that list
+  // rather than by the blocks, so moving a tile does not hand the open cart a
+  // new sample (and forget its steps).
+  const boardProductKey = boardProductIds(blocks).join(",");
   const boardProducts = useMemo(
     () =>
       boardProductKey
@@ -948,10 +1000,13 @@ export const DesignerCanvas = memo(function DesignerCanvas({
       // a bounded integer. gridGapStyle sets the --grid-gap token the
       // .ss-grid rule inherits.
       style={{
-        ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
+        ...boardBackgroundStyle(theme, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
         ...customFontVars(theme.customFont, customFontUrl),
+        ...paletteInkStyle(theme),
         ...canvasFont.style,
+        // A band runs across this frame's padding to its edges.
+        ...(bands?.length ? ({ "--sf-band-bleed": DESIGNER_BAND_BLEED } as CSSProperties) : {}),
       }}
     >
       {/* Registers the uploaded face with the document. Renders nothing, and
@@ -980,6 +1035,12 @@ export const DesignerCanvas = memo(function DesignerCanvas({
           onLineTextChange={changeHeaderText}
           onToggleLineFormat={toggleHeaderFormat}
           onEditDone={endHeaderEdit}
+          // The logo and the menu as buyers see them (words only: nothing on
+          // the canvas navigates), and the cart icon where the cart is on.
+          logoUrl={header.logo ? pagePhotoUrls?.[header.logo.key] : null}
+          nav={header.links?.map((entry) => ({ label: entry.label }))}
+          cart={headerHasMenu(header) && cartPage && cartSwitchedOn({ cartPage }) ? <ShoppingBag className="size-5" strokeWidth={1.75} aria-hidden="true" /> : undefined}
+          foldNav={false}
         />
 
         {blocks.length === 0 && !suggestion ? (
@@ -1033,6 +1094,10 @@ export const DesignerCanvas = memo(function DesignerCanvas({
             // The phone arrangement is already phone-sized.
             responsive={!phoneBoard && !freelyArranged}
             narrowLayout={phoneBoard ? null : phone}
+            underlays={underlays}
+            // Half-step gestures land here, on the design board only: the
+            // phone board's rects are its own, and insets are the block's.
+            onPlace={phoneBoard ? undefined : onPlaceBlock}
             // Corner roundness drives the cell clip (style beats the grid's
             // default rounded-sm class); tiles inherit it, no clip of their
             // own. Scaled per tile size so big tiles round like small ones.
@@ -1068,11 +1133,13 @@ export const DesignerCanvas = memo(function DesignerCanvas({
               const product = productFor(block);
               if (block.type === "product") return product?.title ?? t("blockTile.removedProduct");
               if (block.type === "shape") return t("blockTile.shape", { kind: block.kind });
+              if (block.type === "button") return tButton("tileLabel", { label: block.label.slice(0, 30) });
               if (block.type === "image") {
                 const alt = block.alt.trim();
                 return alt ? t("blockTile.imageWithAlt", { alt: alt.slice(0, 30) }) : t("blockTile.imageElement");
               }
-              const text = block.text.trim();
+              const text = blockWords(block);
+              if (block.type !== "text") return text.slice(0, 30) || t(`blockKinds.${block.type}`);
               return text ? t("blockTile.textWithContent", { text: text.slice(0, 30) }) : t("blockTile.textBlock");
             }}
             onMove={
@@ -1121,6 +1188,8 @@ export const DesignerCanvas = memo(function DesignerCanvas({
                 onTypeEnd={endTyping}
                 onSpotChange={changeSpot}
                 onOpenSpotSetting={openSpotSetting}
+                backdrop={blockBackdrop(theme, bands, gridBlock.data, state.underlayKey)}
+                carouselCards={carouselCards}
               />
             )}
           />

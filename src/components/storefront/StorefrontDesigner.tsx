@@ -23,6 +23,7 @@ import {
   HEADER_BASE_PX,
   blockFootprint,
   blockKey,
+  boardProductIds,
   headerStyleValue,
   mergeCardStyleOverrides,
   readingOrder,
@@ -48,6 +49,7 @@ import {
   type CartPageConfig,
   type CheckoutPageConfig,
   type StorefrontSeller,
+  type StorefrontBand,
 } from "@/types/storefront";
 import { LAYER_OPS, moveLayerTo, type LayerOp } from "@/lib/storefront/layers";
 import { pinOnPhone, unpinnedOnPhone, withPhoneColumns } from "@/lib/storefront/mobile-layout";
@@ -98,6 +100,8 @@ import {
   type ColorTargetRef,
 } from "@/lib/theme/color-target";
 import { collectStorefrontColors } from "@/lib/theme/palette";
+import { recolourPaletteIn } from "@/lib/storefront/palette";
+import { paletteContext } from "@/lib/theme/palette-swatches";
 import { ColorPanel, type PanelTypography } from "./ColorPanel";
 import type {
   InlineFormatKey,
@@ -158,8 +162,19 @@ import { LayersPanel } from "./LayersPanel";
 import { ProductPicker } from "./ProductPicker";
 import { ProductBlockEditor } from "./ProductBlockEditor";
 import { ShapeBlockEditor, type ShapeBlockPatch } from "./ShapeBlockEditor";
+import { derivePalette } from "@/lib/storefront/palette";
+import { newMarqueeBlock } from "@/lib/storefront/marquee";
+import { keepProducts } from "@/lib/storefront/carousel";
+import { MarqueeBlockEditor, type MarqueeBlockPatch } from "./MarqueeBlockEditor";
+import { MarqueeLibraryEntry } from "./MarqueeLibraryEntry";
 import { TextBlockEditor, type TextBlockPatch } from "./TextBlockEditor";
 import { useCanvasViewport } from "./useCanvasViewport";
+import { useLayoutEditing } from "./useLayoutEditing";
+import { LayoutInspector } from "./LayoutInspector";
+import { LayoutEditorProvider } from "./layout-editor-context";
+import type { LinkableStorefront } from "./ButtonBlockEditor";
+import { bandsForSave } from "@/lib/storefront/bands";
+import { headerForSave } from "@/lib/storefront/layout-blocks";
 import {
   CANVAS_PANEL_ATTR,
   useCanvasAnchor,
@@ -171,7 +186,10 @@ import { useUnsavedChangesGuard } from "@/lib/hooks/useUnsavedChangesGuard";
 import { useStoredFlag } from "@/lib/hooks/useStoredFlag";
 import { useIsTouch } from "@/lib/hooks/useIsTouch";
 import { SearchProvider, useSearch } from "@/components/search/SearchProvider";
-import type { TeamRole } from "@/lib/team/permissions";
+import { can, type TeamRole } from "@/lib/team/permissions";
+import { usePhotoEdgeBackfill } from "@/components/products/usePhotoEdgeBackfill";
+import { productsNeedingPhotoEdge, withPhotoEdge } from "@/lib/storefront/photo-edge";
+import { cardLookColorPatch, isCardLookColorKind, themeWithCardLookColor } from "@/lib/storefront/card-look-fields";
 
 /** What the left inspector column shows: the product picker, or the editor
  *  card for the selected block(s). One key = that block's own editor; several
@@ -187,6 +205,8 @@ type EditorSnapshot = {
   productPage: ProductPageConfig;
   checkoutPage: CheckoutPageConfig;
   cartPage: CartPageConfig;
+  /** Full-width bands (config.bands): beside the blocks, not among them. */
+  bands: StorefrontBand[];
   // NO `policies` OR `shippingProfiles` HERE either, for the same reason as
   // `seller`: shipping and returns terms are account-level and read-only in
   // this editor, so there is nothing about them to undo.
@@ -397,7 +417,11 @@ export function StorefrontDesigner({
   sellerDetailsMissing = false,
   initialVersion = null,
   cartOffered = false,
+  linkStorefronts,
 }: {
+  /** This store's storefronts, for a button that leads to another one.
+   *  Absent = this storefront alone. */
+  linkStorefronts?: LinkableStorefront[];
   /** Whether buyers can have a cart at all yet (lib/cart/availability.ts
    *  cartLaunched). Until then the designer shows none of it: no Cart group,
    *  no cart buttons on the page artboards, cards that open the page. Absent
@@ -474,6 +498,7 @@ export function StorefrontDesigner({
   initialVersion?: string | null;
 }) {
   const t = useTranslations("Storefront.designer");
+  const tStrip = useTranslations("EditorFinish.panel.marquee");
   const locale = useLocale();
   const tCommon = useTranslations("Common.actions");
   const tKey = useTranslations();
@@ -543,6 +568,8 @@ export function StorefrontDesigner({
   );
   // The cart's design, the same way.
   const [cartPage, setCartPage] = useState<CartPageConfig>(() => resolveCartPage(initialConfig));
+  // Full-width bands: undoable and saved like the blocks they sit behind.
+  const [bands, setBands] = useState<StorefrontBand[]>(initialConfig.bands ?? []);
   // Bumped by the panel's "Play it" to replay the thank-you celebration.
   const [celebrationPlays, setCelebrationPlays] = useState(0);
   const [saving, setSaving] = useState(false);
@@ -671,13 +698,23 @@ export function StorefrontDesigner({
     () => new Map(catalog.map((product) => [product.id, product])),
     [catalog],
   );
+  // Photo cards: a card whose look depends on what is at its photo's edges
+  // gets that photo measured, where no answer is stored yet, and the answer
+  // is stored with the PRODUCT (lib/storefront/photo-edge). It lands on the
+  // catalogue, never on the board: measuring marks nothing unsaved.
+  const photoEdgeProducts = useMemo(
+    () => productsNeedingPhotoEdge(theme, blocks, productsById),
+    [theme, blocks, productsById],
+  );
+  usePhotoEdgeBackfill({
+    products: photoEdgeProducts,
+    record: !isSample && can(role, "products.write"),
+    onMeasured: (productId, edge) => setCatalog((current) => withPhotoEdge(current, productId, edge)),
+  });
   // Whether a sale chip shows anywhere on the board: without one, the theme's
   // sale badge controls offer to start a sale instead (SaleBadgeControls).
   const saleOnBoard = useMemo(
-    () =>
-      blocks.some(
-        (block) => block.type === "product" && productsById.get(block.productId)?.sale !== undefined,
-      ),
+    () => boardProductIds(blocks).some((productId) => productsById.get(productId)?.sale !== undefined),
     [blocks, productsById],
   );
 
@@ -722,6 +759,19 @@ export function StorefrontDesigner({
   );
   /** The single selection, when exactly one block is selected. */
   const selectedBlock = selectedBlocks.length === 1 ? selectedBlocks[0] : null;
+  // Bands, half-cell placement and buttons (the layout workstream's edits).
+  const layout = useLayoutEditing({
+    theme, blocks, header, bands, setBands, setBlocks, recordChange, storefrontId, productsById,
+    storefronts: linkStorefronts, storefrontName: name, photoUrls: pagePhotoUrls,
+    onPhotoUrl: (key, url) => setPagePhotoUrls((current) => ({ ...current, [key]: url })),
+    blocksSelected: inspector !== null,
+    clearBlockSelection: () => setInspector(null),
+    insertBlock: (build, w, h) => insertBlock(build, w, h, takeInsertHint()),
+    selectInserted: (block) => selectBlock(blockKey(block), false, block),
+    onNoRoomForBand: () => toast.info(tKey("EditorLayout.panel.insert.noRoom")),
+    onNoProductsForCarousel: () => toast.info(tKey("EditorLayout.panel.insert.noProducts")),
+    newButtonLabel: tKey("EditorLayout.panel.button.defaultLabel"),
+  });
 
   // Which product a "show me the page" request means when it does not name
   // one: the selected tile, else the first product on the board. Null when the
@@ -729,21 +779,14 @@ export function StorefrontDesigner({
   const defaultPageProductId = useMemo<string | null>(() => {
     const selected = selectedBlocks.find((block) => block.type === "product");
     if (selected?.type === "product") return selected.productId;
-    const first = readingOrder(blocks).find(
-      (block) => block.type === "product" && productsById.has(block.productId),
-    );
-    return first?.type === "product" ? first.productId : null;
+    // A tile or a carousel's member: each has a page here.
+    return boardProductIds(blocks).find((productId) => productsById.has(productId)) ?? null;
   }, [selectedBlocks, blocks, productsById]);
 
   // How many of the board's products a card puts straight in the cart: the
   // Cart settings' guess about which button should lead (lib/predictions.ts).
   const cartAddable = useMemo(
-    () =>
-      new Set(
-        blocks.flatMap((block) =>
-          block.type === "product" && productsById.get(block.productId)?.quickAdd ? [block.productId] : [],
-        ),
-      ).size,
+    () => boardProductIds(blocks).filter((productId) => productsById.get(productId)?.quickAdd).length,
     [blocks, productsById],
   );
 
@@ -912,6 +955,7 @@ export function StorefrontDesigner({
     productPage,
     checkoutPage,
     cartPage,
+    bands,
   });
 
   /** Every undoable mutation calls this FIRST with an optional coalesce key. */
@@ -927,6 +971,7 @@ export function StorefrontDesigner({
     setProductPage(next.productPage);
     setCheckoutPage(next.checkoutPage);
     setCartPage(next.cartPage);
+    setBands(next.bands);
     markDirty();
   }
 
@@ -2346,6 +2391,18 @@ export function StorefrontDesigner({
     if (block) selectBlock(blockKey(block), false, block);
   }
 
+  /** A scrolling text strip, the board's full width (lib/storefront/marquee). */
+  function addMarqueeBlock(text: string) {
+    const block = insertBlock((placement) => newMarqueeBlock(placement, text), theme.columns, 1, takeInsertHint());
+    if (block) selectBlock(blockKey(block), false, block);
+  }
+
+  /** A strip's own fields, as its inspector changes them. */
+  function updateMarqueeBlock(key: string, patch: MarqueeBlockPatch) {
+    recordChange(`marquee:${key}`);
+    setBlocks((current) => current.map((b) => (b.type === "marquee" && blockKey(b) === key ? { ...b, ...patch } : b)));
+  }
+
   /**
    * Upload the seller's own artwork and drop it on the canvas.
    *
@@ -2444,7 +2501,8 @@ export function StorefrontDesigner({
     if (keys.length === 0) return;
     const gone = new Set(keys);
     recordChange();
-    setBlocks((current) => current.filter((b) => !gone.has(blockKey(b))));
+    // A button whose product went with them goes too (layout.withoutDeadLinks).
+    setBlocks((current) => layout.withoutDeadLinks(current.filter((b) => !gone.has(blockKey(b))), bands));
     setInspector((current) => {
       if (current?.kind !== "blocks") return current;
       const left = current.keys.filter((k) => !gone.has(k));
@@ -3269,14 +3327,8 @@ export function StorefrontDesigner({
    * history and flips the dirty flag exactly like one set from a swatch.
    */
   function applyColorTarget(ref: ColorTargetRef, hex: string) {
+    if (isCardLookColorKind(ref.kind)) return setCardLookColor(ref, hex);
     switch (ref.kind) {
-      case "theme-accent":
-        updateTheme({ ...theme, accent: hex });
-        return;
-      case "theme-background-solid":
-        if (theme.background.kind !== "solid") return;
-        updateTheme({ ...theme, background: { kind: "solid", color: hex } });
-        return;
       case "theme-background-from":
         if (theme.background.kind !== "gradient") return;
         updateTheme({ ...theme, background: { ...theme.background, from: hex } });
@@ -3295,7 +3347,8 @@ export function StorefrontDesigner({
       // picked with six shapes selected paints six shapes, in one undo step
       // (see updateShapeBlocks and shapeColorKeys).
       case "shape-fill":
-        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex });
+        // A colour is a solid fill: it takes a gradient off (shape-fill.ts).
+        updateShapeBlocks(shapeColorKeys(ref.blockKey), { color: hex, gradient: undefined });
         return;
       case "shape-border":
         updateShapeBlocks(shapeColorKeys(ref.blockKey), { borderColor: hex });
@@ -3309,7 +3362,20 @@ export function StorefrontDesigner({
       case "title-shadow":
         setTitleShadowColor(ref, hex);
         return;
+      // A palette colour recolours the whole design, in one undo step.
+      case "palette":
+        recordChange(`palette:${ref.slot}`);
+        applySnapshot(recolourPaletteIn(snapshot(), ref.slot, hex));
+        return;
     }
+  }
+
+  /** Write (or clear) one of the card look's colours (card-look-fields), on
+   *  a tile's override or the theme, exactly as setPriceTagColor does. */
+  function setCardLookColor(ref: ColorTargetRef, hex: string | undefined) {
+    if (!isCardLookColorKind(ref.kind)) return;
+    if ("blockKey" in ref && ref.blockKey) updateProductBlocksStyle([ref.blockKey], cardLookColorPatch(ref.kind, hex));
+    else updateTheme(themeWithCardLookColor(theme, ref.kind, hex));
   }
 
   /** Write (or clear) the `shadow` title area's tint, on a tile's override
@@ -3408,6 +3474,7 @@ export function StorefrontDesigner({
    *  The header's two lines DROP their key rather than storing `undefined`, so
    *  a header the seller never colored stays identical to a legacy one. */
   function clearColorTarget(ref: ColorTargetRef) {
+    if (isCardLookColorKind(ref.kind)) return setCardLookColor(ref, undefined);
     if (ref.kind === "text-color") {
       setTextColor(ref.blockKey, undefined);
       return;
@@ -3477,10 +3544,11 @@ export function StorefrontDesigner({
     // opened in an effect, so the panel is already on the right group when the
     // editor first paints.
     // (A block's own setting has no panel to seed: it is answered below, once
-    // there is a board to pick its block from.)
+    // there is a board to pick its block from. Nor has the drawer that adds a
+    // block: that opens the same way.)
     () => {
       const ref = settingById(initialSetting ?? "")?.ref;
-      return ref && ref.kind !== "block" ? ref : null;
+      return ref && ref.kind !== "block" && ref.kind !== "library" ? ref : null;
     },
   );
   useEffect(() => {
@@ -3519,8 +3587,8 @@ export function StorefrontDesigner({
   // first render has.
   useEffect(() => {
     const ref = settingById(initialSetting ?? "")?.ref;
-    if (ref?.kind !== "block") return;
-    const timer = setTimeout(() => openBlockSetting(ref), 0);
+    if (ref?.kind !== "block" && ref?.kind !== "library") return;
+    const timer = setTimeout(() => openSetting(ref), 0);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- answered once, for the arrival only
   }, []);
@@ -3528,6 +3596,13 @@ export function StorefrontDesigner({
   function openSetting(ref: SettingRef) {
     if (ref.kind === "block") {
       openBlockSetting(ref);
+      return;
+    }
+    // The drawer that ADDS a band, a button or scrolling text: the same call
+    // the toolbar's "all shapes" makes.
+    if (ref.kind === "library") {
+      setLeftPanel({ kind: "library", tab: ref.tab });
+      setSettingsOpen(false);
       return;
     }
     // THE CART is designed while looking at it, full: a product page out with
@@ -3834,7 +3909,7 @@ export function StorefrontDesigner({
       theme,
       // Blocks carry their own coordinates, so array order is irrelevant.
       blocks,
-      header,
+      header: headerForSave(header, blocks, bands),
       // Embed settings are edited in the list-page modal, not here — pass the
       // loaded value through so a designer save never wipes them.
       ...(initialConfig.embed ? { embed: initialConfig.embed } : {}),
@@ -3849,17 +3924,18 @@ export function StorefrontDesigner({
       // The cart's design: sent once it was ever stored or moved off the
       // defaults (every member optional, so the defaults are an empty one).
       ...(initialConfig.cartPage || !isDefaultCartPage(cartPage) ? { cartPage } : {}),
+      // Bands, held to the board's rows; nothing at all when there are none.
+      ...bandsForSave(bands, theme.rows),
     };
     // SF-01: Warn when any block in the grid points at a draft product.
     // Draft products are hidden from buyers, so a grid tile that points at one
     // would lead buyers to a dead link. The save still succeeds (the seller
     // may be about to publish the product), but they hear about it.
-    const draftBlockTitles = blocks
-      .flatMap((b) => {
-        if (b.type !== "product") return [];
-        const p = productsById.get(b.productId);
-        return p?.status === "draft" ? [p.title] : [];
-      });
+    // A carousel's members count: a draft in one is left out for buyers.
+    const draftBlockTitles = boardProductIds(blocks).flatMap((productId) => {
+      const p = productsById.get(productId);
+      return p?.status === "draft" ? [p.title] : [];
+    });
 
     const result = await saveStorefront(
       storefrontId,
@@ -3879,12 +3955,9 @@ export function StorefrontDesigner({
     if (result.version) savedVersion.current = result.version;
     setSavedElsewhere(false);
     if (result.droppedBlocks > 0) {
-      // Server dropped refs to deleted products; mirror that locally.
-      setBlocks((current) =>
-        current.filter(
-          (b) => b.type !== "product" || productsById.has(b.productId),
-        ),
-      );
+      // Server dropped refs to deleted products; mirror that locally, a
+      // carousel's members included (keepProducts).
+      setBlocks((current) => keepProducts(current, (productId) => productsById.has(productId)));
     }
     // Only clear the flag when no edit arrived while the save was in flight.
     // If the counter moved, the seller made a change after we started; keeping
@@ -3973,16 +4046,29 @@ export function StorefrontDesigner({
               : "text";
   // The title and the close button's label are separate messages rather than
   // one spliced into the other, so each language can inflect them its own way.
+  // A scrolling strip is named from its own catalogue (EditorFinish).
+  const stripSelected = selectedBlocks.length === 1 && selectedBlock?.type === "marquee";
+  const layoutTitle = layout.inspectorTitle(selectedBlock);
+  // A selected band's panel, or a selected button's (null for anything else).
+  const layoutInspector = (
+    <LayoutInspector
+      layout={layout} button={selectedBlock?.type === "button" ? selectedBlock : null}
+      carousel={selectedBlock?.type === "carousel" ? selectedBlock : null}
+      theme={theme} blocks={blocks} header={header} onDuplicate={duplicateBlocks} onRemove={removeBlock}
+    />
+  );
   const inspectorTitle =
+    layoutTitle ? layoutTitle.title :
     inspectorKind === "blocks"
       ? t("inspector.title.blocks", { count: selectedBlocks.length })
-      : t(`inspector.title.${inspectorKind}`);
+      : stripSelected ? tStrip("inspectorTitle") : t(`inspector.title.${inspectorKind}`);
   const inspectorCloseLabel =
+    layoutTitle ? layoutTitle.close :
     inspectorKind === "blocks"
       ? t("inspector.close.blocks", { count: selectedBlocks.length })
-      : t(`inspector.close.${inspectorKind}`);
+      : stripSelected ? tStrip("inspectorClose") : t(`inspector.close.${inspectorKind}`);
   const showInspector =
-    inspector?.kind === "picker" || selectedBlocks.length > 0;
+    inspector?.kind === "picker" || selectedBlocks.length > 0 || layout.selectedBand !== null;
 
   // WHICH PANEL HAS THE PHONE'S ONE BOTTOM SLOT (null on lg+, where they are
   // columns and share nothing). Everything that has to agree about the sheets
@@ -4024,12 +4110,14 @@ export function StorefrontDesigner({
     // ColorPanel. Only the OPENER travels through context; the panel's data
     // comes down as props from here.
     <SampleModeProvider value={isSample}>
+    <LayoutEditorProvider value={layout.editor}>
     <AutoFitRegistryProvider value={autoFitRegistry}>
     <ColorTargetProvider
       value={{
         activeRef: activeColorTarget,
         open: openColorTarget,
         close: () => setColorTarget(null),
+        ...paletteContext(theme),
       }}
     >
     <SettingTargetProvider
@@ -4352,7 +4440,11 @@ export function StorefrontDesigner({
                   onUpload={addImageBlock}
                   onPlaceUpload={placeUpload}
                   onAddShape={addShapeBlock}
+                  onAddBand={layout.addBand}
+                  onAddButton={layout.addButton}
+                  onAddCarousel={layout.addCarousel}
                   onClose={() => setLeftPanel(null)}
+                  moreBlocks={<MarqueeLibraryEntry onAdd={addMarqueeBlock} disabled={blocks.length >= MAX_BLOCKS} />}
                 />
               )}
               </div>
@@ -4480,6 +4572,11 @@ export function StorefrontDesigner({
             celebrationPlays={celebrationPlays}
             shippingPolicy={shippingPolicy}
             seller={sellerIdentity}
+            bands={bands}
+            selectedBandId={layout.selectedBand?.id ?? null}
+            onSelectBand={layout.selectBand}
+            onMoveBand={layout.moveBand}
+            onPlaceBlock={layout.placeBlock}
           />
 
           {/* The selected block's tools, floating over the top of the canvas
@@ -4545,7 +4642,7 @@ export function StorefrontDesigner({
           showInspector={showInspector}
           inspectorTitle={inspectorTitle}
           inspectorCloseLabel={inspectorCloseLabel}
-          onCloseInspector={() => setInspector(null)}
+          onCloseInspector={() => { setInspector(null); layout.selectBand(null); }}
           // On mobile every panel is the SAME bottom slot, and selecting a
           // shape opens both this and the color sheet — which would stack one
           // on top of the other. The color sheet wins while it is open;
@@ -4636,7 +4733,7 @@ export function StorefrontDesigner({
                       />
                     </div>
                   )}
-                  {inspector?.kind === "picker" ? (
+                  {layout.selectedBand ? layoutInspector : inspector?.kind === "picker" ? (
                     <ProductPicker
                       products={catalog}
                       usedProductIds={usedProductIds}
@@ -4716,6 +4813,7 @@ export function StorefrontDesigner({
                     <ShapeBlockEditor
                       block={selectedBlock}
                       summons={blockField}
+                      palette={derivePalette(theme)}
                       onUpdate={(patch) =>
                         updateShapeBlocks([blockKey(selectedBlock)], patch)
                       }
@@ -4728,6 +4826,7 @@ export function StorefrontDesigner({
                     <TextBlockEditor
                       block={selectedBlock}
                       accent={theme.accent}
+                      textStyles={theme.textStyles}
                       hasCustomFont={theme.customFont !== undefined}
                       summons={blockField}
                       onUpdate={(patch) =>
@@ -4771,7 +4870,15 @@ export function StorefrontDesigner({
                       }
                       onRemove={() => removeBlock(blockKey(selectedBlock))}
                     />
-                  ) : null}
+                  ) : selectedBlock?.type === "marquee" ? (
+                    <MarqueeBlockEditor
+                      block={selectedBlock}
+                      theme={theme}
+                      onUpdate={(patch) => updateMarqueeBlock(blockKey(selectedBlock), patch)}
+                      onDuplicate={() => duplicateBlocks([blockKey(selectedBlock)])}
+                      onRemove={() => removeBlock(blockKey(selectedBlock))}
+                    />
+                  ) : selectedBlock?.type === "button" || selectedBlock?.type === "carousel" ? layoutInspector : null}
             </>
           }
         />
@@ -4847,6 +4954,7 @@ export function StorefrontDesigner({
     </SettingTargetProvider>
     </ColorTargetProvider>
     </AutoFitRegistryProvider>
+    </LayoutEditorProvider>
     </SampleModeProvider>
   );
 }

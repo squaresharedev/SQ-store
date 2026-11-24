@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { resolveBackgroundStyle } from "@/components/storefront/background-presets";
 import { CustomFontFace } from "@/components/storefront/CustomFontFace";
 import { customFontVars, fontPresentation } from "@/lib/theme/storefront-fonts";
+import { pairingFontPresentation } from "@/lib/theme/font-pairing-presentation";
 import type { PagePhotoView, ProductPageStorefront } from "@/types/product-page";
 import type { StorefrontFont } from "@/types/storefront";
 import { pagePhotoStyle, ruleColor } from "./product-page-maps";
@@ -71,7 +72,8 @@ export function PageShell({
   children: ReactNode;
 }) {
   const { theme } = storefront;
-  const presentation = fontPresentation(font ?? theme.font);
+  // A page that follows the storefront's font follows its pairing too.
+  const presentation = (font ? undefined : pairingFontPresentation(theme)) ?? fontPresentation(font ?? theme.font);
   const storeName =
     storefront.header?.show && storefront.header.name ? storefront.header.name : storefront.name;
 

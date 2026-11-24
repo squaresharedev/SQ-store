@@ -1,0 +1,82 @@
+{
+  "panel": {
+    "palette": {
+      "title": "Paleta",
+      "hint": "Zmeňte tu farbu a zmení sa s ňou všetko, čo je v nej zafarbené.",
+      "group": "Farby palety",
+      "allColors": "Všetky farby",
+      "photoName": "Pozadie (vaša fotka)",
+      "photoHint": "Pozadím je vaša fotka. Výber farby ju nahradí. Krok späť ju vráti.",
+      "slots": {
+        "background": {
+          "name": "Pozadie",
+          "label": "Pozadie z palety ({value})"
+        },
+        "text": {
+          "name": "Text",
+          "label": "Text z palety ({value})"
+        },
+        "accent": {
+          "name": "Zvýraznenie",
+          "label": "Zvýraznenie z palety ({value})"
+        },
+        "surface": {
+          "name": "Plocha",
+          "label": "Plocha z palety ({value})"
+        },
+        "muted": {
+          "name": "Tlmená",
+          "label": "Tlmená farba z palety ({value})"
+        }
+      }
+    },
+    "pairings": {
+      "title": "Dvojica písiem",
+      "group": "Dvojice písiem",
+      "editorial": {
+        "name": "Redakčná",
+        "hint": "Mäkké pätkové nadpisy a čistý text pod nimi"
+      },
+      "classic": {
+        "name": "Klasická",
+        "hint": "Elegantné pätkové písmo s dobre čitateľným bezpätkovým"
+      },
+      "modern": {
+        "name": "Moderná",
+        "hint": "Geometrické nadpisy a neutrálny text"
+      },
+      "soft": {
+        "name": "Jemná",
+        "hint": "Oblé pätkové písmo s priateľským bezpätkovým"
+      },
+      "studio": {
+        "name": "Ateliér",
+        "hint": "Štíhle pätkové písmo s otvoreným bezpätkovým"
+      }
+    },
+    "typography": {
+      "singleFont": "Jedno písmo na všetko",
+      "singleFontHint": "Výberom písma tu vypnete dvojicu písiem."
+    },
+    "textStyles": {
+      "title": "Štýly textu",
+      "hint": "Každý štýl nastavte raz. Riadi sa ním každý textový blok v tom štýle.",
+      "pick": "Štýl na úpravu",
+      "face": "Písmo",
+      "faceHeading": "Nadpisové",
+      "faceBody": "Textové",
+      "uppercase": "Veľké písmená",
+      "colorDefault": "Predvolená štýlu",
+      "useColorDefault": "Použiť predvolenú štýlu",
+      "reset": "Obnoviť tento štýl"
+    },
+    "valign": {
+      "label": "Zvislé zarovnanie",
+      "group": "Zvislé zarovnanie textu",
+      "top": "Zarovnať nahor",
+      "middle": "Zarovnať na stred",
+      "bottom": "Zarovnať nadol"
+    }
+  },
+  "board": {}
+}

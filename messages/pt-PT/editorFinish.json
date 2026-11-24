@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "motion": {
+      "label": "Movimento",
+      "none": "Nenhum",
+      "subtle": "Subtil",
+      "lively": "Animado",
+      "hint": "É reproduzido na sua loja quando os compradores percorrem a página. O editor fica parado."
+    },
+    "gradient": {
+      "readyLabel": "Gradientes prontos",
+      "custom": "Personalizado",
+      "middle": "Meio",
+      "shapeLabel": "Ou um gradiente",
+      "names": {
+        "soft": "Suave",
+        "light": "Claro",
+        "glow": "Brilho",
+        "wash": "Véu",
+        "sunset": "Pôr do sol",
+        "accent": "Destaque",
+        "deep": "Intenso",
+        "bright": "Vivo",
+        "dusk": "Crepúsculo",
+        "ink": "Tinta"
+      }
+    },
+    "more": "Mais",
+    "texture": {
+      "label": "Textura de papel",
+      "none": "Não",
+      "light": "Suave",
+      "strong": "Forte",
+      "hint": "Um grão fino sobre o fundo, como papel impresso."
+    },
+    "marquee": {
+      "textLabel": "Texto",
+      "speedLabel": "Velocidade",
+      "speeds": {
+        "slow": "Lenta",
+        "normal": "Normal"
+      },
+      "colorLabel": "Cor",
+      "autoColor": "Automática",
+      "useAutoColor": "Usar a cor automática",
+      "defaultText": "Envio grátis em todas as encomendas",
+      "add": "Adicionar texto em movimento",
+      "inspectorTitle": "Texto em movimento",
+      "inspectorClose": "Fechar o painel do texto em movimento"
+    }
+  },
+  "board": {}
+}

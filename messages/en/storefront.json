@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Heading",
     "subheading": "Subheading",
-    "body": "Body text"
+    "body": "Body text",
+    "label": "Small label"
   },
   "layoutPresets": {
     "standard": "Standard",
@@ -85,7 +86,10 @@
     "product": "Product",
     "text": "Text",
     "shape": "Shape",
-    "image": "Image"
+    "image": "Image",
+    "button": "Button",
+    "marquee": "Scrolling text",
+    "carousel": "Carousel"
   },
   "settings": {
     "groups": {
@@ -444,7 +448,6 @@
     "sectionPalettes": "Palettes"
   },
   "themePanel": {
-    "accent": "Accent",
     "accentHint": "Used for buttons, sale badges, headings and your store name."
   },
   "panelSearch": {
@@ -483,7 +486,7 @@
     "uploadImage": "Upload image",
     "uploadingProgress": "Uploading background image",
     "uploadHint": "Up to 10 MB. JPEG, PNG, WebP, GIF, or AVIF.",
-    "colorLabel": "Color",
+    "colorFromPalette": "The color is the Background swatch in the palette above.",
     "from": "From",
     "to": "To",
     "angle": "Angle",
@@ -1299,10 +1302,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accent",
       "storeName": "Store name",
       "bio": "Bio",
-      "background": "Background",
       "gradientFrom": "Gradient from",
       "gradientTo": "Gradient to",
       "fill": "Fill",
@@ -1351,22 +1352,6 @@
       "ink": {
         "name": "Ink",
         "label": "Ink ({value})"
-      },
-      "paleAccent": {
-        "name": "Pale accent",
-        "label": "Pale accent ({value})"
-      },
-      "softAccent": {
-        "name": "Soft accent",
-        "label": "Soft accent ({value})"
-      },
-      "accent": {
-        "name": "Accent",
-        "label": "Accent ({value})"
-      },
-      "deepAccent": {
-        "name": "Deep accent",
-        "label": "Deep accent ({value})"
       }
     },
     "standard": {

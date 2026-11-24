@@ -22,14 +22,19 @@ import {
   customFontVars,
   fontPresentation,
 } from "@/lib/theme/storefront-fonts";
+import { pairingFontPresentation } from "@/lib/theme/font-pairing-presentation";
+import { paletteInkStyle } from "@/lib/storefront/palette";
 import { Grid } from "@/components/grid/Grid";
 import type { GridBlock } from "@/components/grid/gridConstants";
 import { BlockTile } from "./BlockTile";
+import type { CarouselCards } from "./CarouselTileContent";
 import { CustomFontFace } from "./CustomFontFace";
 import { StorefrontMasthead } from "./StorefrontMasthead";
 import { resolveBackgroundStyle } from "./background-presets";
 import { useFitToBox } from "./useFitToBox";
 import {
+  MINIATURE_BOARD_ATTR,
+  MINIATURE_BOARD_STYLE,
   blockTileClipStyle,
   gridGapStyle,
   scaledCornerRadius,
@@ -73,9 +78,10 @@ import {
  * ones that remain stay exactly where the seller put them and the dropped
  * block leaves the same empty square the board already has elsewhere.
  *
- * Product tiles stay, minus the card settings that print words on them: a
- * per-tile override that switched its own title or price tag back on would
- * make that one tile the exception on an otherwise silent card. The rest of a
+ * Product tiles stay, and carousels (a row of the same cards), minus the card
+ * settings that print words on them: a per-tile override that switched its
+ * own title or price tag back on would make that one tile the exception on an
+ * otherwise silent card. The rest of a
  * tile's overrides (roundness, tag style) never draw text and are left alone.
  *
  * Exported because the card asks the same question to decide whether it is
@@ -90,7 +96,9 @@ export function textlessBlocks(
     .filter((block) =>
       block.type === "product"
         ? productsById.has(block.productId)
-        : block.type === "shape",
+        : block.type === "carousel"
+          ? block.productIds.some((id) => productsById.has(id))
+          : block.type === "shape",
     )
     .map((block) =>
       block.type === "product" ? silenceProductBlock(block) : block,
@@ -113,8 +121,10 @@ export function drawsProducts(
   config: StorefrontConfig,
   productsById: ReadonlyMap<string, Product>,
 ): boolean {
-  return buyerVisibleBlocks(config).some(
-    (block) => block.type === "product" && productsById.has(block.productId),
+  return buyerVisibleBlocks(config).some((block) =>
+    block.type === "carousel"
+      ? block.productIds.some((id) => productsById.has(id))
+      : block.type === "product" && productsById.has(block.productId),
   );
 }
 
@@ -183,7 +193,7 @@ export function StorefrontPreview({
   const t = useTranslations("Storefront.preview");
   const { theme, header } = config;
   const { boxRef, contentRef, scale } = useFitToBox();
-  const canvasFont = fontPresentation(theme.font);
+  const canvasFont = pairingFontPresentation(theme) ?? fontPresentation(theme.font);
 
   // Buyer-facing view: hideSoldOut drops marked blocks entirely (the designer
   // canvas keeps showing them dimmed so the seller can manage them). Shared
@@ -247,10 +257,19 @@ export function StorefrontPreview({
     block.type === "product"
       ? (productsById.get(block.productId) ?? null)
       : null;
+  // A carousel's cards, from the same catalogue.
+  const carouselCards = useMemo<CarouselCards>(
+    () => ({ product: (productId) => productsById.get(productId) ?? null }),
+    [productsById],
+  );
 
   return (
     <div
       ref={boxRef}
+      // A MINIATURE of a board, not one to read: its labels keep their own
+      // floors rather than the readable one, and its narrow cards keep name
+      // and price side by side, so the picture looks like the board it shows.
+      {...MINIATURE_BOARD_ATTR}
       className={cn(
         // The box. Centres the scaled board on both axes, so a board that
         // shrinks to fit its height sits in the middle rather than hugging a
@@ -268,7 +287,9 @@ export function StorefrontPreview({
         ...resolveBackgroundStyle(theme.background, backgroundImageUrl),
         ...gridGapStyle(theme.gridGap),
         ...customFontVars(theme.customFont, customFontUrl),
+        ...paletteInkStyle(theme),
         ...canvasFont.style,
+        ...MINIATURE_BOARD_STYLE,
       }}
     >
       <CustomFontFace customFont={theme.customFont} url={customFontUrl} />
@@ -321,6 +342,7 @@ export function StorefrontPreview({
                 theme={tileTheme}
                 look={tileLook}
                 editable={false}
+                carouselCards={carouselCards}
               />
             )}
           />

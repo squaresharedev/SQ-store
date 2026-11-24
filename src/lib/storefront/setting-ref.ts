@@ -14,6 +14,7 @@
 
 import type { MessageKey } from "@/i18n/types";
 import type { BlockField } from "@/components/storefront/SummonedField";
+import type { LibraryTab } from "@/components/storefront/LibraryPanel";
 import type { ProductPageSectionId } from "@/types/storefront";
 
 /** The design panel's groups, mirrored from ControlsPanel. */
@@ -90,7 +91,12 @@ export type SettingRef =
    *  shape's blur), which has no storefront-wide copy at all. The designer
    *  opens it on the selected block when that block has it, else on the first
    *  block on the board that does (see StorefrontDesigner.openSetting). */
-  | { kind: "block"; field: BlockField; types: readonly BlockSettingType[] };
+  | { kind: "block"; field: BlockField; types: readonly BlockSettingType[] }
+  /** A drawer of things to ADD to the board (a band, a button, scrolling
+   *  text, shapes). For a setting whose control is the block itself: there is
+   *  nothing to open until one is added, so search opens the drawer that adds
+   *  it. Like a block's own setting it belongs to no group of the panel. */
+  | { kind: "library"; tab: LibraryTab };
 
 /**
  * CLICKING THE PAGE ITSELF opens the setting behind what was clicked.
@@ -208,7 +214,7 @@ export const SECTION_SETTING: Record<ProductPageSectionId, ProductPageHotspot> =
 /** Which group of the design panel a ref lands in. None for a block's own
  *  setting, which opens in that block's inspector instead. */
 export function settingGroup(ref: SettingRef): ControlsGroup | null {
-  if (ref.kind === "block") return null;
+  if (ref.kind === "block" || ref.kind === "library") return null;
   if (ref.kind === "group") return ref.group;
   if (ref.kind === "cards") return "cards";
   if (ref.kind === "theme") return "theme";
@@ -240,6 +246,7 @@ export function isSameSettingRef(
   if (a.kind === "block" && b.kind === "block") {
     return a.field === b.field && a.types.join() === b.types.join();
   }
+  if (a.kind === "library" && b.kind === "library") return a.tab === b.tab;
   return false;
 }
 
@@ -267,8 +274,8 @@ export function freshSettingRef(ref: SettingRef): SettingRef {
   return { ...ref };
 }
 
-/** The "Storefront / ..." line for a block's own setting, which belongs to
- *  no group of the panel. */
+/** The "Storefront / ..." line for a block's own setting, or the drawer that
+ *  adds it, which belong to no group of the panel. */
 const BLOCK_SUBTITLE: MessageKey = "Storefront.settings.subtitle.blocks";
 
 /** The "Storefront / ..." line under a search result, for any ref. */
@@ -417,6 +424,64 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ],
     ref: { kind: "theme", section: "look" },
   },
+  // ---------------------------------------------------------------------
+  // THE EDITOR UPGRADE'S CONTROLS (docs/editor-upgrade.md). Each is labelled
+  // with the control's OWN words, as the cart's entries are, so a result and
+  // the panel it opens say the same thing and every locale is already written
+  // (EditorType, EditorCards, EditorFinish, EditorLayout). The keywords are
+  // the words a person who has never heard of the control would type.
+  // ---------------------------------------------------------------------
+  {
+    id: "palette",
+    label: "EditorType.panel.palette.title",
+    keywords: [
+      "colours",
+      "color scheme",
+      "colour scheme",
+      "theme colours",
+      "brand colours",
+      "swatches",
+      "change a colour everywhere",
+      "recolour",
+      "text colour",
+      "surface colour",
+      "muted colour",
+      "five colours",
+    ],
+    ref: { kind: "theme", section: "look" },
+  },
+  {
+    id: "motion",
+    label: "EditorFinish.panel.motion.label",
+    keywords: [
+      "animation",
+      "animate",
+      "movement",
+      "fade in",
+      "appear on scroll",
+      "scroll effect",
+      "reveal",
+      "subtle",
+      "lively",
+      "how the page arrives",
+    ],
+    ref: { kind: "theme", section: "look" },
+  },
+  {
+    id: "paper-texture",
+    label: "EditorFinish.panel.texture.label",
+    keywords: [
+      "paper",
+      "grain",
+      "texture",
+      "noise",
+      "film grain",
+      "printed look",
+      "background grain",
+      "rough background",
+    ],
+    ref: { kind: "theme", section: "look" },
+  },
   {
     id: "header",
     label: "Storefront.settings.labels.header",
@@ -436,6 +501,24 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
     ref: { kind: "group", group: "header" },
   },
   {
+    id: "header-logo-menu",
+    label: "EditorLayout.panel.header.logoAndMenu",
+    keywords: [
+      "logo",
+      "upload a logo",
+      "brand mark",
+      "menu",
+      "navigation",
+      "nav bar",
+      "header links",
+      "links at the top",
+      "top menu",
+      "cart icon",
+      "masthead logo",
+    ],
+    ref: { kind: "group", group: "header" },
+  },
+  {
     id: "font",
     label: "Storefront.settings.labels.font",
     keywords: [
@@ -447,6 +530,44 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "text style",
       "letters",
       "words look",
+    ],
+    ref: { kind: "group", group: "typography" },
+  },
+  {
+    id: "font-pairing",
+    label: "EditorType.panel.pairings.title",
+    keywords: [
+      "fonts",
+      "font pair",
+      "font combination",
+      "fonts that go together",
+      "heading and body font",
+      "serif",
+      "sans",
+      "editorial",
+      "classic",
+      "modern",
+      "soft",
+      "studio",
+      "typeface pairing",
+    ],
+    ref: { kind: "group", group: "typography" },
+  },
+  {
+    id: "text-styles",
+    label: "EditorType.panel.textStyles.title",
+    keywords: [
+      "headline",
+      "subheading",
+      "body text",
+      "small label",
+      "heading size",
+      "text size",
+      "all caps",
+      "uppercase",
+      "change every heading",
+      "text presets",
+      "paragraph style",
     ],
     ref: { kind: "group", group: "typography" },
   },
@@ -562,6 +683,83 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "radius",
       "card shape",
       "pill",
+    ],
+    ref: { kind: "cards", section: "cardStyle" },
+  },
+  {
+    id: "card-color",
+    label: "EditorCards.panel.cardColor",
+    keywords: [
+      "card colour",
+      "card background",
+      "card fill",
+      "tile colour",
+      "tile background",
+      "white cards",
+      "surface",
+      "colour behind the photo",
+    ],
+    ref: { kind: "cards", section: "cardStyle" },
+  },
+  {
+    id: "card-blend",
+    label: "EditorCards.panel.blend.label",
+    keywords: [
+      "white background",
+      "white box",
+      "white square around the photo",
+      "photo edges",
+      "blend the photo",
+      "studio photo",
+      "product photo background",
+      "photo on a coloured card",
+      "multiply",
+    ],
+    ref: { kind: "cards", section: "cardStyle" },
+  },
+  {
+    id: "card-name-strip",
+    label: "EditorCards.panel.nameStrip",
+    keywords: [
+      "name bar",
+      "title bar",
+      "title strip",
+      "caption bar",
+      "name colour",
+      "name font",
+      "name background",
+      "product name font",
+      "name text colour",
+    ],
+    ref: { kind: "cards", section: "cardStyle" },
+  },
+  {
+    id: "card-photo-shape",
+    label: "EditorCards.panel.photoShape.label",
+    keywords: [
+      "round photos",
+      "circle photo",
+      "oval",
+      "arch",
+      "rounded photo",
+      "photo outline",
+      "photo frame",
+      "photo corners",
+    ],
+    ref: { kind: "cards", section: "cardStyle" },
+  },
+  {
+    id: "card-shadow",
+    label: "EditorCards.panel.shadow.label",
+    keywords: [
+      "drop shadow",
+      "card shadow",
+      "photo shadow",
+      "soft shadow",
+      "lifted",
+      "depth",
+      "float",
+      "raised",
     ],
     ref: { kind: "cards", section: "cardStyle" },
   },
@@ -748,6 +946,71 @@ export const STOREFRONT_SETTINGS: readonly SettingEntry[] = [
       "text blur",
     ],
     ref: { kind: "block", field: "blur", types: ["shape", "image", "text"] },
+  },
+  {
+    id: "text-valign",
+    label: "EditorType.panel.valign.label",
+    keywords: [
+      "vertical alignment",
+      "text at the top",
+      "text at the bottom",
+      "centre the text",
+      "middle of the box",
+      "align text",
+      "top",
+      "bottom",
+      "middle",
+    ],
+    ref: { kind: "block", field: "valign", types: ["text"] },
+  },
+  {
+    id: "bands",
+    label: "EditorLayout.panel.band.title",
+    keywords: [
+      "band",
+      "stripe",
+      "full width section",
+      "section background",
+      "coloured strip",
+      "row background",
+      "colour behind some rows",
+      "banner",
+      "add a band",
+      "photo behind rows",
+    ],
+    ref: { kind: "library", tab: "shapes" },
+  },
+  {
+    id: "button-block",
+    label: "EditorLayout.panel.button.title",
+    keywords: [
+      "button",
+      "add a button",
+      "link button",
+      "call to action",
+      "shop now",
+      "link to a product",
+      "link to another page",
+      "link",
+      "outline button",
+    ],
+    ref: { kind: "library", tab: "shapes" },
+  },
+  {
+    id: "scrolling-text",
+    label: "EditorFinish.panel.marquee.inspectorTitle",
+    keywords: [
+      "marquee",
+      "ticker",
+      "moving text",
+      "running text",
+      "scrolling banner",
+      "announcement bar",
+      "free delivery strip",
+      "news ticker",
+      "banner text",
+    ],
+    ref: { kind: "library", tab: "shapes" },
   },
   {
     id: "sold-out",

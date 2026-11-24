@@ -7,8 +7,14 @@ import {
   BACKGROUND_IMAGE_SCALE_MAX,
   BACKGROUND_IMAGE_SCALE_MIN,
   DEFAULT_BACKGROUND_IMAGE_PLACEMENT,
+  DEFAULT_STOREFRONT_CONFIG,
   type StorefrontBackground,
+  type StorefrontPalette,
 } from "@/types/storefront";
+import { paletteGradients, readyGradientId } from "@/lib/storefront/gradients";
+import { derivePalette } from "@/lib/storefront/palette";
+import { Disclosure } from "@/components/ui/Disclosure";
+import { GradientSwatches } from "./GradientSwatches";
 import { unexpectedError } from "@/lib/errors";
 import { panPlacement } from "@/lib/images/placement";
 import { UploadError, uploadToR2 } from "@/lib/products/upload";
@@ -20,7 +26,6 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { ColorPicker } from "@/components/ui/ColorPicker";
 import { SliderField } from "@/components/ui/SliderField";
 import { infoTextClass, labelClass, secondaryButtonClass } from "@/components/ui/control-styles";
-import { themeAccentPresets } from "@/lib/theme/theme-color-presets";
 import { resolveBackgroundStyle } from "./background-presets";
 
 type Kind = StorefrontBackground["kind"];
@@ -44,20 +49,27 @@ function baseColor(background: StorefrontBackground): string {
 function switchKind(
   kind: Exclude<Kind, "image">,
   current: StorefrontBackground,
+  palette: StorefrontPalette,
 ): StorefrontBackground {
   if (kind === current.kind) return current;
   const base = baseColor(current);
-  return kind === "solid"
-    ? { kind: "solid", color: base }
+  if (kind === "solid") return { kind: "solid", color: base };
+  // A gradient starts as the first ready-made of the storefront's palette,
+  // else as the plain two-colour one it always started as.
+  const ready = paletteGradients(palette, "backdrop")[0];
+  return ready
+    ? { kind: "gradient", ...ready.fill }
     : { kind: "gradient", from: base, to: DEFAULT_GRADIENT_TO, angle: 160 };
 }
 
 /**
- * Background control: choose a solid color, build a custom two-stop gradient,
- * or upload an image (10 MB cap; drag the preview to position it, zoom to
- * resize). Emits only the structured, schema-safe StorefrontBackground
- * shapes; the image variant stores the R2 object KEY, and display URLs come
- * from the caller.
+ * Background control: choose WHAT KIND of background the board has: a solid
+ * color (whose colour is the palette's Background swatch, set in the palette
+ * row above, not here), a gradient (a ready-made one mixed from the palette,
+ * or its colours one by one behind "Custom"), or an image (10 MB cap; drag the
+ * preview to position it, zoom to resize). Emits only the structured,
+ * schema-safe StorefrontBackground shapes; the image variant stores the R2
+ * object KEY, and display URLs come from the caller.
  */
 export function BackgroundEditor({
   value,
@@ -65,6 +77,7 @@ export function BackgroundEditor({
   imageUrl,
   onImageChange,
   accent,
+  palette: givenPalette,
 }: {
   value: StorefrontBackground;
   onChange: (background: StorefrontBackground) => void;
@@ -72,13 +85,25 @@ export function BackgroundEditor({
   imageUrl: string | null;
   /** Reports a new local preview URL after an upload (null on remove). */
   onImageChange: (url: string | null) => void;
-  /** The theme's own accent, for the solid color field's quick picks — four
-   *  tints and shades of THIS storefront's brand color, not generic neutrals. */
+  /** The theme's own accent: what a palette is read off when none is given. */
   accent: string;
+  /** The storefront's palette (derivePalette), which the ready-made gradients
+   *  are mixed from. Absent = one read off this background and accent. */
+  palette?: StorefrontPalette;
 }) {
   // "Image" tab can be open before any upload exists; the stored background
   // only becomes {kind:"image"} once an upload succeeds.
   const t = useTranslations("Storefront.background");
+  const tFinish = useTranslations("EditorFinish.panel.gradient");
+  const palette =
+    givenPalette ?? derivePalette({ ...DEFAULT_STOREFRONT_CONFIG.theme, background: value, accent });
+  // A stored gradient that is not one of the ready-mades was made by hand:
+  // its controls open with the panel, so the seller finds what made it.
+  const [customOpen] = useState(
+    () =>
+      value.kind === "gradient" &&
+      readyGradientId(value, paletteGradients(palette, "backdrop")) === null,
+  );
   const kinds = useMemo(
     () => [
       { value: "solid" as const, label: t("typeColor") },
@@ -119,7 +144,7 @@ export function BackgroundEditor({
       // on the next save; the preview URL is no longer needed.
       onImageChange(null);
     }
-    onChange(switchKind(kind, value));
+    onChange(switchKind(kind, value, palette));
   }
 
   async function handleFile(file: File | undefined) {
@@ -288,45 +313,58 @@ export function BackgroundEditor({
         </div>
       )}
 
-      {value.kind === "solid" && (
-        <ColorPicker
-          id={`${fieldId}-solid`}
-          label={t("colorLabel")}
-          value={value.color}
-          onChange={(color) => onChange({ kind: "solid", color })}
-          target={{ kind: "theme-background-solid" }}
-          presets={themeAccentPresets(accent)}
-        />
-      )}
+      {/* The colour itself is the palette's Background swatch, above. */}
+      {value.kind === "solid" && <p className={infoTextClass}>{t("colorFromPalette")}</p>}
 
       {value.kind === "gradient" && (
         <div className="space-y-3">
-          <ColorPicker
-            id={`${fieldId}-grad-from`}
-            label={t("from")}
-            value={value.from}
-            onChange={(from) => onChange({ ...value, from })}
-            target={{ kind: "theme-background-from" }}
+          {/* Ready-made first, mixed from the palette (lib/storefront/
+              gradients); the colours one by one behind "Custom". */}
+          <GradientSwatches
+            palette={palette}
+            purpose="backdrop"
+            value={value}
+            onPick={(fill) => onChange({ kind: "gradient", ...fill })}
+            label={tFinish("readyLabel")}
           />
-          <ColorPicker
-            id={`${fieldId}-grad-to`}
-            label={t("to")}
-            value={value.to}
-            onChange={(to) => onChange({ ...value, to })}
-            target={{ kind: "theme-background-to" }}
-          />
-          <SliderField
-            id={`${fieldId}-angle`}
-            label={t("angle")}
-            min={0}
-            max={360}
-            step={5}
-            value={value.angle}
-            onChange={(angle) => onChange({ ...value, angle })}
-            ariaLabel={t("gradientAngle")}
-            valueText={t("angleValueText", { n: value.angle })}
-            unit="°"
-          />
+          <Disclosure open={customOpen} summary={<span className={labelClass}>{tFinish("custom")}</span>}>
+            <div className="space-y-3">
+              <ColorPicker
+                id={`${fieldId}-grad-from`}
+                label={t("from")}
+                value={value.from}
+                onChange={(from) => onChange({ ...value, from })}
+                target={{ kind: "theme-background-from" }}
+              />
+              {value.via !== undefined && (
+                <ColorPicker
+                  id={`${fieldId}-grad-via`}
+                  label={tFinish("middle")}
+                  value={value.via}
+                  onChange={(via) => onChange({ ...value, via })}
+                />
+              )}
+              <ColorPicker
+                id={`${fieldId}-grad-to`}
+                label={t("to")}
+                value={value.to}
+                onChange={(to) => onChange({ ...value, to })}
+                target={{ kind: "theme-background-to" }}
+              />
+              <SliderField
+                id={`${fieldId}-angle`}
+                label={t("angle")}
+                min={0}
+                max={360}
+                step={5}
+                value={value.angle}
+                onChange={(angle) => onChange({ ...value, angle })}
+                ariaLabel={t("gradientAngle")}
+                valueText={t("angleValueText", { n: value.angle })}
+                unit="°"
+              />
+            </div>
+          </Disclosure>
         </div>
       )}
 

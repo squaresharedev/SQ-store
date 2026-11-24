@@ -1,0 +1,53 @@
+{
+  "panel": {
+    "motion": {
+      "label": "Motion",
+      "none": "None",
+      "subtle": "Subtle",
+      "lively": "Lively",
+      "hint": "Plays on your storefront as buyers scroll. The editor stays still."
+    },
+    "gradient": {
+      "readyLabel": "Ready-made gradients",
+      "custom": "Custom",
+      "middle": "Middle",
+      "shapeLabel": "Or a gradient",
+      "names": {
+        "soft": "Soft",
+        "light": "Light",
+        "glow": "Glow",
+        "wash": "Wash",
+        "sunset": "Sunset",
+        "accent": "Accent",
+        "deep": "Deep",
+        "bright": "Bright",
+        "dusk": "Dusk",
+        "ink": "Ink"
+      }
+    },
+    "more": "More",
+    "texture": {
+      "label": "Paper texture",
+      "none": "Off",
+      "light": "Light",
+      "strong": "Strong",
+      "hint": "A fine grain over the background, like printed paper."
+    },
+    "marquee": {
+      "textLabel": "Words",
+      "speedLabel": "Speed",
+      "speeds": {
+        "slow": "Slow",
+        "normal": "Normal"
+      },
+      "colorLabel": "Color",
+      "autoColor": "Automatic",
+      "useAutoColor": "Use the automatic color",
+      "defaultText": "Free delivery on every order",
+      "add": "Add scrolling text",
+      "inspectorTitle": "Scrolling text",
+      "inspectorClose": "Close scrolling text panel"
+    }
+  },
+  "board": {}
+}

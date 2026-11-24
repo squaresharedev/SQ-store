@@ -1,0 +1,36 @@
+{
+  "panel": {
+    "cardColor": "Kolor karty",
+    "blend": {
+      "label": "Wtapianie białego tła",
+      "auto": "Automatycznie",
+      "on": "Włączone",
+      "off": "Wyłączone",
+      "hint": "Kolor karty prześwituje przez białe tło zdjęcia. Automatycznie wtapia tylko zdjęcia z białymi krawędziami.",
+      "darkCard": "Na ciemnej karcie zdjęcia zachowują biel: wtopienie przyciemniłoby też produkt."
+    },
+    "more": "Więcej",
+    "nameStrip": "Pasek z nazwą",
+    "nameColor": "Kolor nazwy",
+    "nameFont": {
+      "label": "Czcionka nazwy",
+      "heading": "Nagłówek",
+      "body": "Tekst"
+    },
+    "photoShape": {
+      "label": "Kształt zdjęcia",
+      "rectangle": "Prostokąt",
+      "rounded": "Zaokrąglony",
+      "arch": "Łuk",
+      "circle": "Koło"
+    },
+    "imageShape": "Kształt",
+    "shadow": {
+      "label": "Cień",
+      "none": "Brak",
+      "soft": "Delikatny",
+      "lifted": "Uniesiony"
+    }
+  },
+  "board": {}
+}

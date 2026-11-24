@@ -14,12 +14,14 @@ import {
 } from "@/lib/validation/storefront";
 import {
   DEFAULT_PRODUCT_PAGE_CONFIG,
-  DEFAULT_STOREFRONT_CONFIG,
+  newStorefrontConfig,
   DEFAULT_STOREFRONT_HEADER,
   DEFAULT_STOREFRONT_NAME,
   HEADER_NAME_MAX,
+  boardProductIds,
   type StorefrontConfig,
 } from "@/types/storefront";
+import { keepProducts } from "@/lib/storefront/carousel";
 import {
   failure,
   invalidInput,
@@ -40,6 +42,7 @@ import {
 } from "@/lib/billing/limits";
 import { firstIssue } from "@/lib/validation/messages";
 import { carryOverDesign } from "@/lib/predictions";
+import { addLogoKey, settleBandPhotos, settleLayout } from "@/lib/storefront/layout-save";
 import { msg } from "@/i18n/types";
 import {
   listStorefronts,
@@ -180,7 +183,9 @@ export async function createStorefront(): Promise<CreateStorefrontResult> {
     owner_id: account.accountId,
     name: finalName,
     config: {
-      ...DEFAULT_STOREFRONT_CONFIG,
+      // The nicer starting point (NEW_STOREFRONT_THEME), given at creation
+      // only: a stored config never gains it by being read.
+      ...newStorefrontConfig(),
       header: initialHeader,
       productPage: initialProductPage,
       ...(previous ? carryOverDesign(previous) : {}),
@@ -248,12 +253,13 @@ export async function saveStorefront(
 
   const supabase = await createClient();
 
-  // Ownership check: keep only product blocks whose product exists AND belongs
-  // to the caller. Text blocks carry no references and pass through as-parsed.
+  // Ownership check: keep only the products that exist AND belong to the
+  // active account (a team member saves the OWNER's store), wherever the board
+  // shows them: a product block naming any other goes whole, a carousel loses
+  // that member, and a carousel left with none goes too (keepProducts). Text
+  // and the other kinds carry no product and pass through as parsed.
   let blocks = parsed.data.blocks;
-  const productIds = blocks
-    .filter((block) => block.type === "product")
-    .map((block) => block.productId);
+  const productIds = boardProductIds(blocks);
   if (productIds.length > 0) {
     const { data: ownedRows, error } = await supabase
       .from("products")
@@ -265,9 +271,7 @@ export async function saveStorefront(
       return failure(serverError("saveStorefront"));
     }
     const ownedIds = new Set(ownedRows.map((row) => row.id));
-    blocks = blocks.filter(
-      (block) => block.type !== "product" || ownedIds.has(block.productId),
-    );
+    blocks = keepProducts(blocks, (productId) => ownedIds.has(productId));
   }
 
   const config: StorefrontConfig = {
@@ -299,6 +303,10 @@ export async function saveStorefront(
       ? { cartPage: parsed.data.cartPage }
       : {}),
   };
+  // Layout and navigation (lib/storefront/layout-save.ts): the bands come
+  // along, and a link to another storefront must name one of this store's.
+  const layout = await settleLayout(supabase, account.accountId, config, parsed.data.bands);
+  if (!layout.ok) return failure(layout.error);
 
   // Uploaded assets (image background, custom font): the config stores only the
   // R2 object KEY. A key that differs from the one already saved must be a NEW
@@ -354,9 +362,11 @@ export async function saveStorefront(
   // storefront are verified: re-saving an untouched canvas costs no HEAD
   // requests at all, however many elements it carries.
   const previousElementKeys = storedElementKeys(existingRow.config);
+  addLogoKey(previousElementKeys, existingRow.config);
   const nextElementKeys = new Set(
     config.blocks.flatMap((block) => (block.type === "image" ? [block.key] : [])),
   );
+  addLogoKey(nextElementKeys, config);
   const newElementKeys = [...nextElementKeys].filter(
     (key) => !previousElementKeys.has(key),
   );
@@ -377,6 +387,8 @@ export async function saveStorefront(
   // once the row is written.
   const pagePhotos = await settlePagePhotos(existingRow.config, config, account.userId);
   if (!pagePhotos.ok) return failure(pagePhotos.error);
+  const bandPhotos = await settleBandPhotos(existingRow.config, config, account.userId);
+  if (!bandPhotos.ok) return failure(bandPhotos.error);
 
   await precheck("storefront", id, { name: parsedName.data, config });
 
@@ -409,6 +421,7 @@ export async function saveStorefront(
     if (!nextElementKeys.has(key)) await evictObject(key);
   }
   for (const key of pagePhotos.released) await evictObject(key);
+  for (const key of bandPhotos.released) await evictObject(key);
 
   revalidatePath("/storefront");
   revalidatePath(`/storefront/${id}`);

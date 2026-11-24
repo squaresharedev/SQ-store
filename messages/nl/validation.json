@@ -210,6 +210,11 @@
       "tooLong": "Alt-tekst voor het element mag maximaal {maximum} tekens bevatten.",
       "unsupported": "Alt-tekst voor het element bevat niet-ondersteunde tekens."
     },
+    "linkLabel": {
+      "required": "Linktekst is verplicht.",
+      "tooLong": "Linktekst mag maximaal {maximum} tekens bevatten.",
+      "unsupported": "Linktekst bevat niet-ondersteunde tekens."
+    },
     "notificationTitle": {
       "required": "Een titel voor de melding is verplicht.",
       "tooLong": "Een titel voor de melding mag maximaal {maximum} tekens bevatten.",
@@ -564,7 +569,8 @@
     "spanRange": "Een geformatteerd bereik moet later eindigen dan het begint.",
     "blocksTooMany": "Een etalage kan maximaal {maximum} blokken bevatten. Verwijder een paar blokken of splits deze etalage in tweeën.",
     "blocksDuplicate": "Rasterblokken moeten uniek zijn.",
-    "blockOutsideCanvas": "Een blok staat buiten het canvas."
+    "blockOutsideCanvas": "Een blok staat buiten het canvas.",
+    "linkTargetMissing": "Een link verwijst naar iets dat niet in deze etalage staat."
   },
   "discountCode": {
     "code": "Een code bestaat uit {min} tot {max} letters of cijfers, en mag ook - of _ bevatten."

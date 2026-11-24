@@ -27,7 +27,7 @@
 // identity is complete. Calling a page live on any looser rule would hand the
 // seller a link to copy that 404s.
 
-import type { StorefrontConfig } from "@/types/storefront";
+import { boardProductIds, type StorefrontConfig } from "@/types/storefront";
 import { msg, type MessageRef } from "@/i18n/types";
 import {
   traderIdentityHref,
@@ -148,16 +148,14 @@ export function buildSetupSteps(facts: SetupFacts): SetupChecklistData {
   const existing = new Set(facts.existingProductIds);
   const active = new Set(facts.activeProductIds);
 
-  // Every product block that points at a product which still exists, in the
-  // order the storefronts arrive, so the first match is on the storefront the
-  // seller edited last. A block whose product was deleted is not a placement:
-  // its page cannot open.
+  // Every product a board shows (a tile, or a carousel's member) that still
+  // exists, in the order the storefronts arrive, so the first match is on the
+  // storefront the seller edited last. A product that was deleted is not a
+  // placement: its page cannot open.
   const placed: Placement[] = facts.storefronts.flatMap((storefront) => {
     const pagesOn = resolveProductPage(storefront.config).enabled;
-    return storefront.config.blocks.flatMap((block) =>
-      block.type === "product" && existing.has(block.productId)
-        ? [{ storefrontId: storefront.id, productId: block.productId, pagesOn }]
-        : [],
+    return boardProductIds(storefront.config.blocks).flatMap((productId) =>
+      existing.has(productId) ? [{ storefrontId: storefront.id, productId, pagesOn }] : [],
     );
   });
   const placedActive = placed.filter((placement) => active.has(placement.productId));

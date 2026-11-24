@@ -72,7 +72,8 @@
   "textVariants": {
     "heading": "Titre",
     "subheading": "Sous-titre",
-    "body": "Texte de corps"
+    "body": "Texte de corps",
+    "label": "Petite étiquette"
   },
   "layoutPresets": {
     "standard": "Standard",
@@ -85,7 +86,10 @@
     "product": "Produit",
     "text": "Texte",
     "shape": "Forme",
-    "image": "Image"
+    "image": "Image",
+    "button": "Bouton",
+    "marquee": "Texte défilant",
+    "carousel": "Carrousel"
   },
   "settings": {
     "groups": {
@@ -444,7 +448,6 @@
     "sectionPalettes": "Palettes"
   },
   "themePanel": {
-    "accent": "Accent",
     "accentHint": "S’applique aux boutons, aux étiquettes promo, aux titres et au nom de votre boutique."
   },
   "panelSearch": {
@@ -483,7 +486,7 @@
     "uploadImage": "Importer une image",
     "uploadingProgress": "Import de l’image d’arrière-plan",
     "uploadHint": "Jusqu’à 10 Mo. JPEG, PNG, WebP, GIF ou AVIF.",
-    "colorLabel": "Couleur",
+    "colorFromPalette": "La couleur est celle de la pastille Arrière-plan de la palette ci-dessus.",
     "from": "De",
     "to": "À",
     "angle": "Angle",
@@ -1262,10 +1265,8 @@
   },
   "colors": {
     "fields": {
-      "accent": "Accent",
       "storeName": "Nom de la boutique",
       "bio": "Bio",
-      "background": "Arrière-plan",
       "gradientFrom": "Début du dégradé",
       "gradientTo": "Fin du dégradé",
       "fill": "Remplissage",
@@ -1314,22 +1315,6 @@
       "ink": {
         "name": "Encre",
         "label": "Encre ({value})"
-      },
-      "paleAccent": {
-        "name": "Accent pâle",
-        "label": "Accent pâle ({value})"
-      },
-      "softAccent": {
-        "name": "Accent doux",
-        "label": "Accent doux ({value})"
-      },
-      "accent": {
-        "name": "Accent",
-        "label": "Accent ({value})"
-      },
-      "deepAccent": {
-        "name": "Accent profond",
-        "label": "Accent profond ({value})"
       }
     },
     "standard": {

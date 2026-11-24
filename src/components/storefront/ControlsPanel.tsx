@@ -30,6 +30,7 @@ import { PanelSearchField } from "./PanelSearchField";
 import type { EditorJump, EditorSearchEntry } from "./editor-search";
 import { FONT_LABELS } from "./config-maps";
 import { ThemePanel } from "./ThemePanel";
+import { FinishControls } from "./FinishControls";
 import { HeaderSection } from "./HeaderSection";
 import { CardsSection } from "./CardsSection";
 import { PriceTagSection } from "./PriceTagSection";
@@ -39,6 +40,7 @@ import { CardShoppingControls } from "./CardShoppingControls";
 import { ChipScaleControl } from "./ChipScaleControl";
 import { LayoutSection } from "./LayoutSection";
 import { TypographySection } from "./TypographySection";
+import { typographyMenuHint } from "@/lib/theme/font-pairing-labels";
 import { SoldOutSection } from "./SoldOutSection";
 import { ProductPageSection } from "./ProductPageSection";
 import { CheckoutPageSection } from "./CheckoutPageSection";
@@ -265,9 +267,9 @@ export function ControlsPanel({
             // holds instead.
             hint={
               id === "typography"
-                ? theme.customFont && theme.font === "custom"
+                ? typographyMenuHint(theme, tKey) ?? (theme.customFont && theme.font === "custom"
                   ? theme.customFont.name
-                  : tKey(FONT_LABELS[theme.font])
+                  : tKey(FONT_LABELS[theme.font]))
                 : id === "theme"
                   ? t("themeHint")
                   : id === "productPage" && !productPage.enabled
@@ -385,6 +387,7 @@ export function ControlsPanel({
           shippingPolicy={shippingPolicy}
           sellerIdentity={sellerIdentity}
           storefrontFont={theme.font}
+          storefrontPairingName={typographyMenuHint(theme, tKey)}
           customFontName={theme.customFont?.name}
           background={theme.background}
           accent={theme.accent}
@@ -428,6 +431,7 @@ export function ControlsPanel({
               backgroundImageUrl={backgroundImageUrl}
               onBackgroundImageChange={onBackgroundImageChange}
             />
+            <FinishControls theme={theme} onChange={onThemeChange} />
           </CollapsibleSection>
           <CollapsibleSection title={t("canvas")} summon={summonedTheme === "canvas"}>
             <LayoutSection

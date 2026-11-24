@@ -210,6 +210,11 @@
       "tooLong": "Tekst alternatywny elementu może mieć maksymalnie {maximum} znaków.",
       "unsupported": "Tekst alternatywny elementu zawiera nieobsługiwane znaki."
     },
+    "linkLabel": {
+      "required": "Tekst linku jest wymagany.",
+      "tooLong": "Tekst linku może mieć maksymalnie {maximum} znaków.",
+      "unsupported": "Tekst linku zawiera nieobsługiwane znaki."
+    },
     "notificationTitle": {
       "required": "Tytuł powiadomienia jest wymagany.",
       "tooLong": "Tytuł powiadomienia może mieć maksymalnie {maximum} znaków.",
@@ -564,7 +569,8 @@
     "spanRange": "Sformatowany zakres musi kończyć się po jego rozpoczęciu",
     "blocksTooMany": "Witryna może zawierać maksymalnie {maximum} bloków. Usuń część bloków albo podziel tę witrynę na dwie.",
     "blocksDuplicate": "Bloki siatki muszą być unikalne.",
-    "blockOutsideCanvas": "Blok znajduje się poza obszarem roboczym."
+    "blockOutsideCanvas": "Blok znajduje się poza obszarem roboczym.",
+    "linkTargetMissing": "Link prowadzi do czegoś, czego nie ma na tej witrynie."
   },
   "discountCode": {
     "code": "Kod to od {min} do {max} liter lub cyfr; dozwolone są też znaki - i _."

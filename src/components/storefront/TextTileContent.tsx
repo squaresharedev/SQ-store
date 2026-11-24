@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import {
   TEXT_SIZE_MIN,
-  TEXT_VARIANT_BASE_PX,
   blockKey,
   type StorefrontTheme,
   type TextBlock,
@@ -13,7 +12,17 @@ import {
 } from "@/types/storefront";
 import { isStrictHexColor } from "@/lib/validation/predicates";
 import { segmentText } from "@/lib/storefront/text-spans";
-import { fontPresentation } from "@/lib/theme/storefront-fonts";
+import {
+  TEXT_VALIGN_CLASSES,
+  resolveTextStyle,
+  textInkOnBackdrop,
+  textStyleColor,
+  textStyleSpacing,
+  textStyleWeightClass,
+} from "@/lib/storefront/text-styles";
+import { isFontPairing } from "@/lib/theme/font-pairings";
+import { fontRoleStyle } from "@/lib/theme/font-roles";
+import { fontPresentation, type FontPresentation } from "@/lib/theme/storefront-fonts";
 import { cn } from "@/lib/utils";
 import {
   TEXT_ALIGN_CLASSES,
@@ -47,6 +56,7 @@ import { useEditorSlots } from "./editor-slots";
 export function TextTileContent({
   block,
   theme,
+  backdrop,
   editing = false,
   selectAllOnEdit = false,
   onTextChange,
@@ -56,6 +66,8 @@ export function TextTileContent({
 }: {
   block: TextBlock;
   theme: StorefrontTheme;
+  /** The hex the words are read against (see BlockFace). Absent = not known. */
+  backdrop?: string;
   /** True when this block's words are being typed in place. */
   editing?: boolean;
   /** Start with everything selected, so typing replaces the block's text.
@@ -73,18 +85,29 @@ export function TextTileContent({
 }) {
   const t = useTranslations("Storefront.tiles");
   const { InlineTextEditor } = useEditorSlots();
-  // An explicit block color wins; else headings pick up the accent and other
-  // variants stay foreground. Every color is re-gated before touching style.
+  // The block's saved text style (theme.textStyles), what it carries only
+  // when the storefront set one: absent, every line below resolves to exactly
+  // what a text block rendered before styles could be saved.
+  const saved = theme.textStyles?.[block.variant];
+  const style = resolveTextStyle(theme, block.variant);
+  // An explicit block color wins; else the style's saved colour; else headings
+  // pick up the accent and other variants stay foreground. Every color is
+  // re-gated before touching style. On a band (`backdrop`) a colour the
+  // seller did not choose gives way to an ink that reads there.
   const color =
     block.color && isStrictHexColor(block.color)
       ? block.color
-      : block.variant === "heading" && isStrictHexColor(theme.accent)
-        ? theme.accent
-        : undefined;
+      : textInkOnBackdrop(theme, textStyleColor(theme, block.variant), backdrop);
 
   // Per-block font override; absent (or an uploaded face the canvas could not
-  // resolve) leaves the block inheriting the canvas font.
-  const font = fontPresentation(block.font);
+  // resolve) leaves the block inheriting the canvas font. Under a font
+  // pairing a block with no font of its own wears its style's face (headline
+  // or body); without a pairing there is one face and nothing to add.
+  const font: FontPresentation = block.font
+    ? fontPresentation(block.font)
+    : isFontPairing(theme.fontPairing)
+      ? { style: fontRoleStyle(style.font) }
+      : {};
 
   // The box the words have to fit inside, and the words themselves — two refs
   // rather than one because which element holds the words depends on editing
@@ -99,7 +122,8 @@ export function TextTileContent({
   const autoFitSize = useAutoFitTextSize({
     containerRef,
     textRef,
-    ceiling: TEXT_VARIANT_BASE_PX[block.variant],
+    // The style's size is the ceiling (its coded default when unsaved).
+    ceiling: style.size,
     floor: TEXT_SIZE_MIN,
     enabled: autoFit,
     deps: [
@@ -114,6 +138,9 @@ export function TextTileContent({
       // Spacing changes how much room the words take, so Auto re-fits.
       block.letterSpacing,
       block.lineHeight,
+      // So does the style the block wears, and the face it is set in.
+      saved,
+      theme.fontPairing,
       editing,
     ],
   });
@@ -140,16 +167,17 @@ export function TextTileContent({
   // that only ever applied above some breakpoint could not be measured
   // against the box it has to fit, which auto-fit needs unconditionally.
   const bodyClass = cn(
-    TEXT_VARIANT_WEIGHT_CLASSES[block.variant],
+    textStyleWeightClass(saved) ?? TEXT_VARIANT_WEIGHT_CLASSES[block.variant],
     block.bold && "font-bold",
-    block.italic && "italic",
+    (block.italic || saved?.italic) && "italic",
     block.underline && "underline",
+    saved?.uppercase && "uppercase",
   );
   const bodyStyle = {
     ...textSizeStyle(resolvedSize),
-    // The block's own spacing, over textSizeStyle's line height (see
-    // textSpacingStyle). Absent, it adds nothing at all.
-    ...textSpacingStyle(block),
+    // The block's own spacing, else its style's, over textSizeStyle's line
+    // height (see textSpacingStyle). Neither set, it adds nothing at all.
+    ...textSpacingStyle(textStyleSpacing(block, saved)),
     ...(color ? { color } : undefined),
   };
 
@@ -157,7 +185,11 @@ export function TextTileContent({
     <div
       ref={containerRef}
       className={cn(
-        "flex min-h-0 flex-1 flex-col justify-center overflow-hidden whitespace-pre-line p-3",
+        "flex min-h-0 flex-1 flex-col",
+        // Where the words sit, top to bottom: middle, as always, unless the
+        // block says otherwise.
+        TEXT_VALIGN_CLASSES[block.valign ?? "middle"],
+        "overflow-hidden whitespace-pre-line p-3",
         TEXT_ALIGN_CLASSES[block.align],
         font.className,
       )}

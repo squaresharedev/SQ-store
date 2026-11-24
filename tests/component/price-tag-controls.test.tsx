@@ -422,22 +422,26 @@ describe("PriceTagSection (theme scope)", () => {
     expect(next).toEqual(themed());
   });
 
-  it("offers one switch for the whole board: chips grow with bigger cards, or stay the same", async () => {
+  it("keeps the board's chip size out of the way unless the board already uses it", async () => {
     const user = userEvent.setup();
-    const onChange = vi.fn();
     const theme = themed();
-    render(<PriceTagSection theme={theme} onChange={onChange} />);
-    const scale = screen.getByRole("group", { name: "On bigger cards" });
-    expect(within(scale).getByRole("button", { name: "Grow" })).toHaveAttribute("aria-pressed", "true");
-    // The Sale badge section shows this same switch, so each copy says it
-    // covers both chips rather than reading as a setting of its own.
+    // Photo cards: with the labels' readable floor the choice changes little,
+    // so a board on the default is not shown it at all (the field still works).
+    render(<PriceTagSection theme={theme} onChange={vi.fn()} />);
+    expect(screen.queryByRole("group", { name: "On bigger cards" })).toBeNull();
+    cleanup();
+
+    // A board already set to "stay the same" keeps the switch, so the seller
+    // can go back; the copy says it covers both chips on every card.
+    const onBack = vi.fn();
+    render(<PriceTagSection theme={{ ...theme, chipScale: "cell" }} onChange={onBack} />);
     expect(screen.getByText("Applies to price tags and sale badges on every card.")).toBeInTheDocument();
-    await user.click(within(scale).getByRole("button", { name: "Stay the same" }));
-    expect(onChange).toHaveBeenLastCalledWith({ ...theme, chipScale: "cell" });
+    expect(
+      within(screen.getByRole("group", { name: "On bigger cards" })).getByRole("button", { name: "Stay the same" }),
+    ).toHaveAttribute("aria-pressed", "true");
     cleanup();
 
     // Back to the default is no key at all.
-    const onBack = vi.fn();
     render(<PriceTagSection theme={{ ...theme, chipScale: "cell" }} onChange={onBack} />);
     await user.click(within(screen.getByRole("group", { name: "On bigger cards" })).getByRole("button", { name: "Grow" }));
     expect(onBack.mock.lastCall![0]).not.toHaveProperty("chipScale");

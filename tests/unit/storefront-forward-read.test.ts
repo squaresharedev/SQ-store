@@ -47,87 +47,56 @@ function currentConfig() {
 
 afterEach(() => vi.restoreAllMocks());
 
+/**
+ * THIS branch writes every field the fixture uses, so the fixture is no longer
+ * "newer" here (on main it is: see the pull request that added this file).
+ * To stay a test of a config from the FUTURE, it gets material no version has
+ * yet: a top-level member, theme and band keys, a block type, a key on a
+ * known block.
+ */
+const FUTURE_BLOCK = { type: "hologram", id: UUID, x: 0, y: 30, w: 2, h: 2, depth: 3 };
+function futureConfig() {
+  const stored = fixture();
+  stored.soundtrack = { track: "rain" };
+  stored.theme.sparkle = "lots";
+  stored.bands[0].parallax = true;
+  stored.blocks[0].glow = "soft";
+  stored.blocks.push(FUTURE_BLOCK);
+  return stored;
+}
+
 describe("a config written by newer code", () => {
-  it("reads to a config, keeping what this version knows", () => {
-    const parsed = parseStoredStorefrontConfig(fixture());
+  it("reads to a config, keeping everything this version knows", () => {
+    const parsed = parseStoredStorefrontConfig(futureConfig());
     expect(parsed).not.toBeNull();
-
-    // The blocks it understands survive in order; the new types, and the text
-    // block whose variant this version does not know, are gone.
-    expect(parsed!.blocks.map((b) => b.type)).toEqual([
-      "text",
-      "text",
-      "image",
-      "shape",
-      "product",
-      "product",
-      "product",
-      "text",
-      "product",
-      "product",
-    ]);
-    expect(JSON.stringify(parsed)).not.toContain("Picked by hand");
-    expect(JSON.stringify(parsed)).not.toContain("Shop the camera");
-
-    // Every theme member this version knows is kept as stored.
-    const original = fixture().theme;
-    expect(parsed!.theme).toMatchObject({
-      accent: original.accent,
-      font: original.font,
-      columns: original.columns,
-      rows: original.rows,
-      cornerRadius: original.cornerRadius,
-      titleStyle: original.titleStyle,
-      titleDisplay: original.titleDisplay,
-      priceDisplay: original.priceDisplay,
-      gridGap: original.gridGap,
-      soldOutBadge: original.soldOutBadge,
-      background: { kind: "gradient", from: "#f4efe6", to: "#e6dccb", angle: 180 },
-    });
-    // The new members, and the gradient's third stop, are not carried over.
-    for (const unknown of ["palette", "fontPairing", "textStyles", "motion", "texture", "cardColor"]) {
-      expect(parsed!.theme).not.toHaveProperty(unknown);
-    }
-    expect(parsed!.theme.background).not.toHaveProperty("via");
-
-    // The header keeps its known members; the new ones go.
-    expect(parsed!.header).toEqual({
-      show: true,
-      name: "Parallel Goods",
-      bio: "Objects for slow mornings.",
-    });
-
-    // Block members this version knows are untouched; the new ones are gone.
-    expect(parsed!.blocks[0]).toEqual({
-      type: "text",
-      id: "ed0de300-0000-4000-8000-000000000011",
-      text: "Things for slow mornings",
-      variant: "heading",
-      align: "left",
-      x: 0,
-      y: 0,
-      w: 4,
-      h: 2,
-    });
-    expect(parsed).not.toHaveProperty("bands");
-
-    // What came out is a config this version would itself have written.
+    // Exactly the config this version wrote, before the future added to it.
+    expect(parsed).toEqual(storefrontConfigSchema.parse(fixture()));
+    expect(JSON.stringify(parsed)).not.toContain("hologram");
     expect(storefrontConfigSchema.safeParse(parsed).success).toBe(true);
   });
 
+  it("reads this version's own config with every new field, directly", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const parsed = parseStoredStorefrontConfig(fixture());
+    expect(parsed).toEqual(storefrontConfigSchema.parse(fixture()));
+    expect(parsed!.bands).toHaveLength(fixture().bands.length);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it("does not change the stored value it was handed", () => {
-    const stored = fixture();
+    const stored = futureConfig();
     parseStoredStorefrontConfig(stored);
-    expect(stored).toEqual(fixture());
+    expect(stored).toEqual(futureConfig());
   });
 
   it("logs the dropped paths once, with no seller content", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    parseStoredStorefrontConfig(fixture());
+    parseStoredStorefrontConfig(futureConfig());
     expect(warn).toHaveBeenCalledTimes(1);
     const line = warn.mock.calls[0].join(" ");
-    expect(line).toContain("theme.palette");
-    expect(line).toContain("bands");
+    for (const path of ["soundtrack", "theme.sparkle", "bands.0.parallax", "blocks.0.glow"]) {
+      expect(line).toContain(path);
+    }
     expect(line).not.toContain("Things for slow mornings");
     expect(line).not.toContain("Parallel Goods");
   });

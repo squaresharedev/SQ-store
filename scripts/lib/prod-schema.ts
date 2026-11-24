@@ -201,6 +201,11 @@ export const SCHEMA_REQUIREMENTS: readonly SchemaRequirement[] = [
     migration: "20261120_shopping_cart.sql",
   },
   { kind: "check", constraint: "storefront_signals_kind_check", allows: "cart_add", migration: "20261120_shopping_cart.sql" },
+  // 20261123_product_photo_edge: what is at a product photo's edges, read by
+  // every product select; it follows the photo, and measuring it is no edit.
+  { kind: "column", table: "products", column: "photo_edge", migration: "20261123_product_photo_edge.sql" },
+  { kind: "function", signature: "products_photo_edge_follows_photo()", migration: "20261123_product_photo_edge.sql" },
+  { kind: "function", signature: "products_set_updated_at()", migration: "20261123_product_photo_edge.sql" },
 ];
 
 /** A SQL string literal. Every value below is a constant from this file, and

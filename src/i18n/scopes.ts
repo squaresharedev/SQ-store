@@ -80,6 +80,23 @@ const APP_CHROME = [
   "Storefront.settings",
   // ...whose cart entries are named by the Cart panel's own labels
   "Storefront.cartPage",
+  // ...and whose entries for the editor upgrade's controls are named by those
+  // controls' own labels (one string each, not the catalogues they sit in)
+  "EditorType.panel.palette.title",
+  "EditorType.panel.pairings.title",
+  "EditorType.panel.textStyles.title",
+  "EditorType.panel.valign.label",
+  "EditorCards.panel.cardColor",
+  "EditorCards.panel.blend.label",
+  "EditorCards.panel.nameStrip",
+  "EditorCards.panel.photoShape.label",
+  "EditorCards.panel.shadow.label",
+  "EditorFinish.panel.motion.label",
+  "EditorFinish.panel.texture.label",
+  "EditorFinish.panel.marquee.inspectorTitle",
+  "EditorLayout.panel.band.title",
+  "EditorLayout.panel.button.title",
+  "EditorLayout.panel.header.logoAndMenu",
   // lib/auth/actions.ts + lib/auth/signup.ts in shell closure
   "Auth.success",
   // lib/security/events.ts in shell closure
@@ -260,6 +277,12 @@ const WELCOME = [
 /** What the storefront editor ships (scope `designer`). */
 const DESIGNER = [
   "Storefront",
+  // The editor upgrade's four catalogues, one per workstream (cards, type,
+  // layout, finish): the panels' own words and what a board can say.
+  "EditorCards",
+  "EditorType",
+  "EditorLayout",
+  "EditorFinish",
   "ProductPage",
   // The editor carries the dashboard's search, bell, tour and product form, but
   // not the pages those link to: the rest of Settings, Orders, Billing, and so on.
@@ -314,6 +337,13 @@ export const CLIENT_SCOPES = {
     "Storefront.spotDrag",
     "Storefront.colors.fields",
     "Storefront.colors.inherit",
+    // What the editor upgrade's faces can say to a buyer (a carousel's arrows,
+    // a header menu's cart): the `board` half of each catalogue, never the
+    // panels' half.
+    "EditorCards.board",
+    "EditorType.board",
+    "EditorLayout.board",
+    "EditorFinish.board",
     // EditableText renders a seller-prose guard on the buyer order-status page.
     "Validation.generic",
   ],
@@ -402,6 +432,11 @@ export const CLIENT_SCOPES = {
   storefrontList: [
     ...APP_CHROME,
     "Storefront",
+    // The list's previews draw boards, so they can say what a board says.
+    "EditorCards.board",
+    "EditorType.board",
+    "EditorLayout.board",
+    "EditorFinish.board",
     // SellerDetailsNotice.tsx uses Settings.sellerDetails.* beyond just .fields
     "Settings.sellerDetails",
     // ProductTileContent.tsx uses ProductPage.sale and ProductPage.addOns,

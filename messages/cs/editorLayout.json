@@ -1,0 +1,124 @@
+{
+  "panel": {
+    "insert": {
+      "group": "Rozvržení",
+      "groupLabel": "Přidat prvek rozvržení",
+      "name": {
+        "band": "Pás",
+        "button": "Tlačítko",
+        "carousel": "Karusel"
+      },
+      "add": {
+        "band": "Přidat pás přes celou šířku",
+        "button": "Přidat tlačítko",
+        "carousel": "Přidat řadu produktů k listování"
+      },
+      "noRoom": "Za každým řádkem už je nějaký pás.",
+      "noProducts": "Nejdřív přidejte do obchodu produkt, pak ho dejte do karuselu."
+    },
+    "bandChrome": {
+      "rail": "Pás za řádky {from} až {to}. Přetažením ho přesunete, stisknutím upravíte.",
+      "stretch": "Přetažením změníte, přes kolik řádků pás vede"
+    },
+    "band": {
+      "title": "Pás",
+      "close": "Zavřít pás",
+      "background": "Pozadí",
+      "kind": {
+        "solid": "Barva",
+        "gradient": "Přechod",
+        "image": "Fotka"
+      },
+      "palette": "Vaše barvy",
+      "custom": "Vlastní barva",
+      "gradients": "Hotové přechody",
+      "gradientOption": "Přechod {n}",
+      "photo": "Fotka",
+      "shade": "Závoj",
+      "shadeInfo": "Světlý nebo tmavý závoj přes fotku udrží text na ní čitelný.",
+      "dim": {
+        "none": "Žádný",
+        "light": "Světlý",
+        "dark": "Tmavý"
+      },
+      "moveHint": "Pás přesunete úchytem vedle plochy. Na telefonu jde s bloky, které na něm leží.",
+      "linked": "Na tento pás vede odkaz. Než pás odstraníte, nasměrujte odkaz jinam.",
+      "remove": "Odstranit pás"
+    },
+    "button": {
+      "title": "Tlačítko",
+      "close": "Zavřít tlačítko",
+      "label": "Text",
+      "labelProblem": "Tlačítko potřebuje pár slov.",
+      "charsLeft": "{n, plural, one {Zbývá # znak} few {Zbývají # znaky} other {Zbývá # znaků}}",
+      "destination": "Vede na",
+      "kind": {
+        "product": "Produkt",
+        "band": "Pás na této stránce",
+        "storefront": "Výloha",
+        "url": "Webová adresa"
+      },
+      "bandName": "Pás v řádcích {from} až {to}",
+      "url": "Webová adresa",
+      "urlPlaceholder": "https://",
+      "urlProblem": "Zadejte celou adresu začínající https://",
+      "look": "Vzhled",
+      "looks": {
+        "solid": "Plné",
+        "outline": "Obrys",
+        "link": "Odkaz"
+      },
+      "defaultLabel": "Nakupovat",
+      "tileLabel": "Tlačítko: {label}"
+    },
+    "carousel": {
+      "title": "Karusel",
+      "close": "Zavřít karusel",
+      "products": "Produkty v karuselu",
+      "count": "{count} z {max} produktů",
+      "moveEarlier": "Posunout {title} dopředu",
+      "moveLater": "Posunout {title} dozadu",
+      "remove": "Vyjmout {title} z karuselu",
+      "keepOne": "Karusel má vždy aspoň jeden produkt.",
+      "addProducts": "Přidat produkty",
+      "add": "Přidat {title} do karuselu",
+      "search": "Najít produkt",
+      "noMatch": "Žádný produkt neodpovídá.",
+      "full": "Karusel pojme nejvýš {max} produktů."
+    },
+    "header": {
+      "logoAndMenu": "Logo a menu",
+      "logo": "Logo",
+      "uploadLogo": "Nahrát logo",
+      "replaceLogo": "Vyměnit logo",
+      "removeLogo": "Odstranit logo",
+      "logoAlt": "Co je na logu",
+      "logoSize": "Velikost loga",
+      "sizes": {
+        "small": "Malé",
+        "medium": "Střední",
+        "large": "Velké"
+      },
+      "menu": "Odkazy v menu",
+      "addLink": "Přidat odkaz",
+      "linkLabel": "Text",
+      "linkDestination": "Vede na",
+      "removeLink": "Odstranit tento odkaz",
+      "newLinkLabel": "Obchod",
+      "menuFull": "Menu pojme nejvýš 4 odkazy.",
+      "cartNote": "Ikona košíku se do menu přidá sama všude, kde je košík zapnutý."
+    }
+  },
+  "board": {
+    "navLabel": "Menu výlohy",
+    "openMenu": "Otevřít menu",
+    "closeMenu": "Zavřít menu",
+    "logoFallback": "Logo {store}",
+    "carousel": {
+      "roleDescription": "karusel",
+      "label": "{count, plural, one {# produkt} few {# produkty} many {# produktu} other {# produktů}}",
+      "previous": "Předchozí produkty",
+      "next": "Další produkty"
+    }
+  }
+}

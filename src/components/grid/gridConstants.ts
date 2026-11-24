@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   boardLanding,
   isOnBoard,
@@ -67,6 +67,44 @@ export interface GridBlock<TData = unknown> extends GridPlacement {
    * and depth must not ride along in that payload.
    */
   z?: number;
+  /**
+   * Half-cell insets (see HALF-CELL INSETS below): the block is drawn pulled
+   * in by half a cell on these sides, inside the cells it occupies. Absent =
+   * drawn on its whole cells, as every block was before.
+   */
+  inset?: GridInset;
+  /**
+   * Gestures move and stretch this block in HALF cells along any axis it is
+   * small on (HALF_STEP_SPAN_MAX), and hand the result back through the
+   * grid's `onPlace` as whole cells plus insets. Only honoured on a level
+   * block, on a board drawn as placed, with an `onPlace` to call.
+   */
+  halfSteps?: boolean;
+  /**
+   * On a narrower board (the reflow, a phone layout's automatic placement)
+   * this block keeps its HEIGHT in cells instead of shrinking with the
+   * column ratio, never taller than it is wide there. For a row of cards to
+   * swipe through: scaling its height down only shrinks every card, where
+   * keeping it shows fewer cards at a size a thumb can read. See reflowedSpan.
+   */
+  keepRows?: boolean;
+}
+
+/**
+ * A block's span on a board `ratio` as wide in columns (the reflow, a phone
+ * layout's automatic placement): both sides scaled by the ratio, at least one
+ * cell, no wider than the board. A block that keeps its rows (GridBlock
+ * keepRows) keeps its height instead, up to its new width.
+ */
+export function reflowedSpan(
+  covered: { w: number; h: number },
+  ratio: number,
+  columns: number,
+  keepRows = false,
+): { w: number; h: number } {
+  const w = Math.min(columns, Math.max(1, Math.round(covered.w * ratio)));
+  const h = keepRows ? Math.max(1, Math.min(covered.h, w)) : Math.max(1, Math.round(covered.h * ratio));
+  return { w, h };
 }
 
 // PAINT ORDER BANDS. In ONE place because everything below shares a single
@@ -357,13 +395,7 @@ export function reflowBlocks<TData>(
 ): { blocks: GridBlock<TData>[]; rows: number } {
   const ratio = renderColumns / designColumns;
   const ordered = [...blocks].sort((a, b) => a.y - b.y || a.x - b.x);
-  const scaled = ordered.map((block) => {
-    const covered = blockFootprint(block);
-    return {
-      w: Math.min(renderColumns, Math.max(1, Math.round(covered.w * ratio))),
-      h: Math.max(1, Math.round(covered.h * ratio)),
-    };
-  });
+  const scaled = ordered.map((block) => reflowedSpan(blockFootprint(block), ratio, renderColumns, block.keepRows));
 
   const packed = packFirstFit(scaled, renderColumns);
   let rows = 0;
@@ -767,6 +799,13 @@ export interface GridBlockState {
   isResizing: boolean;
   /** Live placement during a drag/resize; the committed one when idle. */
   placement: GridPlacement;
+  /**
+   * The key of the underlay drawn behind this block as the board is laid out
+   * right now (underlayBehind), or null for none. On a reflowed or narrow
+   * board that can differ from the one behind its stored rows, which is why
+   * the grid says: it is what the block's words are actually read against.
+   */
+  underlayKey: string | null;
 }
 
 /**
@@ -779,6 +818,295 @@ export type RenderGridBlock<TData> = (
   block: GridBlock<TData>,
   state: GridBlockState,
 ) => ReactNode;
+
+// HALF-CELL INSETS. A block may be drawn pulled in by half a cell on any of
+// its four sides, so a small thing can sit between two cells or be half a cell
+// across. The block still OCCUPIES the whole cells x/y/w/h name (overlap,
+// packing, the reflow and every other rule read those), and only its paint
+// and the gestures that write it know about the halves.
+//
+// Gestures on such a block work in HALF CELLS: a box is stated as half-cell
+// LINES (l, t, r, b), moved and stretched there, and turned back into whole
+// cells plus insets (fromHalves). Lines rather than cells for the same reason
+// LocalBox uses them: an edge sits between two cells.
+
+/** The sides a block is pulled in by half a cell. Absent or false = none. */
+export interface GridInset {
+  left?: boolean;
+  right?: boolean;
+  top?: boolean;
+  bottom?: boolean;
+}
+
+/** A box in half-cell lines: it spans [l, r] across and [t, b] down. */
+export interface HalfBox {
+  l: number;
+  t: number;
+  r: number;
+  b: number;
+}
+
+/**
+ * The longest a block may be along an axis, in cells, and still move along
+ * it in half steps. Small things are what need placing between two cells;
+ * anything longer moves in whole cells there, as everything always has.
+ */
+export const HALF_STEP_SPAN_MAX = 2;
+
+/** Is anything pulled in at all? */
+export function hasInset(inset: GridInset | undefined): inset is GridInset {
+  return Boolean(inset && (inset.left || inset.right || inset.top || inset.bottom));
+}
+
+/**
+ * The inset a block can actually draw at a given span: a side one cell long
+ * cannot be pulled in from both ends (nothing would be left), so it keeps the
+ * leading one. Only reached on a board that was not the one the insets were
+ * set on (a phone's), since the schema refuses the stored case.
+ */
+export function drawnInset(inset: GridInset | undefined, w: number, h: number): GridInset | undefined {
+  if (!hasInset(inset)) return undefined;
+  const next: GridInset = {};
+  if (inset.left) next.left = true;
+  if (inset.right && !(w <= 1 && inset.left)) next.right = true;
+  if (inset.top) next.top = true;
+  if (inset.bottom && !(h <= 1 && inset.top)) next.bottom = true;
+  return next;
+}
+
+/** A placement and its insets, as half-cell lines. */
+export function toHalves(placement: GridPlacement, inset?: GridInset): HalfBox {
+  return {
+    l: 2 * placement.x + (inset?.left ? 1 : 0),
+    t: 2 * placement.y + (inset?.top ? 1 : 0),
+    r: 2 * (placement.x + placement.w) - (inset?.right ? 1 : 0),
+    b: 2 * (placement.y + placement.h) - (inset?.bottom ? 1 : 0),
+  };
+}
+
+const isOdd = (value: number) => ((value % 2) + 2) % 2 === 1;
+
+/**
+ * Half-cell lines back into the whole cells that hold them and the insets
+ * that pull the paint in. The cells are the smallest run that contains the
+ * box, so a block never claims a cell it does not reach into.
+ */
+export function fromHalves(box: HalfBox): { placement: GridPlacement; inset: GridInset | undefined } {
+  const x = Math.floor(box.l / 2);
+  const y = Math.floor(box.t / 2);
+  const placement = {
+    x,
+    y,
+    w: Math.max(1, Math.ceil(box.r / 2) - x),
+    h: Math.max(1, Math.ceil(box.b / 2) - y),
+  };
+  const inset: GridInset = {};
+  if (isOdd(box.l)) inset.left = true;
+  if (isOdd(box.r)) inset.right = true;
+  if (isOdd(box.t)) inset.top = true;
+  if (isOdd(box.b)) inset.bottom = true;
+  return { placement, inset: hasInset(inset) ? inset : undefined };
+}
+
+/** The box a block is DRAWN on, in cells (halves where it is inset). */
+export function drawnPlacement(placement: GridPlacement, inset?: GridInset): GridPlacement {
+  const box = toHalves(placement, drawnInset(inset, placement.w, placement.h));
+  return { x: box.l / 2, y: box.t / 2, w: (box.r - box.l) / 2, h: (box.b - box.t) / 2 };
+}
+
+/** How many half cells one step is along each axis: one along an axis the
+ *  block is small on, two (a whole cell) along any other. */
+export function halfStepSizes(box: HalfBox): { x: 1 | 2; y: 1 | 2 } {
+  return {
+    x: box.r - box.l <= 2 * HALF_STEP_SPAN_MAX ? 1 : 2,
+    y: box.b - box.t <= 2 * HALF_STEP_SPAN_MAX ? 1 : 2,
+  };
+}
+
+/** A count of half cells rounded to a step of 1 or 2. */
+export function roundToStep(halves: number, step: 1 | 2): number {
+  return step === 1 ? Math.round(halves) : 2 * Math.round(halves / 2);
+}
+
+/** A box moved by (dx, dy) half cells, held to a columns x rows board as one
+ *  body: it stops at an edge rather than squashing against it. */
+export function moveHalfBox(box: HalfBox, dx: number, dy: number, columns: number, rows: number): HalfBox {
+  const stepX = Math.min(Math.max(dx, -box.l), 2 * columns - box.r);
+  const stepY = Math.min(Math.max(dy, -box.t), 2 * rows - box.b);
+  return { l: box.l + stepX, r: box.r + stepX, t: box.t + stepY, b: box.b + stepY };
+}
+
+/**
+ * A box with some of its edges put on new lines, held to the board and never
+ * narrower or shorter than half a cell. `edges` names which lines move; the
+ * others stay where they are.
+ */
+export function resizeHalfBox(
+  box: HalfBox,
+  edges: ResizeEdges,
+  to: { x: number; y: number },
+  columns: number,
+  rows: number,
+): HalfBox {
+  const next = { ...box };
+  if (edges.w) next.l = Math.min(Math.max(0, to.x), box.r - 1);
+  else if (edges.e) next.r = Math.max(Math.min(2 * columns, to.x), box.l + 1);
+  if (edges.n) next.t = Math.min(Math.max(0, to.y), box.b - 1);
+  else if (edges.s) next.b = Math.max(Math.min(2 * rows, to.y), box.t + 1);
+  return next;
+}
+
+/**
+ * The corner handle's resize, in half cells: the far corner goes to `to`, and
+ * past the near corner the span lands on the OTHER side of the anchor cell.
+ *
+ * It is the whole-cell corner gesture (resizeLocalBox, "corner") carried into
+ * half steps, so a small block stretches up and left from the one handle
+ * exactly as every block always has. The anchor is the block's own top-left
+ * cell: it stays inside the result however far the hand travels. `to` is the
+ * line the far corner is dragged to; the cell the hand is over is the one whose
+ * centre sits a half cell before it, which is the cell the far corner sat in.
+ * Drag that cell off the anchor's side and the span flips; until then it is
+ * resizeHalfBox's, never narrower than half a cell.
+ */
+export function resizeHalfCorner(
+  box: HalfBox,
+  to: { x: number; y: number },
+  columns: number,
+  rows: number,
+): HalfBox {
+  const anchorX = Math.floor(box.l / 2);
+  const anchorY = Math.floor(box.t / 2);
+  const handX = Math.floor((to.x - 1) / 2);
+  const handY = Math.floor((to.y - 1) / 2);
+  const flippedX = handX < anchorX;
+  const flippedY = handY < anchorY;
+  const straight = resizeHalfBox(box, { n: false, e: true, s: true, w: false }, to, columns, rows);
+  return {
+    l: flippedX ? Math.max(0, 2 * handX) : box.l,
+    r: flippedX ? 2 * (anchorX + 1) : straight.r,
+    t: flippedY ? Math.max(0, 2 * handY) : box.t,
+    b: flippedY ? 2 * (anchorY + 1) : straight.b,
+  };
+}
+
+/**
+ * Where a block's cell is PAINTED, as offsets and a size in its own grid
+ * area: the half-cell nudge a turned block needs (`shift`, in cells), plus its
+ * insets. Stated against the grid area rather than measured, the way
+ * snapToGridStyle in Grid is: `(100% + gap) / span` is one cell pitch however
+ * wide the board is drawn, and a grid item's width and height percentages
+ * resolve against its area.
+ *
+ * Nothing for a block with neither, so an unchanged block carries no new
+ * style at all.
+ */
+export function cellPaintStyle(
+  placement: GridPlacement,
+  shift: { x: number; y: number },
+  inset: GridInset | undefined,
+): CSSProperties {
+  const drawn = drawnInset(inset, placement.w, placement.h);
+  const pitch = (cells: number, span: number) => `calc((100% + var(--grid-gap, 0px)) * ${cells} / ${span})`;
+  // The vertical offset is a length, not a percentage of the area: WebKit (every
+  // Safari) ignores a percentage `top` on a relatively positioned grid item, so a
+  // block with a top inset or a vertical nudge stayed on its whole cells there.
+  // `--ss-cell` is the row height (globals.css, `.ss-grid`), so a cell plus a gap
+  // is one pitch: the same number of pixels the percentage gave, in every engine.
+  const rowPitch = (cells: number) => `calc((var(--ss-cell) + var(--grid-gap, 0px)) * ${cells})`;
+  const offsetX = shift.x + (drawn?.left ? 0.5 : 0);
+  const offsetY = shift.y + (drawn?.top ? 0.5 : 0);
+  const cutX = (drawn?.left ? 1 : 0) + (drawn?.right ? 1 : 0);
+  const cutY = (drawn?.top ? 1 : 0) + (drawn?.bottom ? 1 : 0);
+  return {
+    ...(offsetX ? { left: pitch(offsetX, placement.w) } : {}),
+    ...(offsetY ? { top: rowPitch(offsetY) } : {}),
+    ...(cutX ? { width: `calc(100% - ${pitch(cutX / 2, placement.w)})` } : {}),
+    ...(cutY ? { height: `calc(100% - ${pitch(cutY / 2, placement.h)})` } : {}),
+  };
+}
+
+// FULL-ROW UNDERLAYS. A strip a consumer draws behind a run of the board's
+// rows, across every column (a storefront's full-width band). Not a block:
+// nothing selects, packs or overlaps it, and it paints under every block.
+//
+// On a board drawn as placed it covers the rows it names. On a reflowed or
+// narrow board, where the rows mean nothing any more, it FOLLOWS the blocks
+// the consumer says sit on it: it runs from the first of them to the last, as
+// they were laid out there. One with nothing on it has no place on such a
+// board and is not drawn.
+
+export interface GridUnderlay {
+  key: string;
+  /** The first row it sits behind, and how many it runs. */
+  y: number;
+  h: number;
+  /** The keys of the blocks sitting on it, which it follows when the board is
+   *  reflowed. */
+  members?: readonly string[];
+  /** What it paints. Drawn in a layer under every block. */
+  node: ReactNode;
+  /** Editor controls for it, drawn above every block (editable boards only,
+   *  and only while the board is drawn as placed). */
+  chrome?: ReactNode;
+}
+
+/**
+ * The rows an underlay runs behind on a board laid out as `placed`.
+ *
+ * It starts from its LEAD member (the first of `members` on that board: the
+ * consumer lists them in reading order) and takes in every other member whose
+ * rows touch or overlap what it already covers, until none is left that does.
+ * A member the layout put somewhere else entirely (a phone layout that filled
+ * an earlier gap with it) is left off the strip rather than stretching it
+ * over everything in between. Null when none of its members is on the board.
+ */
+export function followRows(
+  members: readonly string[],
+  placed: readonly GridBlock<unknown>[],
+): { y: number; h: number } | null {
+  const byKey = new Map(placed.map((block) => [block.key, block]));
+  const rows = members.flatMap((key) => {
+    const block = byKey.get(key);
+    if (!block) return [];
+    const covered = blockFootprint(block);
+    return [{ top: covered.y, bottom: covered.y + covered.h }];
+  });
+  if (rows.length === 0) return null;
+  let { top, bottom } = rows[0];
+  const left = rows.slice(1);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (let index = left.length - 1; index >= 0; index -= 1) {
+      const next = left[index];
+      if (next.top > bottom || next.bottom < top) continue;
+      top = Math.min(top, next.top);
+      bottom = Math.max(bottom, next.bottom);
+      left.splice(index, 1);
+      grew = true;
+    }
+  }
+  const y = Math.max(0, top);
+  return { y, h: Math.max(1, bottom - y) };
+}
+
+/**
+ * The underlay drawn behind a placement as it is laid out: the one behind its
+ * MIDDLE row (a block that only grazes a strip's edge is not on it), the later
+ * one in the list where two overlap, since it paints on top. The board-side
+ * twin of lib/storefront/backdrop's bandBehind, asked of what is drawn.
+ */
+export function underlayBehind(
+  underlays: readonly { key: string; y: number; h: number }[],
+  placement: GridPlacement,
+): string | null {
+  const middle = placement.y + placement.h / 2;
+  for (let index = underlays.length - 1; index >= 0; index -= 1) {
+    const underlay = underlays[index];
+    if (middle >= underlay.y && middle <= underlay.y + underlay.h) return underlay.key;
+  }
+  return null;
+}
 
 // Token class references (styles.md). Kept here so no component hardcodes the
 // radius; the gap + square-cell mechanics live in the `.ss-grid` rule in
