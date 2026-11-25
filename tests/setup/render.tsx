@@ -1,6 +1,7 @@
 import { render as rtlRender, type RenderOptions } from "@testing-library/react";
 import type { ReactElement, ReactNode } from "react";
 import { NextIntlClientProvider } from "next-intl";
+import { AppRouterContext } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ToastProvider } from "@/components/ui/Toast";
 import messages from "../../messages/en";
 
@@ -20,11 +21,29 @@ import messages from "../../messages/en";
  */
 export * from "@testing-library/react";
 
+/**
+ * The App Router's router, inert. next/navigation's useRouter throws outside
+ * it, and AppLink (every in-app link) reads it to fetch a page ahead. A spec
+ * that asserts on navigation mocks next/navigation itself, which wins over this.
+ */
+const NO_ROUTER = {
+  back: () => undefined,
+  forward: () => undefined,
+  refresh: () => undefined,
+  push: () => undefined,
+  replace: () => undefined,
+  prefetch: () => undefined,
+  hmrRefresh: () => undefined,
+  bfcacheId: "test",
+};
+
 function IntlProvider({ children }: { children: ReactNode }) {
   return (
-    <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
-      {children}
-    </NextIntlClientProvider>
+    <AppRouterContext.Provider value={NO_ROUTER}>
+      <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        {children}
+      </NextIntlClientProvider>
+    </AppRouterContext.Provider>
   );
 }
 

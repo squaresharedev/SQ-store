@@ -7,6 +7,8 @@ import { render, renderWithoutToasts, screen, cleanup } from "../setup/render";
 const mockPath = vi.hoisted(() => ({ value: "/dashboard" }));
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPath.value,
+  // AppLink fetches a page ahead through the router; a test never needs it.
+  useRouter: () => ({ prefetch: () => undefined }),
 }));
 
 import { OverviewAddButton } from "@/components/dashboard/OverviewAddButton";

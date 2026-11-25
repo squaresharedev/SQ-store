@@ -27,6 +27,8 @@ import {
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/dashboard",
+  // AppLink fetches a page ahead through the router; a test never needs it.
+  useRouter: () => ({ prefetch: () => undefined }),
 }));
 
 // Stripe payouts off, as in production today: the Payments row carries its pill.

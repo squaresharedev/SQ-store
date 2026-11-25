@@ -18,6 +18,8 @@ afterEach(cleanup);
 const mockPath = vi.hoisted(() => ({ value: "/dashboard" }));
 vi.mock("next/navigation", () => ({
   usePathname: () => mockPath.value,
+  // AppLink fetches a page ahead through the router; a test never needs it.
+  useRouter: () => ({ prefetch: () => undefined }),
 }));
 vi.mock("next/link", () => ({
   // AppLink reads this to report a page change; nothing is ever pending in a test.

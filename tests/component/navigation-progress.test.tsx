@@ -14,6 +14,8 @@ import { useProgressWhile } from "@/lib/hooks/useProgressWhile";
  */
 
 const link = vi.hoisted(() => ({ pending: false }));
+const router = vi.hoisted(() => ({ prefetch: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => router }));
 vi.mock("next/link", () => ({
   // What Next reports for the link under the pointer.
   useLinkStatus: () => ({ pending: link.pending }),
@@ -37,6 +39,7 @@ vi.mock("next/link", () => ({
 beforeEach(() => {
   vi.useFakeTimers();
   link.pending = false;
+  router.prefetch.mockClear();
 });
 afterEach(() => {
   cleanup();
@@ -181,22 +184,41 @@ describe("AppLink", () => {
  * its page ahead only once someone shows they mean to follow it.
  */
 describe("AppLink prefetching", () => {
-  const prefetch = () => screen.getByRole("link").getAttribute("data-prefetch");
+  const prefetchProp = () =>
+    screen.getByRole("link").getAttribute("data-prefetch");
 
   it("fetches nothing ahead while the link is merely on screen", () => {
     render(<AppLink href="/orders">Orders</AppLink>);
     elapse(PREFETCH_INTENT_MS * 10);
-    expect(prefetch()).toBe("false");
+    expect(router.prefetch).not.toHaveBeenCalled();
+    expect(prefetchProp()).toBe("false");
   });
 
   it("fetches ahead once the pointer rests on it", () => {
     render(<AppLink href="/orders">Orders</AppLink>);
     fireEvent.mouseEnter(screen.getByRole("link"));
     elapse(PREFETCH_INTENT_MS - 1);
-    expect(prefetch()).toBe("false");
+    expect(router.prefetch).not.toHaveBeenCalled();
     elapse(1);
-    // null is next/link's own default: fetch now that the link is on screen.
-    expect(prefetch()).toBe("null");
+    expect(router.prefetch).toHaveBeenCalledExactlyOnceWith("/orders");
+  });
+
+  it("never flips next/link's prefetch prop, which would rebuild its ref", () => {
+    render(<AppLink href="/orders">Orders</AppLink>);
+    fireEvent.mouseEnter(screen.getByRole("link"));
+    elapse(PREFETCH_INTENT_MS * 2);
+    expect(prefetchProp()).toBe("false");
+  });
+
+  it("fetches a page ahead only once, however often it is hovered", () => {
+    render(<AppLink href="/orders">Orders</AppLink>);
+    const anchor = screen.getByRole("link");
+    for (let i = 0; i < 3; i += 1) {
+      fireEvent.mouseEnter(anchor);
+      elapse(PREFETCH_INTENT_MS);
+      fireEvent.mouseLeave(anchor);
+    }
+    expect(router.prefetch).toHaveBeenCalledOnce();
   });
 
   it("fetches nothing for a pointer passing over on its way elsewhere", () => {
@@ -206,14 +228,14 @@ describe("AppLink prefetching", () => {
     elapse(PREFETCH_INTENT_MS / 2);
     fireEvent.mouseLeave(anchor);
     elapse(PREFETCH_INTENT_MS * 10);
-    expect(prefetch()).toBe("false");
+    expect(router.prefetch).not.toHaveBeenCalled();
   });
 
   it("counts keyboard focus resting on it as intent", () => {
     render(<AppLink href="/orders">Orders</AppLink>);
     fireEvent.focus(screen.getByRole("link"));
     elapse(PREFETCH_INTENT_MS);
-    expect(prefetch()).toBe("null");
+    expect(router.prefetch).toHaveBeenCalledExactlyOnceWith("/orders");
   });
 
   it("leaves a prefetch prop passed in as it is", () => {
@@ -222,7 +244,10 @@ describe("AppLink prefetching", () => {
         Orders
       </AppLink>,
     );
-    expect(prefetch()).toBe("true");
+    fireEvent.mouseEnter(screen.getByRole("link"));
+    elapse(PREFETCH_INTENT_MS * 2);
+    expect(prefetchProp()).toBe("true");
+    expect(router.prefetch).not.toHaveBeenCalled();
   });
 
   it("still runs the caller's own pointer and focus handlers", () => {

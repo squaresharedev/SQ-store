@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useRef, type ComponentProps } from "react";
 import Link, { useLinkStatus } from "next/link";
+import { useRouter } from "next/navigation";
 import { useProgressWhile } from "@/lib/hooks/useProgressWhile";
 
 /**
@@ -37,6 +38,12 @@ function LinkProgress() {
  * it. So a link fetches its page ahead only once the pointer or focus rests
  * on it for PREFETCH_INTENT_MS. A `prefetch` prop passed in still wins.
  *
+ * The fetch goes through the router, never through next/link's `prefetch`
+ * prop. That prop must stay put: next/link rebuilds its ref whenever it flips
+ * between false and anything else, and a ref rebuilt under the pointer makes a
+ * motion row (`motion.create(AppLink)`, the sidebar) lose its hover listeners,
+ * so its icon never gets the pointer-leave and stays in its hover pose.
+ *
  * Everything else is next/link unchanged: same props, same ref. A route with
  * a loading.tsx usually navigates before the bar can show.
  */
@@ -49,24 +56,32 @@ export function AppLink({
   onBlur,
   ...props
 }: ComponentProps<typeof Link>) {
-  const [intent, setIntent] = useState(false);
+  const router = useRouter();
+  const fetched = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const { href } = props;
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
   const lean = () => {
-    if (intent || prefetch !== undefined) return;
+    if (fetched.current || prefetch !== undefined || typeof href !== "string") {
+      return;
+    }
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setIntent(true), PREFETCH_INTENT_MS);
+    timer.current = setTimeout(() => {
+      fetched.current = true;
+      router.prefetch(href);
+    }, PREFETCH_INTENT_MS);
   };
   const leave = () => clearTimeout(timer.current);
 
   return (
     <Link
       {...props}
-      // false keeps next/link from fetching on sight AND on hover; null is
-      // its own default, which fetches as soon as the link is (still) on screen.
-      prefetch={prefetch !== undefined ? prefetch : intent ? null : false}
+      // false keeps next/link from fetching on sight AND on hover, and stays
+      // false for the link's whole life (see above); intent is answered by
+      // router.prefetch instead.
+      prefetch={prefetch !== undefined ? prefetch : false}
       onMouseEnter={(event) => {
         onMouseEnter?.(event);
         lean();
